@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin Dashboard - POS System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        /* Excel-like Grid Styles */
+        .excel-grid-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        /* Custom Scrollbar for Touch */
+        .excel-grid-container::-webkit-scrollbar {
+            width: 24px;
+            height: 24px;
+        }
+
+        .excel-grid-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin: 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .excel-grid-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            min-height: 60px;
+            box-shadow:
+                0 4px 8px rgba(0, 0, 0, 0.3),
+                0 2px 4px rgba(99, 102, 241, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .excel-grid-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 6px 12px rgba(0, 0, 0, 0.4),
+                0 3px 6px rgba(99, 102, 241, 0.6),
+                inset 0 1px 2px rgba(255, 255, 255, 0.4);
+        }
+
+        .excel-grid-container::-webkit-scrollbar-thumb:active {
+            background: var(--primary-dark);
+            box-shadow:
+                inset 0 4px 8px rgba(0, 0, 0, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* For Firefox */
+        .excel-grid-container {
+            scrollbar-width: auto;
+            scrollbar-color: var(--primary) rgba(0, 0, 0, 0.3);
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        .excel-table th,
+        .excel-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0;
+            position: relative;
+        }
+
+        .excel-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: var(--space-sm) var(--space-md);
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .excel-input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: var(--space-sm) var(--space-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            min-height: 44px;
+            /* Touch friendly */
+        }
+
+        select.excel-input {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+            border-radius: 4px;
+            /* Optional rounded */
+        }
+
+        select.excel-input option {
+            background-color: #2a2a2a;
+            /* Dark background for options */
+            color: #fff;
+        }
+
+        .excel-input:focus {
+            outline: 2px solid var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            position: relative;
+        }
+
+        .excel-tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .excel-tr.new-row td {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .excel-tr.modified td::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 6px 6px 0;
+            border-color: transparent var(--warning) transparent transparent;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 0 5px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-icon:hover {
+            color: var(--error);
+        }
+
+        /* Toolbar */
+        .grid-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Touch Optimization Highlighting */
+        @media (pointer: coarse) {
+            .excel-input {
+                min-height: 50px;
+                /* Even larger for touch */
+                font-size: 1rem;
+            }
+        }
+
+        /* Sync Status Styles */
+        .sync-status {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <a href="admin-dashboard.html" class="sidebar-logo">
+                    <i class="fas fa-cash-register"></i>
+                    <span>POS System</span>
+                </a>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
+                <!-- Main Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" onclick="switchView(''); return false;">
+                                <i class="fas fa-th-large"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Inventory Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Inventory</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item has-submenu">
+                            <a href="#" class="nav-link dropdown-toggle">
+                                <div style="display:flex; align-items:center; gap:var(--space-md); flex:1;">
+                                    <i class="fas fa-boxes"></i>
+                                    <span>Products</span>
+                                </div>
+                                <i class="fas fa-chevron-right nav-arrow"></i>
+                            </a>
+                            <ul class="submenu">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link" onclick="switchView('products'); return false;">Product
+                                        Manager</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('products', 'add'); return false;">Add Product</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('categories'); return false;">Product Categories</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('variations'); return false;">Variations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('brands'); return false;">Brands</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link" onclick="switchView('units'); return false;">Units /
+                                        Base Units</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Units</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Base Units</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Print Barcode</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Adjustments</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-warehouse"></i>
+                                <span>Warehouse</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sales & Purchases Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Transactions</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>Quotations</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Purchases</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-cash-register"></i>
+                                <span>Sales</span>
+                                <span class="nav-badge">NEW</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Transfers</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Finance Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Finance</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-receipt"></i>
+                                <span>Expenses</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- People Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">People</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                <span>Peoples</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Roles/Permissions</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Reports Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Analytics</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reports</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Settings</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Currencies</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-language"></i>
+                                <span>Languages</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Templates</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <div class="navbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title-nav">Dashboard</h1>
+                </div>
+
+                <div class="navbar-right">
+                    <!-- Search Bar -->
+                    <div class="navbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search...">
+                    </div>
+
+                    <!-- Navbar Icons -->
+                    <div class="navbar-icons">
+                        <button class="navbar-icon">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                        <button class="navbar-icon">
+                            <i class="fas fa-envelope"></i>
+                            <span class="badge">5</span>
+                        </button>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name-nav" id="userName">Admin</div>
+                            <div class="user-role-nav" id="userRole">Administrator</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Dashboard Content -->
+            <main class="dashboard-content">
+                <!-- Dashboard View -->
+                <div id="view-dashboard">
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h1 class="page-title">Admin Dashboard</h1>
+                        <p class="page-subtitle">Welcome back! Here's what's happening today.</p>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card fade-in">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Sales Today</div>
+                                    <div class="stat-value" id="todaySales">$0.00</div>
+                                    <div class="stat-change positive">
+                                        <i class="fas fa-arrow-up"></i> 12.5% from yesterday
+                                    </div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card fade-in" style="animation-delay: 0.1s">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Transactions</div>
+                                    <div class="stat-value" id="transactionCount">0</div>
+                                    <div class="stat-change positive">
+                                        <i class="fas fa-arrow-up"></i> 8 new today
+                                    </div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card fade-in" style="animation-delay: 0.2s">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Products</div>
+                                    <div class="stat-value" id="productCount">0</div>
+                                    <div class="stat-change">
+                                        <i class="fas fa-box"></i> In stock
+                                    </div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="fas fa-boxes"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card fade-in" style="animation-delay: 0.3s">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Active Users</div>
+                                    <div class="stat-value" id="userCount">0</div>
+                                    <div class="stat-change">
+                                        <i class="fas fa-users"></i> Total users
+                                    </div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="fas fa-user-friends"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Grid -->
+                    <div class="content-grid">
+                        <!-- Recent Transactions -->
+                        <div class="table-container fade-in" style="animation-delay: 0.4s">
+                            <div class="table-header">
+                                <h3 class="table-title">Recent Transactions</h3>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View All
+                                </button>
+                            </div>
+
+                            <table id="transactionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            <i class="fas fa-inbox"></i> No transactions yet
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="quick-actions fade-in" style="animation-delay: 0.5s">
+                            <h3 class="table-title mb-lg">Quick Actions</h3>
+
+                            <button class="btn btn-primary action-btn" onclick="switchView('products', 'add')">
+                                <i class="fas fa-plus-circle"></i>
+                                Add New Product
+                            </button>
+
+                            <button class="btn btn-primary action-btn" onclick="switchView('products')">
+                                <i class="fas fa-boxes"></i>
+                                Manage Products
+                            </button>
+
+                            <button class="btn btn-primary action-btn" onclick="viewTransactions()">
+                                <i class="fas fa-file-invoice"></i>
+                                View All Transactions
+                            </button>
+
+                            <button class="btn btn-primary action-btn" onclick="manageUsers()">
+                                <i class="fas fa-users-cog"></i>
+                                Manage Users
+                            </button>
+
+                            <button class="btn btn-success action-btn" onclick="openPOS()">
+                                <i class="fas fa-cash-register"></i>
+                                Open POS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Manager View -->
+                <div id="view-products" class="hidden">
+                    <!-- Toolbar -->
+                    <div class="grid-toolbar">
+                        <div style="display: flex; align-items: center; gap: var(--space-md);">
+                            <h1 class="page-title" style="margin:0;">Product Manager</h1>
+                            <span id="syncStatus" class="sync-status">Synced to Supabase</span>
+                        </div>
+
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <button class="btn btn-secondary" onclick="loadProducts()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-primary" onclick="addNewRow()">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                            <button class="btn btn-success" onclick="saveAllChanges()" id="saveBtn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Excel-like Grid -->
+                    <div class="excel-grid-container fade-in">
+                        <table class="excel-table" id="productsGrid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Name *</th>
+                                    <th style="width: 120px;">Code/SKU</th>
+                                    <th style="width: 150px;">Category</th>
+                                    <th style="width: 150px;">Subcategory</th>
+                                    <th style="width: 120px;">Brand</th>
+                                    <th style="width: 100px;">Price *</th>
+                                    <th style="width: 100px;">Cost</th>
+                                    <th style="width: 80px;">Qty</th>
+                                    <th style="width: 80px;">Unit</th>
+                                    <th style="width: 150px;">Image URL</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsBody">
+                                <!-- Rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Categories Manager View -->
+                <div id="view-categories" class="hidden">
+                    <!-- Toolbar -->
+                    <div class="grid-toolbar">
+                        <div style="display: flex; align-items: center; gap: var(--space-md);">
+                            <h1 class="page-title" style="margin:0;">Category Manager</h1>
+                            <span id="syncStatusCategories" class="sync-status">Synced to Supabase</span>
+                        </div>
+
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <button class="btn btn-secondary" onclick="loadCategories()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-success" onclick="saveCategoryChanges()" id="saveCategoriesBtn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div
+                        style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); border-bottom: 2px solid rgba(255,255,255,0.1);">
+                        <button class="btn btn-secondary" id="mainCategoriesTab" onclick="switchCategoryTab('main')"
+                            style="border-radius: var(--radius-md) var(--radius-md) 0 0; border-bottom: 3px solid var(--primary);">
+                            <i class="fas fa-layer-group"></i> Main Categories
+                        </button>
+                        <button class="btn btn-secondary" id="subcategoriesTab" onclick="switchCategoryTab('sub')"
+                            style="border-radius: var(--radius-md) var(--radius-md) 0 0;">
+                            <i class="fas fa-sitemap"></i> Subcategories
+                        </button>
+                    </div>
+
+                    <!-- Main Categories Table -->
+                    <div id="mainCategoriesView">
+                        <div class="excel-grid-container fade-in">
+                            <table class="excel-table" id="categoriesGrid">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"></th>
+                                        <th>Name *</th>
+                                        <th>Description</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="categoriesBody">
+                                    <!-- Rows populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary" onclick="addNewCategory()" style="margin-top: var(--space-md);">
+                            <i class="fas fa-plus"></i> Add Category
+                        </button>
+                    </div>
+
+                    <!-- Subcategories Table -->
+                    <div id="subcategoriesView" class="hidden">
+                        <div class="excel-grid-container fade-in">
+                            <table class="excel-table" id="subcategoriesGrid">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"></th>
+                                        <th>Main Category *</th>
+                                        <th>Subcategory Name *</th>
+                                        <th>Description</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="subcategoriesBody">
+                                    <!-- Rows populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary" onclick="addNewSubcategory()"
+                            style="margin-top: var(--space-md);">
+                            <i class="fas fa-plus"></i> Add Subcategory
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Variations Manager View -->
+                <div id="view-variations" class="hidden">
+                    <!-- Toolbar -->
+                    <div class="grid-toolbar">
+                        <h1 class="page-title" style="margin:0;">Variation Manager</h1>
+
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <button class="btn btn-secondary" onclick="loadVariations()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-success" onclick="saveVariationChanges()" id="saveVariationsBtn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div
+                        style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); border-bottom: 2px solid rgba(255,255,255,0.1);">
+                        <button class="btn btn-secondary" id="variationTypesTab" onclick="switchVariationTab('types')"
+                            style="border-radius: var(--radius-md) var(--radius-md) 0 0; border-bottom: 3px solid var(--primary);">
+                            <i class="fas fa-tags"></i> Variation Types
+                        </button>
+                        <button class="btn btn-secondary" id="variationOptionsTab"
+                            onclick="switchVariationTab('options')"
+                            style="border-radius: var(--radius-md) var(--radius-md) 0 0;">
+                            <i class="fas fa-list-ol"></i> Variation Options
+                        </button>
+                    </div>
+
+                    <!-- Variation Types Table -->
+                    <div id="variationTypesView">
+                        <div class="excel-grid-container fade-in">
+                            <table class="excel-table" id="variationTypesGrid">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"></th>
+                                        <th>Type Name *</th>
+                                        <th>Description</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variationTypesBody">
+                                    <!-- Rows populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary" onclick="addNewVariationType()"
+                            style="margin-top: var(--space-md);">
+                            <i class="fas fa-plus"></i> Add Type
+                        </button>
+                    </div>
+
+                    <!-- Variation Options Table -->
+                    <div id="variationOptionsView" class="hidden">
+                        <div class="excel-grid-container fade-in">
+                            <table class="excel-table" id="variationOptionsGrid">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"></th>
+                                        <th>Variation Type *</th>
+                                        <th>Option Value *</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variationOptionsBody">
+                                    <!-- Rows populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary" onclick="addNewVariationOption()"
+                            style="margin-top: var(--space-md);">
+                            <i class="fas fa-plus"></i> Add Option
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Brands Manager View -->
+                <div id="view-brands" class="hidden">
+                    <div class="grid-toolbar">
+                        <div style="display: flex; align-items: center; gap: var(--space-md);">
+                            <h1 class="page-title" style="margin:0;">Brand Manager</h1>
+                            <span id="syncStatusBrands" class="sync-status">Synced to Supabase</span>
+                        </div>
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <button class="btn btn-secondary" onclick="loadBrands()"><i class="fas fa-sync-alt"></i>
+                                Refresh</button>
+                            <button class="btn btn-success" onclick="saveBrandChanges()"><i class="fas fa-save"></i>
+                                Save Changes</button>
+                        </div>
+                    </div>
+                    <div class="excel-grid-container fade-in">
+                        <table class="excel-table" id="brandsGrid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Brand Name *</th>
+                                    <th>Description</th>
+                                    <th>Website</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="brandsBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary" onclick="addNewBrand()" style="margin-top: var(--space-md);"><i
+                            class="fas fa-plus"></i> Add Brand</button>
+                </div>
+
+                <!-- Units Manager View -->
+                <div id="view-units" class="hidden">
+                    <div class="grid-toolbar">
+                        <div style="display: flex; align-items: center; gap: var(--space-md);">
+                            <h1 class="page-title" style="margin:0;">Unit Manager</h1>
+                            <span id="syncStatusUnits" class="sync-status">Synced to Supabase</span>
+                        </div>
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <button class="btn btn-secondary" onclick="loadUnits()"><i class="fas fa-sync-alt"></i>
+                                Refresh</button>
+                            <button class="btn btn-success" onclick="saveUnitChanges()"><i class="fas fa-save"></i> Save
+                                Changes</button>
+                        </div>
+                    </div>
+                    <div class="excel-grid-container fade-in">
+                        <table class="excel-table" id="unitsGrid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Unit Name * (e.g. Kilogram)</th>
+                                    <th>Short Name * (e.g. kg)</th>
+                                    <th style="width: 120px; text-align: center;">Allow Decimals</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="unitsBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary" onclick="addNewUnit()" style="margin-top: var(--space-md);"><i
+                            class="fas fa-plus"></i> Add Unit</button>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // Supabase client is already initialized globally in supabase-client.js
+
+        // Sidebar Toggle for Mobile
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Sidebar Dropdown Toggle
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const parent = toggle.parentElement;
+
+                // Close other open dropdowns (accordion style - optional)
+                // document.querySelectorAll('.nav-item.has-submenu.active').forEach(item => {
+                //     if (item !== parent) item.classList.remove('active');
+                // });
+
+                parent.classList.toggle('active');
+            });
+        });
+
+        // Initialize on page load
+        // Require admin authentication
+        let currentUser = null;
+
+        // Product Management State
+        let productsData = [];
+        let modifiedProducts = new Set(); // Stores IDs
+        let deletedProducts = new Set();  // Stores IDs
+
+        async function init() {
+            // Check authentication and role
+            currentUser = await requireAuth(['admin', 'manager', 'cashier']); // Allowed roles expanded for product management
+
+            if (currentUser) {
+                // Update user info
+                if (document.getElementById('userName')) document.getElementById('userName').textContent = currentUser.email;
+                if (document.getElementById('userRole')) document.getElementById('userRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+
+                // Handle URL parameters for initial view
+                const urlParams = new URLSearchParams(window.location.search);
+                const view = urlParams.get('view');
+                const action = urlParams.get('action');
+
+                if (view === 'products') {
+                    switchView('products', action);
+                } else {
+                    // Default to dashboard
+                    await loadDashboardData();
+                }
+            }
+        }
+
+        // View Switching Logic
+        function switchView(viewName, action = null) {
+            // Hide all views
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-products').classList.add('hidden');
+            document.getElementById('view-categories').classList.add('hidden');
+            document.getElementById('view-variations').classList.add('hidden');
+            document.getElementById('view-brands').classList.add('hidden');
+            document.getElementById('view-units').classList.add('hidden');
+
+            // Reset sidebar active state
+            document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => link.classList.remove('active'));
+
+            if (viewName === 'products') {
+                document.getElementById('view-products').classList.remove('hidden');
+
+                // Update URL without reloading
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('view', 'products');
+                if (action) newUrl.searchParams.set('action', action);
+                else newUrl.searchParams.delete('action');
+                window.history.pushState({}, '', newUrl);
+
+                // Highlight sidebar item
+                // Ideally select by href or ID, for now let's just highlight "List Products"
+                // strict selector might be needed if multiple links point to similar things
+
+                loadProducts().then(() => {
+                    if (action === 'add') {
+                        addNewRow();
+                        // Clean URL action after adding
+                        const cleanUrl = new URL(window.location);
+                        cleanUrl.searchParams.delete('action');
+                        window.history.replaceState({}, '', cleanUrl);
+                    }
+                });
+            } else if (viewName === 'categories') {
+                document.getElementById('view-categories').classList.remove('hidden');
+
+                // Update URL
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('view', 'categories');
+                window.history.pushState({}, '', newUrl);
+
+                loadCategories();
+            } else if (viewName === 'variations') {
+                document.getElementById('view-variations').classList.remove('hidden');
+
+                // Update URL
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('view', 'variations');
+                window.history.pushState({}, '', newUrl);
+
+                loadVariations();
+            } else if (viewName === 'brands') {
+                document.getElementById('view-brands').classList.remove('hidden');
+
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('view', 'brands');
+                window.history.pushState({}, '', newUrl);
+
+                loadBrands();
+            } else if (viewName === 'units') {
+                document.getElementById('view-units').classList.remove('hidden');
+
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('view', 'units');
+                window.history.pushState({}, '', newUrl);
+
+                loadUnits();
+            } else {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+
+                // Update URL
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.delete('view');
+                newUrl.searchParams.delete('action');
+                window.history.pushState({}, '', newUrl);
+
+                loadDashboardData();
+            }
+        }
+
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load products count
+                const { data: products, error: productsError } = await supabase
+                    .from('products')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!productsError) {
+                    document.getElementById('productCount').textContent = products?.length || 0;
+                }
+
+                // Load transactions
+                const { data: transactions, error: transactionsError } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (!transactionsError && transactions) {
+                    document.getElementById('transactionCount').textContent = transactions.length;
+                    displayTransactions(transactions);
+
+                    // Calculate today's sales
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayTransactions = transactions.filter(t =>
+                        t.created_at.startsWith(today)
+                    );
+                    const todayTotal = todayTransactions.reduce((sum, t) => sum + parseFloat(t.total), 0);
+                    document.getElementById('todaySales').textContent = `$${todayTotal.toFixed(2)}`;
+                }
+
+                // Load users count
+                const { data: users, error: usersError } = await supabase
+                    .from('user_roles')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!usersError) {
+                    document.getElementById('userCount').textContent = users?.length || 0;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Display transactions in table
+        function displayTransactions(transactions) {
+            const tbody = document.getElementById('transactionsBody');
+
+            if (transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            <i class="fas fa-inbox"></i> No transactions yet
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = transactions.map(t => `
+                <tr>
+                    <td>#${t.id.substring(0, 8)}</td>
+                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                    <td>$${parseFloat(t.total).toFixed(2)}</td>
+                    <td><span class="badge badge-success">${t.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // --- Product Management Logic ---
+
+        // Reference Data Cache
+        let refCategories = [];
+        let refSubcategories = [];
+        let refBrands = [];
+        let refUnits = [];
+
+        async function loadReferenceData() {
+            try {
+                const [cats, subs, brands, units] = await Promise.all([
+                    supabase.from('categories').select('*').order('name'),
+                    supabase.from('subcategories').select('*').order('name'),
+                    supabase.from('brands').select('*').order('name'),
+                    supabase.from('units').select('*').order('name')
+                ]);
+
+                refCategories = cats.data || [];
+                refSubcategories = subs.data || [];
+                refBrands = brands.data || [];
+                refUnits = units.data || [];
+            } catch (error) {
+                console.error('Error loading reference data:', error);
+            }
+        }
+
+        // Local Storage Draft Helpers
+        function saveProductDraft() {
+            try {
+                const draft = {
+                    productsData,
+                    modifiedProducts: Array.from(modifiedProducts),
+                    deletedProducts: Array.from(deletedProducts),
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('pos_draft_products', JSON.stringify(draft));
+                updateSyncStatus('Unsaved Changes (Local)');
+            } catch (e) {
+                console.error('Failed to save draft:', e);
+            }
+        }
+
+        function clearProductDraft() {
+            localStorage.removeItem('pos_draft_products');
+            updateSyncStatus('Synced to Supabase');
+        }
+
+        function updateSyncStatus(status) {
+            const el = document.getElementById('syncStatus');
+            if (el) {
+                el.textContent = status;
+                el.className = 'sync-status ' + (status.includes('Unsaved') ? 'status-warning' : 'status-success');
+            }
+        }
+
+        async function loadProducts() {
+            const tbody = document.getElementById('productsBody');
+            tbody.innerHTML = `<tr><td colspan="12" class="text-center" style="padding: 20px;"><div class="spinner"></div>Loading...</td></tr>`;
+
+            // Check for local draft first
+            const localDraft = localStorage.getItem('pos_draft_products');
+            if (localDraft) {
+                if (confirm('You have unsaved changes from a previous session. Would you like to resume your draft?')) {
+                    try {
+                        const draft = JSON.parse(localDraft);
+                        productsData = draft.productsData;
+                        modifiedProducts = new Set(draft.modifiedProducts);
+                        deletedProducts = new Set(draft.deletedProducts);
+                        renderGrid();
+                        updateSaveButton();
+                        updateSyncStatus('Unsaved Changes (Local)');
+                        return;
+                    } catch (e) {
+                        console.error('Error parsing draft:', e);
+                    }
+                } else {
+                    localStorage.removeItem('pos_draft_products');
+                }
+            }
+
+            modifiedProducts.clear();
+            deletedProducts.clear();
+
+            try {
+                // Load refs first
+                if (refCategories.length === 0) await loadReferenceData();
+
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Auto-map legacy text fields to IDs if IDs are missing
+                if (products) {
+                    products.forEach(p => {
+                        // Category
+                        if (!p.category_id && p.category) {
+                            const match = refCategories.find(c => c.name.toLowerCase() === p.category.toLowerCase());
+                            if (match) p.category_id = match.id;
+                        }
+                        // Brand
+                        if (!p.brand_id && p.brand) {
+                            const match = refBrands.find(b => b.name.toLowerCase() === p.brand.toLowerCase());
+                            if (match) p.brand_id = match.id;
+                        }
+                        // Unit
+                        if (!p.unit_id && p.unit) {
+                            const match = refUnits.find(u => u.name.toLowerCase() === p.unit.toLowerCase() || u.short_name.toLowerCase() === p.unit.toLowerCase());
+                            if (match) p.unit_id = match.id;
+                        }
+                    });
+                }
+
+                productsData = products || [];
+                renderGrid();
+                updateSyncStatus('Synced to Supabase');
+
+            } catch (error) {
+                console.error('Error loading products:', error);
+                tbody.innerHTML = `<tr><td colspan="12" class="text-center text-error" style="padding: 20px;">Error loading products</td></tr>`;
+            }
+        }
+
+        function renderGrid() {
+            const tbody = document.getElementById('productsBody');
+            tbody.innerHTML = '';
+
+            if (productsData.length === 0) {
+                addNewRow();
+                return;
+            }
+
+            productsData.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedProducts.has(product.id)) tr.classList.add('modified');
+                if (product.id && product.id.toString().startsWith('new_')) tr.classList.add('new-row');
+
+                tr.dataset.id = product.id;
+                tr.dataset.index = index;
+
+                // Dropdown Options
+                let categoryOptions = `<option value="">Select</option>` + refCategories.map(c =>
+                    `<option value="${c.id}" ${product.category_id === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+                ).join('');
+                if (!product.category_id && product.category) {
+                    categoryOptions += `<option value="" selected disabled style="color:red">Legacy: ${escapeHtml(product.category)}</option>`;
+                }
+
+                const filteredSubs = product.category_id
+                    ? refSubcategories.filter(s => s.category_id === product.category_id)
+                    : [];
+
+                const subOptions = `<option value="">Select</option>` + filteredSubs.map(s =>
+                    `<option value="${s.id}" ${product.subcategory_id === s.id ? 'selected' : ''}>${escapeHtml(s.name)}</option>`
+                ).join('');
+
+                let brandOptions = `<option value="">Select</option>` + refBrands.map(b =>
+                    `<option value="${b.id}" ${product.brand_id === b.id ? 'selected' : ''}>${escapeHtml(b.name)}</option>`
+                ).join('');
+                if (!product.brand_id && product.brand) {
+                    brandOptions += `<option value="" selected disabled style="color:red">Legacy: ${escapeHtml(product.brand)}</option>`;
+                }
+
+                let unitOptions = `<option value="">Select</option>` + refUnits.map(u =>
+                    `<option value="${u.id}" ${product.unit_id === u.id ? 'selected' : ''}>${escapeHtml(u.name)} (${escapeHtml(u.short_name)})</option>`
+                ).join('');
+                if (!product.unit_id && product.unit) {
+                    unitOptions += `<option value="" selected disabled style="color:red">Legacy: ${escapeHtml(product.unit)}</option>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="text-center" style="color: var(--text-muted); font-size: 0.75rem;">${index + 1}</td>
+                    <td><input type="text" class="excel-input" name="name" value="${escapeHtml(product.name || '')}" oninput="markProductModified(this)"></td>
+                    <td><input type="text" class="excel-input" name="code" value="${escapeHtml(product.code || '')}" oninput="markProductModified(this)"></td>
+                    
+                    <!-- Category -->
+                    <td><select class="excel-input" name="category_id" onchange="handleCategoryChange(this)">${categoryOptions}</select></td>
+                    
+                    <!-- Subcategory -->
+                    <td><select class="excel-input" name="subcategory_id" onchange="markProductModified(this)">${subOptions}</select></td>
+                    
+                    <!-- Brand -->
+                    <td><select class="excel-input" name="brand_id" onchange="markProductModified(this)">${brandOptions}</select></td>
+                    
+                    <td><input type="number" class="excel-input" name="price" value="${product.price || ''}" step="0.01" oninput="markProductModified(this)"></td>
+                    <td><input type="number" class="excel-input" name="cost" value="${product.cost || ''}" step="0.01" oninput="markProductModified(this)"></td>
+                    <td><input type="number" class="excel-input" name="stock" value="${product.stock || 0}" oninput="markProductModified(this)"></td>
+                    
+                    <!-- Unit -->
+                    <td><select class="excel-input" name="unit_id" onchange="markProductModified(this)">${unitOptions}</select></td>
+
+                    <td><input type="text" class="excel-input" name="image_url" value="${escapeHtml(product.image_url || '')}" oninput="markProductModified(this)"></td>
+                    
+                    <td class="action-cell">
+                        <button class="btn-icon" onclick="deleteProductRow(this)" title="Delete Row"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleCategoryChange(select) {
+            const tr = select.closest('tr');
+            const subSelect = tr.querySelector('select[name="subcategory_id"]');
+            const categoryId = select.value;
+            const productId = tr.dataset.id;
+
+            // Mark modified
+            markProductModified(select);
+
+            // Update subcategory options
+            const filteredSubs = categoryId
+                ? refSubcategories.filter(s => s.category_id === categoryId)
+                : [];
+
+            subSelect.innerHTML = `<option value="">Select</option>` + filteredSubs.map(s =>
+                `<option value="${s.id}">${escapeHtml(s.name)}</option>`
+            ).join('');
+
+            // Trigger change on subselect to update model (clearing it)
+            subSelect.value = "";
+
+            // Update the model for this product
+            const product = productsData.find(p => p.id.toString() === productId.toString());
+            if (product) {
+                product.subcategory_id = null;
+            }
+        }
+
+        function addNewRow() {
+            const tbody = document.getElementById('productsBody');
+            const index = productsData.length;
+
+            // Create a temp object with stable ID
+            const newProduct = {
+                id: 'new_' + Date.now(),
+                name: '',
+                code: '',
+                category_id: null,
+                subcategory_id: null,
+                brand_id: null,
+                price: '',
+                cost: '',
+                stock: 0,
+                unit_id: null,
+                image_url: '',
+                isNew: true
+            };
+
+            productsData.push(newProduct);
+            modifiedProducts.add(newProduct.id);
+
+            renderGrid();
+
+            // Focus new row name input
+            const lastTr = tbody.lastElementChild;
+            if (lastTr) lastTr.querySelector('input[name="name"]').focus();
+
+            updateSaveButton();
+            saveProductDraft();
+        }
+
+        function deleteProductRow(btn) {
+            const tr = btn.closest('tr');
+            const id = tr.dataset.id;
+            const index = parseInt(tr.dataset.index);
+
+            if (confirm('Delete this row?')) {
+                const product = productsData[index];
+                if (id && !id.toString().startsWith('new_')) {
+                    deletedProducts.add(id);
+                }
+                modifiedProducts.delete(id);
+
+                // Visual feedback
+                tr.style.opacity = '0.5';
+                tr.style.pointerEvents = 'none';
+                tr.style.backgroundColor = 'rgba(255, 50, 50, 0.1)';
+
+                updateSaveButton();
+                saveProductDraft();
+            }
+        }
+
+        function markProductModified(input) {
+            const tr = input.closest('tr');
+            const productId = tr.dataset.id;
+            const product = productsData.find(p => p.id.toString() === productId.toString());
+
+            if (!product) {
+                console.error('Product not found for ID:', productId);
+                return;
+            }
+            const field = input.name;
+            let value = input.value;
+
+            if (['price', 'cost', 'stock'].includes(field)) {
+                value = parseFloat(value) || 0;
+            }
+            // For dropdowns, if value is empty string, set to null
+            if (['category_id', 'subcategory_id', 'brand_id', 'unit_id'].includes(field)) {
+                if (value === "") value = null;
+            }
+
+            product[field] = value;
+            modifiedProducts.add(product.id);
+            tr.classList.add('modified');
+
+            updateSaveButton();
+            saveProductDraft();
+        }
+
+        function updateSaveButton() {
+            const btn = document.getElementById('saveBtn');
+            const count = modifiedProducts.size + deletedProducts.size;
+            if (count > 0) {
+                btn.innerHTML = `<i class="fas fa-save"></i> Save (${count})`;
+                btn.classList.add('pulse');
+            } else {
+                btn.innerHTML = `<i class="fas fa-save"></i> Save Changes`;
+                btn.classList.remove('pulse');
+            }
+        }
+
+        async function saveAllChanges() {
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+                btn.disabled = true;
+
+                // 1. Handle Deletions
+                if (deletedProducts.size > 0) {
+                    const { error } = await supabase
+                        .from('products')
+                        .delete()
+                        .in('id', Array.from(deletedProducts));
+
+                    if (error) throw error;
+                }
+
+                // 2. Handle Upserts (Updates + Inserts)
+                const upsertData = [];
+
+                modifiedProducts.forEach(id => {
+                    const product = productsData.find(p => p.id === id);
+                    if (!product) return;
+
+                    // Skip if this product is marked for deletion
+                    if (deletedProducts.has(id)) return;
+
+                    const payload = {
+                        name: product.name,
+                        code: product.code,
+                        category_id: product.category_id,
+                        subcategory_id: product.subcategory_id,
+                        brand_id: product.brand_id,
+                        price: parseFloat(product.price) || 0,
+                        cost: parseFloat(product.cost) || 0,
+                        stock: parseInt(product.stock) || 0,
+                        unit_id: product.unit_id,
+                        image_url: product.image_url
+                    };
+
+                    // If it's an existing item, include ID
+                    if (id && !id.toString().startsWith('new_')) {
+                        payload.id = id;
+                    }
+
+                    upsertData.push(payload);
+                });
+
+                if (upsertData.length > 0) {
+                    const { error } = await supabase
+                        .from('products')
+                        .upsert(upsertData);
+
+                    if (error) throw error;
+                }
+
+                alert('Products saved successfully!');
+                await loadProducts(); // Refresh grid and clean state
+                updateSaveButton();
+                clearProductDraft();
+
+            } catch (error) {
+                console.error('Error saving products:', error);
+                alert('Error saving products: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('pulse');
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+
+        // Quick action functions handled via switchView now
+        function addProduct() {
+            switchView('products', 'add');
+        }
+
+        function viewProducts() {
+            switchView('products');
+        }
+
+        function viewTransactions() {
+            alert('Transactions page coming soon!');
+        }
+
+        function manageUsers() {
+            alert('User management feature coming soon!');
+        }
+
+        function openPOS() {
+            alert('POS feature coming soon!');
+        }
+
+        // =====================================================
+        // CATEGORY MANAGEMENT FUNCTIONS
+        // =====================================================
+
+        let categoriesData = [];
+        let subcategoriesData = [];
+        let modifiedCategories = new Set();
+        let deletedCategories = new Set();
+        let modifiedSubcategories = new Set();
+        let deletedSubcategories = new Set();
+
+        // Switch between Main Categories and Subcategories tabs
+        function switchCategoryTab(tab) {
+            const mainTab = document.getElementById('mainCategoriesTab');
+            const subTab = document.getElementById('subcategoriesTab');
+            const mainView = document.getElementById('mainCategoriesView');
+            const subView = document.getElementById('subcategoriesView');
+
+            if (tab === 'main') {
+                mainTab.style.borderBottom = '3px solid var(--primary)';
+                subTab.style.borderBottom = 'none';
+                mainView.classList.remove('hidden');
+                subView.classList.add('hidden');
+            } else {
+                subTab.style.borderBottom = '3px solid var(--primary)';
+                mainTab.style.borderBottom = 'none';
+                subView.classList.remove('hidden');
+                mainView.classList.add('hidden');
+            }
+        }
+
+        // Load all categories and subcategories
+        async function loadCategories() {
+            try {
+                // Load main categories
+                const { data: categories, error: catError } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .order('name', { ascending: true });
+
+                if (catError) throw catError;
+
+                categoriesData = categories || [];
+                renderCategories();
+
+                // Load subcategories
+                const { data: subcategories, error: subError } = await supabase
+                    .from('subcategories')
+                    .select(`
+                        *,
+                        categories (name)
+                    `)
+                    .order('name', { ascending: true });
+
+                if (subError) throw subError;
+
+                subcategoriesData = subcategories || [];
+                renderSubcategories();
+
+                // Reset tracking
+                modifiedCategories.clear();
+                deletedCategories.clear();
+                modifiedSubcategories.clear();
+                deletedSubcategories.clear();
+
+                console.log('Categories loaded successfully');
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                alert('Failed to load categories: ' + error.message);
+            }
+        }
+
+        // Render main categories table
+        function renderCategories() {
+            const tbody = document.getElementById('categoriesBody');
+            tbody.innerHTML = '';
+
+            categoriesData.forEach((category, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedCategories.has(category.id)) tr.classList.add('modified');
+                if (category.id && category.id.toString().startsWith('new_')) tr.classList.add('new-row');
+                tr.dataset.index = index;
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(category.name || '')}" data-field="name" oninput="markCategoryModified(this)"></td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(category.description || '')}" data-field="description" oninput="markCategoryModified(this)"></td>
+                    <td class="action-cell">
+                        <button class="btn-icon" onclick="deleteCategory(${index})" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render subcategories table
+        function renderSubcategories() {
+            const tbody = document.getElementById('subcategoriesBody');
+            tbody.innerHTML = '';
+
+            subcategoriesData.forEach((sub, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedSubcategories.has(sub.id)) tr.classList.add('modified');
+                if (sub.id && sub.id.toString().startsWith('new_')) tr.classList.add('new-row');
+                tr.dataset.index = index;
+
+                // Create category dropdown options
+                const categoryOptions = categoriesData.map(cat =>
+                    `<option value="${cat.id}" ${sub.category_id === cat.id ? 'selected' : ''}>${escapeHtml(cat.name)}</option>`
+                ).join('');
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <select class="excel-input" data-field="category_id" onchange="markSubcategoryModified(this)">
+                            <option value="">Select Category</option>
+                            ${categoryOptions}
+                        </select>
+                    </td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(sub.name || '')}" data-field="name" oninput="markSubcategoryModified(this)"></td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(sub.description || '')}" data-field="description" oninput="markSubcategoryModified(this)"></td>
+                    <td class="action-cell">
+                        <button class="btn-icon" onclick="deleteSubcategory(${index})" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Mark category as modified
+        function markCategoryModified(input) {
+            const tr = input.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const category = categoriesData[index];
+            const field = input.dataset.field;
+            const value = input.value;
+
+            category[field] = value;
+            modifiedCategories.add(category.id);
+
+            tr.classList.add('modified');
+        }
+
+        // Mark subcategory as modified
+        function markSubcategoryModified(input) {
+            const tr = input.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const sub = subcategoriesData[index];
+            const field = input.dataset.field;
+            const value = input.value;
+
+            sub[field] = value;
+            modifiedSubcategories.add(sub.id);
+
+            tr.classList.add('modified');
+        }
+
+        // Add new category row
+        function addNewCategory() {
+            const newCategory = {
+                id: 'new_' + Date.now(),
+                name: '',
+                description: '',
+                isNew: true
+            };
+
+            categoriesData.push(newCategory);
+            modifiedCategories.add(newCategory.id);
+
+            renderCategories();
+            // Focus new row name input
+            const lastTr = document.getElementById('categoriesBody').lastElementChild;
+            if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+        }
+
+        // Add new subcategory row
+        function addNewSubcategory() {
+            const newSubcategory = {
+                id: 'new_' + Date.now(),
+                category_id: '',
+                name: '',
+                description: '',
+                isNew: true
+            };
+
+            subcategoriesData.push(newSubcategory);
+            modifiedSubcategories.add(newSubcategory.id);
+
+            renderSubcategories();
+            // Focus new row name input
+            const lastTr = document.getElementById('subcategoriesBody').lastElementChild;
+            if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+        }
+
+        // Delete category
+        function deleteCategory(index) {
+            if (confirm('Are you sure you want to delete this category? This will also delete all its subcategories.')) {
+                const category = categoriesData[index];
+                if (category.id && !category.id.toString().startsWith('new_')) {
+                    deletedCategories.add(category.id);
+                }
+                modifiedCategories.delete(category.id);
+                categoriesData.splice(index, 1);
+                renderCategories();
+                saveCategoriesDraft();
+            }
+        }
+
+        function deleteSubcategory(index) {
+            if (confirm('Are you sure you want to delete this subcategory?')) {
+                const subcategory = subcategoriesData[index];
+                if (subcategory.id && !subcategory.id.toString().startsWith('new_')) {
+                    deletedSubcategories.add(subcategory.id);
+                }
+                modifiedSubcategories.delete(subcategory.id);
+                subcategoriesData.splice(index, 1);
+                renderSubcategories();
+                saveCategoriesDraft();
+            }
+        }
+
+        // Save all category changes
+        async function saveCategoryChanges() {
+            try {
+                // Delete categories
+                if (deletedCategories.size > 0) {
+                    const { error: deleteError } = await supabase
+                        .from('categories')
+                        .delete()
+                        .in('id', Array.from(deletedCategories));
+
+                    if (deleteError) throw deleteError;
+                }
+
+                // Upsert categories
+                const categoriesToSave = Array.from(modifiedCategories)
+                    .map(id => categoriesData.find(c => c.id === id))
+                    .filter(cat => cat && cat.name); // Only save if exists and name is filled
+
+                if (categoriesToSave.length > 0) {
+                    const { error: upsertError } = await supabase
+                        .from('categories')
+                        .upsert(categoriesToSave.map(cat => {
+                            const payload = {
+                                name: cat.name,
+                                description: cat.description
+                            };
+                            if (!cat.id.toString().startsWith('new_')) {
+                                payload.id = cat.id;
+                            }
+                            return payload;
+                        }));
+
+                    if (upsertError) throw upsertError;
+                }
+
+                // Delete subcategories
+                if (deletedSubcategories.size > 0) {
+                    const { error: deleteError } = await supabase
+                        .from('subcategories')
+                        .delete()
+                        .in('id', Array.from(deletedSubcategories));
+
+                    if (deleteError) throw deleteError;
+                }
+
+                // Upsert subcategories
+                const subcategoriesToSave = Array.from(modifiedSubcategories)
+                    .map(id => subcategoriesData.find(s => s.id === id))
+                    .filter(sub => sub && sub.name && sub.category_id);
+
+                if (subcategoriesToSave.length > 0) {
+                    const { error: upsertError } = await supabase
+                        .from('subcategories')
+                        .upsert(subcategoriesToSave.map(sub => {
+                            const payload = {
+                                category_id: sub.category_id,
+                                name: sub.name,
+                                description: sub.description
+                            };
+                            if (!sub.id.toString().startsWith('new_')) {
+                                payload.id = sub.id;
+                            }
+                            return payload;
+                        }));
+
+                    if (upsertError) throw upsertError;
+                }
+
+                alert('All changes saved successfully!');
+                await loadCategories(); // Reload local category data
+                await loadReferenceData(); // Sync global cache for products
+                if (!document.getElementById('view-products').classList.contains('hidden')) {
+                    renderGrid(); // Update products dropdowns if visible
+                }
+                clearCategoriesDraft();
+            } catch (error) {
+                console.error('Error saving categories:', error);
+                alert('Failed to save categories: ' + error.message);
+            }
+        }
+
+        // =====================================================
+        // VARIATION MANAGEMENT FUNCTIONS
+        // =====================================================
+
+        let variationTypesData = [];
+        let variationOptionsData = [];
+        let modifiedVariationTypes = new Set();
+        let deletedVariationTypes = new Set();
+        let modifiedVariationOptions = new Set();
+        let deletedVariationOptions = new Set();
+
+        // Switch between Variation Types and Options tabs
+        function switchVariationTab(tab) {
+            const typesTab = document.getElementById('variationTypesTab');
+            const optionsTab = document.getElementById('variationOptionsTab');
+            const typesView = document.getElementById('variationTypesView');
+            const optionsView = document.getElementById('variationOptionsView');
+
+            if (tab === 'types') {
+                typesTab.style.borderBottom = '3px solid var(--primary)';
+                optionsTab.style.borderBottom = 'none';
+                typesView.classList.remove('hidden');
+                optionsView.classList.add('hidden');
+            } else {
+                optionsTab.style.borderBottom = '3px solid var(--primary)';
+                typesTab.style.borderBottom = 'none';
+                optionsView.classList.remove('hidden');
+                typesView.classList.add('hidden');
+            }
+        }
+
+        // Load all variations data
+        async function loadVariations() {
+            try {
+                // Load variation types
+                const { data: types, error: typesError } = await supabase
+                    .from('variation_types')
+                    .select('*')
+                    .order('name', { ascending: true });
+
+                if (typesError) throw typesError;
+
+                variationTypesData = types || [];
+                renderVariationTypes();
+
+                // Load variation options
+                const { data: options, error: optionsError } = await supabase
+                    .from('variation_options')
+                    .select(`
+                        *,
+                        variation_types (name)
+                    `)
+                    .order('option_value', { ascending: true });
+
+                if (optionsError) throw optionsError;
+
+                variationOptionsData = options || [];
+                renderVariationOptions();
+
+                // Reset tracking
+                modifiedVariationTypes.clear();
+                deletedVariationTypes.clear();
+                modifiedVariationOptions.clear();
+                deletedVariationOptions.clear();
+
+                console.log('Variations loaded successfully');
+            } catch (error) {
+                console.error('Error loading variations:', error);
+                alert('Failed to load variations: ' + error.message);
+            }
+        }
+
+        // Render variation types table
+        function renderVariationTypes() {
+            const tbody = document.getElementById('variationTypesBody');
+            tbody.innerHTML = '';
+
+            variationTypesData.forEach((type, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedVariationTypes.has(type.id)) tr.classList.add('modified');
+                if (type.id && type.id.toString().startsWith('new_')) tr.classList.add('new-row');
+                tr.dataset.index = index;
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(type.name || '')}" data-field="name" oninput="markVariationTypeModified(this)"></td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(type.description || '')}" data-field="description" oninput="markVariationTypeModified(this)"></td>
+                    <td class="action-cell">
+                        <button class="btn-icon" onclick="deleteVariationType(${index})" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render variation options table
+        function renderVariationOptions() {
+            const tbody = document.getElementById('variationOptionsBody');
+            tbody.innerHTML = '';
+
+            variationOptionsData.forEach((opt, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedVariationOptions.has(opt.id)) tr.classList.add('modified');
+                if (opt.id && opt.id.toString().startsWith('new_')) tr.classList.add('new-row');
+                tr.dataset.index = index;
+
+                // Create type dropdown options
+                const typeOptions = variationTypesData.map(type =>
+                    `<option value="${type.id}" ${opt.variation_type_id === type.id ? 'selected' : ''}>${escapeHtml(type.name)}</option>`
+                ).join('');
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <select class="excel-input" data-field="variation_type_id" onchange="markVariationOptionModified(this)">
+                            <option value="">Select Type</option>
+                            ${typeOptions}
+                        </select>
+                    </td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(opt.option_value || '')}" data-field="option_value" oninput="markVariationOptionModified(this)"></td>
+                    <td class="action-cell">
+                        <button class="btn-icon" onclick="deleteVariationOption(${index})" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+        // Mark variation type as modified
+        function markVariationTypeModified(input) {
+            const tr = input.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const type = variationTypesData[index];
+            const field = input.dataset.field;
+            const value = input.value;
+
+            type[field] = value;
+            modifiedVariationTypes.add(type.id);
+
+            tr.classList.add('modified');
+        }
+
+        // Mark variation option as modified
+        function markVariationOptionModified(input) {
+            const tr = input.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const opt = variationOptionsData[index];
+            const field = input.dataset.field;
+            const value = input.value;
+
+            opt[field] = value;
+            modifiedVariationOptions.add(opt.id);
+
+            tr.classList.add('modified');
+        }
+
+        // Add new variation type row
+        function addNewVariationType() {
+            const newType = {
+                id: 'new_' + Date.now(),
+                name: '',
+                description: '',
+                isNew: true
+            };
+
+            variationTypesData.push(newType);
+            modifiedVariationTypes.add(newType.id);
+
+            renderVariationTypes();
+            const lastTr = document.getElementById('variationTypesBody').lastElementChild;
+            if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+        }
+
+        // Add new variation option row
+        function addNewVariationOption() {
+            const newOption = {
+                id: 'new_' + Date.now(),
+                variation_type_id: '',
+                option_value: '',
+                isNew: true
+            };
+
+            variationOptionsData.push(newOption);
+            modifiedVariationOptions.add(newOption.id);
+
+            renderVariationOptions();
+            const lastTr = document.getElementById('variationOptionsBody').lastElementChild;
+            if (lastTr) lastTr.querySelector('input[data-field="option_value"]').focus();
+        }
+
+        // Delete variation type
+        function deleteVariationType(index) {
+            if (confirm('Are you sure you want to delete this variation type? This will also delete all its options.')) {
+                const type = variationTypesData[index];
+                if (type.id && !type.id.toString().startsWith('new_')) {
+                    deletedVariationTypes.add(type.id);
+                }
+                modifiedVariationTypes.delete(type.id);
+                variationTypesData.splice(index, 1);
+                renderVariationTypes();
+            }
+        }
+
+        // Delete variation option
+        function deleteVariationOption(index) {
+            if (confirm('Are you sure you want to delete this option?')) {
+                const option = variationOptionsData[index];
+                if (option.id && !option.id.toString().startsWith('new_')) {
+                    deletedVariationOptions.add(option.id);
+                }
+                modifiedVariationOptions.delete(option.id);
+                variationOptionsData.splice(index, 1);
+                renderVariationOptions();
+            }
+        }
+
+        // Save all variation changes
+        async function saveVariationChanges() {
+            try {
+                // Delete types
+                if (deletedVariationTypes.size > 0) {
+                    const { error: deleteError } = await supabase
+                        .from('variation_types')
+                        .delete()
+                        .in('id', Array.from(deletedVariationTypes));
+
+                    if (deleteError) throw deleteError;
+                }
+
+                // Upsert types
+                const typesToSave = Array.from(modifiedVariationTypes)
+                    .map(id => variationTypesData.find(t => t.id === id))
+                    .filter(type => type && type.name);
+
+                if (typesToSave.length > 0) {
+                    const { error: upsertError } = await supabase
+                        .from('variation_types')
+                        .upsert(typesToSave.map(type => {
+                            const payload = {
+                                name: type.name,
+                                description: type.description
+                            };
+                            if (!type.id.toString().startsWith('new_')) {
+                                payload.id = type.id;
+                            }
+                            return payload;
+                        }));
+
+                    if (upsertError) throw upsertError;
+                }
+
+                // Delete options
+                if (deletedVariationOptions.size > 0) {
+                    const { error: deleteError } = await supabase
+                        .from('variation_options')
+                        .delete()
+                        .in('id', Array.from(deletedVariationOptions));
+
+                    if (deleteError) throw deleteError;
+                }
+
+                // Upsert options
+                const optionsToSave = Array.from(modifiedVariationOptions)
+                    .map(id => variationOptionsData.find(o => o.id === id))
+                    .filter(opt => opt && opt.option_value && opt.variation_type_id);
+
+                if (optionsToSave.length > 0) {
+                    const { error: upsertError } = await supabase
+                        .from('variation_options')
+                        .upsert(optionsToSave.map(opt => {
+                            const payload = {
+                                variation_type_id: opt.variation_type_id,
+                                option_value: opt.option_value
+                            };
+                            if (!opt.id.toString().startsWith('new_')) {
+                                payload.id = opt.id;
+                            }
+                            return payload;
+                        }));
+
+                    if (upsertError) throw upsertError;
+                }
+
+                alert('All changes saved successfully!');
+                await loadVariations(); // Reload local variation data
+                await loadReferenceData(); // Sync global cache for products
+                if (!document.getElementById('view-products').classList.contains('hidden')) {
+                    renderGrid(); // Update products grid if visible
+                }
+            } catch (error) {
+                console.error('Error saving variations:', error);
+                alert('Failed to save variations: ' + error.message);
+            }
+        }
+
+        // =====================================================
+        // BRAND MANAGEMENT FUNCTIONS
+        // =====================================================
+
+        let brandsData = [];
+        let modifiedBrands = new Set();
+        let deletedBrands = new Set();
+
+        async function loadBrands() {
+            try {
+                const { data, error } = await supabase
+                    .from('brands')
+                    .select('*')
+                    .order('name', { ascending: true });
+
+                if (error) throw error;
+                brandsData = data || [];
+                renderBrands();
+                modifiedBrands.clear();
+                deletedBrands.clear();
+            } catch (error) {
+                console.error('Error loading brands:', error);
+                alert('Failed to load brands');
+            }
+        }
+
+        function renderBrands() {
+            const tbody = document.getElementById('brandsBody');
+            tbody.innerHTML = '';
+            brandsData.forEach((brand, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedBrands.has(brand.id)) tr.classList.add('modified');
+                if (brand.id && brand.id.toString().startsWith('new_')) tr.classList.add('new-row');
+                tr.dataset.index = index;
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(brand.name || '')}" data-field="name" oninput="markBrandModified(this)"></td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(brand.description || '')}" data-field="description" oninput="markBrandModified(this)"></td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(brand.website || '')}" data-field="website" oninput="markBrandModified(this)"></td>
+                    <td class="action-cell"><button class="btn-icon" onclick="deleteBrand(${index})"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function markBrandModified(input) {
+            const tr = input.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const brand = brandsData[index];
+            brand[input.dataset.field] = input.value;
+            modifiedBrands.add(brand.id);
+            tr.classList.add('modified');
+        }
+
+        function addNewBrand() {
+            const newBrand = { id: 'new_' + Date.now(), name: '', description: '', website: '', isNew: true };
+            brandsData.push(newBrand);
+            modifiedBrands.add(newBrand.id);
+            renderBrands();
+            const lastTr = document.getElementById('brandsBody').lastElementChild;
+            if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+        }
+
+        function deleteBrand(index) {
+            if (confirm('Delete this brand?')) {
+                const brand = brandsData[index];
+                if (brand.id && !brand.id.toString().startsWith('new_')) {
+                    deletedBrands.add(brand.id);
+                }
+                modifiedBrands.delete(brand.id);
+                brandsData.splice(index, 1);
+                renderBrands();
+            }
+        }
+
+        async function saveBrandChanges() {
+            try {
+                // Delete
+                if (deletedBrands.size > 0) {
+                    await supabase.from('brands').delete().in('id', Array.from(deletedBrands));
+                }
+
+                // Upsert
+                const toSave = Array.from(modifiedBrands)
+                    .map(id => brandsData.find(b => b.id === id))
+                    .filter(b => b && b.name);
+
+                if (toSave.length > 0) {
+                    const { error } = await supabase.from('brands').upsert(toSave.map(b => {
+                        const payload = {
+                            name: b.name,
+                            description: b.description,
+                            website: b.website
+                        };
+                        if (!b.id.toString().startsWith('new_')) {
+                            payload.id = b.id;
+                        }
+                        return payload;
+                    }));
+                    if (error) throw error;
+                }
+
+                alert('Saved!');
+                await loadBrands(); // Reload local brand data
+                await loadReferenceData(); // Sync global cache for products
+                if (!document.getElementById('view-products').classList.contains('hidden')) {
+                    renderGrid(); // Update products dropdowns if visible
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error saving: ' + e.message);
+            }
+        }
+
+        // =====================================================
+        // UNIT MANAGEMENT FUNCTIONS
+        // =====================================================
+
+        let unitsData = [];
+        let modifiedUnits = new Set();
+        let deletedUnits = new Set();
+
+        async function loadUnits() {
+            try {
+                const { data, error } = await supabase.from('units').select('*').order('name');
+                if (error) throw error;
+                unitsData = data || [];
+                renderUnits();
+                modifiedUnits.clear();
+                deletedUnits.clear();
+            } catch (e) { console.error(e); alert('Failed to load units'); }
+        }
+
+        function renderUnits() {
+            const tbody = document.getElementById('unitsBody');
+            tbody.innerHTML = '';
+            unitsData.forEach((u, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                if (modifiedUnits.has(u.id)) tr.classList.add('modified');
+                if (u.id && u.id.toString().startsWith('new_')) tr.classList.add('new-row');
+                tr.dataset.index = index;
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(u.name || '')}" data-field="name" oninput="markUnitModified(this)"></td>
+                    <td><input type="text" class="excel-input" value="${escapeHtml(u.short_name || '')}" data-field="short_name" oninput="markUnitModified(this)"></td>
+                    <td style="text-align: center;"><input type="checkbox" ${u.allow_decimals ? 'checked' : ''} onchange="markUnitModified(this, true)" data-field="allow_decimals"></td>
+                    <td class="action-cell"><button class="btn-icon" onclick="deleteUnit(${index})"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function markUnitModified(input, isCheckbox = false) {
+            const tr = input.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const unit = unitsData[index];
+            const val = isCheckbox ? input.checked : input.value;
+            unit[input.dataset.field] = val;
+            modifiedUnits.add(unit.id);
+            tr.classList.add('modified');
+        }
+
+        function addNewUnit() {
+            const newUnit = { id: 'new_' + Date.now(), name: '', short_name: '', allow_decimals: false, isNew: true };
+            unitsData.push(newUnit);
+            modifiedUnits.add(newUnit.id);
+            renderUnits();
+            const lastTr = document.getElementById('unitsBody').lastElementChild;
+            if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+        }
+
+        function deleteUnit(index) {
+            if (confirm('Delete unit?')) {
+                const unit = unitsData[index];
+                if (unit.id && !unit.id.toString().startsWith('new_')) {
+                    deletedUnits.add(unit.id);
+                }
+                modifiedUnits.delete(unit.id);
+                unitsData.splice(index, 1);
+                renderUnits();
+            }
+        }
+
+        async function saveUnitChanges() {
+            try {
+                if (deletedUnits.size > 0) {
+                    await supabase.from('units').delete().in('id', Array.from(deletedUnits));
+                }
+                const toSave = Array.from(modifiedUnits)
+                    .map(id => unitsData.find(u => u.id === id))
+                    .filter(u => u && u.name && u.short_name);
+
+                if (toSave.length > 0) {
+                    const { error } = await supabase.from('units').upsert(toSave.map(u => {
+                        const payload = {
+                            name: u.name,
+                            short_name: u.short_name,
+                            allow_decimals: u.allow_decimals
+                        };
+                        if (!u.id.toString().startsWith('new_')) {
+                            payload.id = u.id;
+                        }
+                        return payload;
+                    }));
+                    if (error) throw error;
+                }
+                alert('Saved!');
+                await loadUnits(); // Reload local unit data
+                await loadReferenceData(); // Sync global cache for products
+                if (!document.getElementById('view-products').classList.contains('hidden')) {
+                    renderGrid(); // Update products dropdowns if visible
+                }
+            } catch (e) { console.error(e); alert('Error saving: ' + e.message); }
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+
+</html>

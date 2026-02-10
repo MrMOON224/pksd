@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products Manager - POS System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <style>
+        /* Excel-like Grid Styles */
+        .excel-grid-container {
+            overflow-x: auto;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+            /* Ensure horizontal scroll on small screens */
+        }
+
+        .excel-table th,
+        .excel-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0;
+            position: relative;
+        }
+
+        .excel-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: var(--space-sm) var(--space-md);
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .excel-input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: var(--space-sm) var(--space-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            min-height: 44px;
+            /* Touch friendly */
+        }
+
+        .excel-input:focus {
+            outline: 2px solid var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            position: relative;
+        }
+
+        .excel-tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .excel-tr.new-row td {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .excel-tr.modified td::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 6px 6px 0;
+            border-color: transparent var(--warning) transparent transparent;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 0 5px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-icon:hover {
+            color: var(--error);
+        }
+
+        /* Toolbar */
+        .grid-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+
+        /* Touch Optimization Highlighting */
+        @media (pointer: coarse) {
+            .excel-input {
+                min-height: 50px;
+                /* Even larger for touch */
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <a href="admin-dashboard.html" class="sidebar-logo">
+                    <i class="fas fa-cash-register"></i>
+                    <span>POS System</span>
+                </a>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
+                <!-- Main Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="admin-dashboard.html" class="nav-link">
+                                <i class="fas fa-th-large"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Inventory Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Inventory</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item has-submenu active">
+                            <a href="#" class="nav-link dropdown-toggle">
+                                <div style="display:flex; align-items:center; gap:var(--space-md); flex:1;">
+                                    <i class="fas fa-boxes"></i>
+                                    <span>Products</span>
+                                </div>
+                                <i class="fas fa-chevron-right nav-arrow"></i>
+                            </a>
+                            <ul class="submenu">
+                                <li class="nav-item">
+                                    <a href="products.html" class="nav-link active">Product Manager</a>
+                                </li>
+                                <!-- Removed separate Add Product link as it's now integrated -->
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Product Categories</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Variations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Brands</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Units</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Base Units</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Print Barcode</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Adjustments</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-warehouse"></i>
+                                <span>Warehouse</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sales & Purchases Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Transactions</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>Quotations</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Purchases</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-cash-register"></i>
+                                <span>Sales</span>
+                                <span class="nav-badge">NEW</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Transfers</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Finance Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Finance</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-receipt"></i>
+                                <span>Expenses</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- People Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">People</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                <span>Peoples</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Roles/Permissions</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Reports Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Analytics</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reports</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Settings</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Currencies</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-language"></i>
+                                <span>Languages</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Templates</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <div class="navbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title-nav">Products</h1>
+                </div>
+
+                <div class="navbar-right">
+                    <!-- Search Bar -->
+                    <div class="navbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search products...">
+                    </div>
+
+                    <!-- Navbar Icons -->
+                    <div class="navbar-icons">
+                        <button class="navbar-icon">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                        <button class="navbar-icon">
+                            <i class="fas fa-envelope"></i>
+                            <span class="badge">5</span>
+                        </button>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name-nav" id="userName">Admin</div>
+                            <div class="user-role-nav" id="userRole">Administrator</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Dashboard Content -->
+            <main class="dashboard-content">
+                <!-- Toolbar -->
+                <div class="grid-toolbar">
+                    <h1 class="page-title" style="margin:0;">Product Manager</h1>
+
+                    <div style="display: flex; gap: var(--space-sm);">
+                        <button class="btn btn-secondary" onclick="loadProducts()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-primary" onclick="addNewRow()">
+                            <i class="fas fa-plus"></i> Add Row
+                        </button>
+                        <button class="btn btn-success" onclick="saveAllChanges()" id="saveBtn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Excel-like Grid -->
+                <div class="excel-grid-container fade-in">
+                    <table class="excel-table" id="productsGrid">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"></th>
+                                <th>Name *</th>
+                                <th style="width: 120px;">Code/SKU</th>
+                                <th style="width: 150px;">Category</th>
+                                <th style="width: 120px;">Brand</th>
+                                <th style="width: 100px;">Price *</th>
+                                <th style="width: 100px;">Cost</th>
+                                <th style="width: 80px;">Qty</th>
+                                <th style="width: 80px;">Unit</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsBody">
+                            <!-- Rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // Supabase client is already initialized globally in supabase-client.js
+
+        // Sidebar Toggle for Mobile
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Sidebar Dropdown Toggle
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const parent = toggle.parentElement;
+                parent.classList.toggle('active');
+            });
+        });
+
+        // Require authentication
+        let currentUser = null;
+        // Store modified rows to track changes
+        let productsData = [];
+        let modifiedRows = new Set();
+        let deletedRows = new Set();
+
+        async function init() {
+            // Check authentication and role
+            currentUser = await requireAuth(['admin', 'manager', 'cashier']);
+
+            if (currentUser) {
+                // Update user info
+                document.getElementById('userName').textContent = currentUser.email;
+                document.getElementById('userRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+
+                // Load products
+                await loadProducts();
+            }
+        }
+
+        // Load products function
+        async function loadProducts() {
+            const tbody = document.getElementById('productsBody');
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center" style="padding: 20px;"><div class="spinner"></div>Loading...</td></tr>`;
+
+            modifiedRows.clear();
+            deletedRows.clear();
+
+            try {
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                productsData = products || [];
+                renderGrid();
+
+                // Check for URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('action') === 'add') {
+                    addNewRow();
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+
+            } catch (error) {
+                console.error('Error loading products:', error);
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-error" style="padding: 20px;">Error loading products</td></tr>`;
+            }
+        }
+
+        // Render the grid
+        function renderGrid() {
+            const tbody = document.getElementById('productsBody');
+            tbody.innerHTML = '';
+
+            if (productsData.length === 0) {
+                // Add one empty row if no data
+                addNewRow();
+                return;
+            }
+
+            productsData.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'excel-tr';
+                tr.dataset.id = product.id;
+                tr.dataset.index = index;
+
+                tr.innerHTML = `
+                    <td class="text-center" style="color: var(--text-muted); font-size: 0.75rem;">${index + 1}</td>
+                    <td><input type="text" class="excel-input" name="name" value="${escapeHtml(product.name || '')}" onchange="markModified(this)"></td>
+                    <td><input type="text" class="excel-input" name="code" value="${escapeHtml(product.code || '')}" onchange="markModified(this)"></td>
+                    <td><input type="text" class="excel-input" name="category" value="${escapeHtml(product.category || '')}" onchange="markModified(this)" list="categories"></td>
+                    <td><input type="text" class="excel-input" name="brand" value="${escapeHtml(product.brand || '')}" onchange="markModified(this)" list="brands"></td>
+                    <td><input type="number" class="excel-input" name="price" value="${product.price || ''}" step="0.01" onchange="markModified(this)"></td>
+                    <td><input type="number" class="excel-input" name="cost" value="${product.cost || ''}" step="0.01" onchange="markModified(this)"></td>
+                    <td><input type="number" class="excel-input" name="stock" value="${product.stock || 0}" onchange="markModified(this)"></td>
+                    <td><input type="text" class="excel-input" name="unit" value="${escapeHtml(product.unit || '')}" onchange="markModified(this)" list="units"></td>
+                    <td class="action-cell">
+                        <button class="btn-icon" onclick="deleteRow(this)" title="Delete Row"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Add Datalists for auto-complete
+            addDatalists();
+        }
+
+        function addNewRow() {
+            const tbody = document.getElementById('productsBody');
+            const index = productsData.length;
+
+            // Create a temp object
+            const newProduct = {
+                id: 'new_' + Date.now(),
+                name: '',
+                code: '',
+                category: '',
+                brand: '',
+                price: '',
+                cost: '',
+                stock: 0,
+                unit: 'pc',
+                isNew: true
+            };
+
+            productsData.push(newProduct);
+
+            const tr = document.createElement('tr');
+            tr.className = 'excel-tr new-row modified'; // Mark as new and modified immediately
+            tr.dataset.id = newProduct.id;
+            tr.dataset.index = index;
+
+            tr.innerHTML = `
+                <td class="text-center" style="color: var(--text-muted); font-size: 0.75rem;">${index + 1}</td>
+                <td><input type="text" class="excel-input" name="name" value="" placeholder="New Item" onchange="markModified(this)"></td>
+                <td><input type="text" class="excel-input" name="code" value="" onchange="markModified(this)"></td>
+                <td><input type="text" class="excel-input" name="category" value="" onchange="markModified(this)" list="categories"></td>
+                <td><input type="text" class="excel-input" name="brand" value="" onchange="markModified(this)" list="brands"></td>
+                <td><input type="number" class="excel-input" name="price" value="" step="0.01" onchange="markModified(this)"></td>
+                <td><input type="number" class="excel-input" name="cost" value="" step="0.01" onchange="markModified(this)"></td>
+                <td><input type="number" class="excel-input" name="stock" value="0" onchange="markModified(this)"></td>
+                <td><input type="text" class="excel-input" name="unit" value="pc" onchange="markModified(this)" list="units"></td>
+                <td class="action-cell">
+                    <button class="btn-icon" onclick="deleteRow(this)" title="Remove Row"><i class="fas fa-times"></i></button>
+                </td>
+            `;
+
+            // Insert at the top or bottom? Excel style usually bottom.
+            tbody.appendChild(tr);
+
+            // Scroll to view
+            tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+            // Focus first input
+            tr.querySelector('input[name="name"]').focus();
+
+            // Track as modified
+            modifiedRows.add(index);
+            updateSaveButton();
+        }
+
+        function deleteRow(btn) {
+            const tr = btn.closest('tr');
+            const index = parseInt(tr.dataset.index);
+            const id = tr.dataset.id;
+
+            if (confirm('Delete this row?')) {
+                // If it's a real existing row, track for deletion from DB
+                if (!id.startsWith('new_')) {
+                    deletedRows.add(id);
+                } else {
+                    // Just removing a new unsaved row, remove from tracking
+                    modifiedRows.delete(index);
+                }
+
+                // Visual removal (we don't splice productsData to keep indexes consistent until save/reload)
+                tr.style.opacity = '0.5';
+                tr.style.pointerEvents = 'none';
+                tr.style.backgroundColor = 'rgba(255, 50, 50, 0.1)';
+
+                // We actually want to visually remove it for better UX, 
+                // but keep the data tracked.
+                // For simplicity in this version, we'll mark it pending delete visually.
+
+                updateSaveButton();
+            }
+        }
+
+        function markModified(input) {
+            const tr = input.closest('tr');
+            tr.classList.add('modified');
+            const index = parseInt(tr.dataset.index);
+
+            // Update data model
+            const field = input.name;
+            let value = input.value;
+
+            // Number conversion
+            if (['price', 'cost', 'stock'].includes(field)) {
+                value = parseFloat(value) || 0;
+            }
+
+            productsData[index][field] = value;
+            modifiedRows.add(index);
+
+            updateSaveButton();
+        }
+
+        function updateSaveButton() {
+            const btn = document.getElementById('saveBtn');
+            const count = modifiedRows.size + deletedRows.size;
+            if (count > 0) {
+                btn.innerHTML = `<i class="fas fa-save"></i> Save (${count})`;
+                btn.classList.add('pulse');
+            } else {
+                btn.innerHTML = `<i class="fas fa-save"></i> Save Changes`;
+                btn.classList.remove('pulse');
+            }
+        }
+
+        async function saveAllChanges() {
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+                btn.disabled = true;
+
+                // 1. Handle Deletions
+                if (deletedRows.size > 0) {
+                    const { error } = await supabase
+                        .from('products')
+                        .delete()
+                        .in('id', Array.from(deletedRows));
+
+                    if (error) throw error;
+                }
+
+                // 2. Handle Upserts (Updates + Inserts)
+                const upsertData = [];
+
+                modifiedRows.forEach(index => {
+                    const product = productsData[index];
+                    // Skip if this row depends to be deleted
+                    if (product.id && deletedRows.has(product.id)) return;
+
+                    const payload = {
+                        name: product.name,
+                        code: product.code,
+                        category: product.category,
+                        brand: product.brand,
+                        price: parseFloat(product.price) || 0,
+                        cost: parseFloat(product.cost) || 0,
+                        stock: parseInt(product.stock) || 0,
+                        unit: product.unit
+                    };
+
+                    // If it's an existing item, include ID
+                    if (!product.id.startsWith('new_')) {
+                        payload.id = product.id;
+                    }
+
+                    upsertData.push(payload);
+                });
+
+                if (upsertData.length > 0) {
+                    const { error } = await supabase
+                        .from('products')
+                        .upsert(upsertData);
+
+                    if (error) throw error;
+                }
+
+                alert('All changes saved successfully!');
+                await loadProducts(); // Reload to get fresh IDs and clean state
+
+            } catch (error) {
+                console.error('Error saving changes:', error);
+                alert('Failed to save changes: ' + error.message);
+            } finally {
+                btn.innerHTML = `<i class="fas fa-save"></i> Save Changes`;
+                btn.disabled = false;
+                btn.classList.remove('pulse');
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function addDatalists() {
+            if (document.getElementById('categories')) return;
+
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <datalist id="categories">
+                    <option value="Electronics">
+                    <option value="Clothing">
+                    <option value="Food & Beverage">
+                    <option value="Home & Garden">
+                </datalist>
+                <datalist id="brands">
+                    <option value="Generic">
+                    <option value="Brand A">
+                    <option value="Brand B">
+                </datalist>
+                <datalist id="units">
+                    <option value="pc">
+                    <option value="kg">
+                    <option value="l">
+                    <option value="m">
+                    <option value="box">
+                </datalist>
+            `;
+            document.body.appendChild(div);
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+
+</html>
