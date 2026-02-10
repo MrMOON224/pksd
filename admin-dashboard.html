@@ -899,6 +899,12 @@
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Fallback CDN if primary fails
+        if (!window.supabase) {
+            document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+        }
+    </script>
 
     <!-- Scripts -->
     <script src="config.js"></script>
@@ -949,6 +955,17 @@
         let deletedProducts = new Set();  // Stores IDs
 
         async function init() {
+            // Check if dependencies are loaded
+            if (typeof supabase === 'undefined' || !supabase.auth) {
+                console.error('Supabase client is not initialized. Checking window.supabase...');
+                if (window.supabase && window.supabase.auth) {
+                    supabase = window.supabase;
+                } else {
+                    alert('Critical Error: Supabase client is not defined. This usually means the library failed to load from the CDN. Please check your internet connection or if "cdn.jsdelivr.net" is blocked.');
+                    return;
+                }
+            }
+
             // Check authentication and role
             currentUser = await requireAuth(['admin', 'manager', 'cashier']); // Allowed roles expanded for product management
 
@@ -1064,7 +1081,7 @@
                     .select('*', { count: 'exact', head: true });
 
                 if (!productsError) {
-                    document.getElementById('productCount').textContent = products?.length || 0;
+                    document.getElementById('productCount').textContent = (products && products.length) || 0;
                 }
 
                 // Load transactions
@@ -1093,7 +1110,7 @@
                     .select('*', { count: 'exact', head: true });
 
                 if (!usersError) {
-                    document.getElementById('userCount').textContent = users?.length || 0;
+                    document.getElementById('userCount').textContent = (users && users.length) || 0;
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -1558,6 +1575,37 @@
             alert('POS feature coming soon!');
         }
 
+        // Module-specific Sync Status Update
+        function updateModuleSyncStatus(moduleId, status) {
+            const el = document.getElementById('syncStatus' + moduleId);
+            if (el) {
+                el.textContent = status;
+                el.className = 'sync-status ' + (status.includes('Unsaved') ? 'status-warning' : 'status-success');
+            }
+        }
+
+        function saveCategoriesDraft() {
+            try {
+                const draft = {
+                    categoriesData,
+                    subcategoriesData,
+                    modifiedCategories: Array.from(modifiedCategories),
+                    deletedCategories: Array.from(deletedCategories),
+                    modifiedSubcategories: Array.from(modifiedSubcategories),
+                    deletedSubcategories: Array.from(deletedSubcategories)
+                };
+                localStorage.setItem('pos_draft_categories', JSON.stringify(draft));
+                updateModuleSyncStatus('Categories', 'Unsaved Changes (Local)');
+            } catch (e) {
+                console.error('Failed to save categories draft:', e);
+            }
+        }
+
+        function clearCategoriesDraft() {
+            localStorage.removeItem('pos_draft_categories');
+            updateModuleSyncStatus('Categories', 'Synced to Supabase');
+        }
+
         // =====================================================
         // CATEGORY MANAGEMENT FUNCTIONS
         // =====================================================
@@ -1592,6 +1640,30 @@
         // Load all categories and subcategories
         async function loadCategories() {
             try {
+                // Check for local draft first
+                const localDraft = localStorage.getItem('pos_draft_categories');
+                if (localDraft) {
+                    if (confirm('You have unsaved category changes. Would you like to resume?')) {
+                        try {
+                            const draft = JSON.parse(localDraft);
+                            categoriesData = draft.categoriesData;
+                            subcategoriesData = draft.subcategoriesData;
+                            modifiedCategories = new Set(draft.modifiedCategories);
+                            deletedCategories = new Set(draft.deletedCategories);
+                            modifiedSubcategories = new Set(draft.modifiedSubcategories);
+                            deletedSubcategories = new Set(draft.deletedSubcategories);
+                            renderCategories();
+                            renderSubcategories();
+                            updateModuleSyncStatus('Categories', 'Unsaved Changes (Local)');
+                            return;
+                        } catch (e) {
+                            console.error('Error parsing categories draft:', e);
+                        }
+                    } else {
+                        localStorage.removeItem('pos_draft_categories');
+                    }
+                }
+
                 // Load main categories
                 const { data: categories, error: catError } = await supabase
                     .from('categories')
@@ -1599,9 +1671,7 @@
                     .order('name', { ascending: true });
 
                 if (catError) throw catError;
-
                 categoriesData = categories || [];
-                renderCategories();
 
                 // Load subcategories
                 const { data: subcategories, error: subError } = await supabase
@@ -1613,8 +1683,9 @@
                     .order('name', { ascending: true });
 
                 if (subError) throw subError;
-
                 subcategoriesData = subcategories || [];
+
+                renderCategories();
                 renderSubcategories();
 
                 // Reset tracking
@@ -1622,8 +1693,8 @@
                 deletedCategories.clear();
                 modifiedSubcategories.clear();
                 deletedSubcategories.clear();
+                updateModuleSyncStatus('Categories', 'Synced to Supabase');
 
-                console.log('Categories loaded successfully');
             } catch (error) {
                 console.error('Error loading categories:', error);
                 alert('Failed to load categories: ' + error.message);
@@ -1703,6 +1774,7 @@
             modifiedCategories.add(category.id);
 
             tr.classList.add('modified');
+            saveCategoriesDraft();
         }
 
         // Mark subcategory as modified
@@ -1717,6 +1789,7 @@
             modifiedSubcategories.add(sub.id);
 
             tr.classList.add('modified');
+            saveCategoriesDraft();
         }
 
         // Add new category row
@@ -1735,6 +1808,7 @@
             // Focus new row name input
             const lastTr = document.getElementById('categoriesBody').lastElementChild;
             if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+            saveCategoriesDraft();
         }
 
         // Add new subcategory row
@@ -1754,6 +1828,7 @@
             // Focus new row name input
             const lastTr = document.getElementById('subcategoriesBody').lastElementChild;
             if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+            saveCategoriesDraft();
         }
 
         // Delete category
@@ -1895,9 +1970,45 @@
             }
         }
 
+        function saveVariationsDraft() {
+            try {
+                const draft = {
+                    variationTypesData,
+                    variationOptionsData,
+                    modifiedVariationTypes: Array.from(modifiedVariationTypes),
+                    deletedVariationTypes: Array.from(deletedVariationTypes),
+                    modifiedVariationOptions: Array.from(modifiedVariationOptions),
+                    deletedVariationOptions: Array.from(deletedVariationOptions)
+                };
+                localStorage.setItem('pos_draft_variations', JSON.stringify(draft));
+                updateModuleSyncStatus('Variations', 'Unsaved Changes (Local)');
+            } catch (e) { console.error(e); }
+        }
+
+        function clearVariationsDraft() {
+            localStorage.removeItem('pos_draft_variations');
+            updateModuleSyncStatus('Variations', 'Synced to Supabase');
+        }
+
         // Load all variations data
         async function loadVariations() {
             try {
+                // Check draft
+                const localDraft = localStorage.getItem('pos_draft_variations');
+                if (localDraft && confirm('Resume unsaved variation changes?')) {
+                    const draft = JSON.parse(localDraft);
+                    variationTypesData = draft.variationTypesData;
+                    variationOptionsData = draft.variationOptionsData;
+                    modifiedVariationTypes = new Set(draft.modifiedVariationTypes);
+                    deletedVariationTypes = new Set(draft.deletedVariationTypes);
+                    modifiedVariationOptions = new Set(draft.modifiedVariationOptions);
+                    deletedVariationOptions = new Set(draft.deletedVariationOptions);
+                    renderVariationTypes();
+                    renderVariationOptions();
+                    updateModuleSyncStatus('Variations', 'Unsaved Changes (Local)');
+                    return;
+                }
+
                 // Load variation types
                 const { data: types, error: typesError } = await supabase
                     .from('variation_types')
@@ -1928,6 +2039,7 @@
                 deletedVariationTypes.clear();
                 modifiedVariationOptions.clear();
                 deletedVariationOptions.clear();
+                updateModuleSyncStatus('Variations', 'Synced to Supabase');
 
                 console.log('Variations loaded successfully');
             } catch (error) {
@@ -2003,10 +2115,11 @@
             const field = input.dataset.field;
             const value = input.value;
 
-            type[field] = value;
-            modifiedVariationTypes.add(type.id);
+            variationTypesData[index][input.dataset.field] = input.value;
+            modifiedVariationTypes.add(variationTypesData[index].id);
 
             tr.classList.add('modified');
+            saveVariationsDraft();
         }
 
         // Mark variation option as modified
@@ -2017,10 +2130,11 @@
             const field = input.dataset.field;
             const value = input.value;
 
-            opt[field] = value;
-            modifiedVariationOptions.add(opt.id);
+            variationOptionsData[index][input.dataset.field] = input.value;
+            modifiedVariationOptions.add(variationOptionsData[index].id);
 
             tr.classList.add('modified');
+            saveVariationsDraft();
         }
 
         // Add new variation type row
@@ -2038,6 +2152,7 @@
             renderVariationTypes();
             const lastTr = document.getElementById('variationTypesBody').lastElementChild;
             if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+            saveVariationsDraft();
         }
 
         // Add new variation option row
@@ -2055,6 +2170,7 @@
             renderVariationOptions();
             const lastTr = document.getElementById('variationOptionsBody').lastElementChild;
             if (lastTr) lastTr.querySelector('input[data-field="option_value"]').focus();
+            saveVariationsDraft();
         }
 
         // Delete variation type
@@ -2067,6 +2183,7 @@
                 modifiedVariationTypes.delete(type.id);
                 variationTypesData.splice(index, 1);
                 renderVariationTypes();
+                saveVariationsDraft();
             }
         }
 
@@ -2080,6 +2197,7 @@
                 modifiedVariationOptions.delete(option.id);
                 variationOptionsData.splice(index, 1);
                 renderVariationOptions();
+                saveVariationsDraft();
             }
         }
 
@@ -2156,6 +2274,7 @@
                 if (!document.getElementById('view-products').classList.contains('hidden')) {
                     renderGrid(); // Update products grid if visible
                 }
+                clearVariationsDraft();
             } catch (error) {
                 console.error('Error saving variations:', error);
                 alert('Failed to save variations: ' + error.message);
@@ -2170,8 +2289,33 @@
         let modifiedBrands = new Set();
         let deletedBrands = new Set();
 
+        function saveBrandsDraft() {
+            try {
+                const draft = { brandsData, modifiedBrands: Array.from(modifiedBrands), deletedBrands: Array.from(deletedBrands) };
+                localStorage.setItem('pos_draft_brands', JSON.stringify(draft));
+                updateModuleSyncStatus('Brands', 'Unsaved Changes (Local)');
+            } catch (e) { console.error(e); }
+        }
+
+        function clearBrandsDraft() {
+            localStorage.removeItem('pos_draft_brands');
+            updateModuleSyncStatus('Brands', 'Synced to Supabase');
+        }
+
         async function loadBrands() {
             try {
+                // Check draft
+                const localDraft = localStorage.getItem('pos_draft_brands');
+                if (localDraft && confirm('Resume unsaved brand changes?')) {
+                    const draft = JSON.parse(localDraft);
+                    brandsData = draft.brandsData;
+                    modifiedBrands = new Set(draft.modifiedBrands);
+                    deletedBrands = new Set(draft.deletedBrands);
+                    renderBrands();
+                    updateModuleSyncStatus('Brands', 'Unsaved Changes (Local)');
+                    return;
+                }
+
                 const { data, error } = await supabase
                     .from('brands')
                     .select('*')
@@ -2182,6 +2326,7 @@
                 renderBrands();
                 modifiedBrands.clear();
                 deletedBrands.clear();
+                updateModuleSyncStatus('Brands', 'Synced to Supabase');
             } catch (error) {
                 console.error('Error loading brands:', error);
                 alert('Failed to load brands');
@@ -2215,6 +2360,7 @@
             brand[input.dataset.field] = input.value;
             modifiedBrands.add(brand.id);
             tr.classList.add('modified');
+            saveBrandsDraft();
         }
 
         function addNewBrand() {
@@ -2224,6 +2370,7 @@
             renderBrands();
             const lastTr = document.getElementById('brandsBody').lastElementChild;
             if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+            saveBrandsDraft();
         }
 
         function deleteBrand(index) {
@@ -2235,6 +2382,7 @@
                 modifiedBrands.delete(brand.id);
                 brandsData.splice(index, 1);
                 renderBrands();
+                saveBrandsDraft();
             }
         }
 
@@ -2271,6 +2419,7 @@
                 if (!document.getElementById('view-products').classList.contains('hidden')) {
                     renderGrid(); // Update products dropdowns if visible
                 }
+                clearBrandsDraft();
             } catch (e) {
                 console.error(e);
                 alert('Error saving: ' + e.message);
@@ -2285,14 +2434,40 @@
         let modifiedUnits = new Set();
         let deletedUnits = new Set();
 
+        function saveUnitsDraft() {
+            try {
+                const draft = { unitsData, modifiedUnits: Array.from(modifiedUnits), deletedUnits: Array.from(deletedUnits) };
+                localStorage.setItem('pos_draft_units', JSON.stringify(draft));
+                updateModuleSyncStatus('Units', 'Unsaved Changes (Local)');
+            } catch (e) { console.error(e); }
+        }
+
+        function clearUnitsDraft() {
+            localStorage.removeItem('pos_draft_units');
+            updateModuleSyncStatus('Units', 'Synced to Supabase');
+        }
+
         async function loadUnits() {
             try {
+                // Check draft
+                const localDraft = localStorage.getItem('pos_draft_units');
+                if (localDraft && confirm('Resume unsaved unit changes?')) {
+                    const draft = JSON.parse(localDraft);
+                    unitsData = draft.unitsData;
+                    modifiedUnits = new Set(draft.modifiedUnits);
+                    deletedUnits = new Set(draft.deletedUnits);
+                    renderUnits();
+                    updateModuleSyncStatus('Units', 'Unsaved Changes (Local)');
+                    return;
+                }
+
                 const { data, error } = await supabase.from('units').select('*').order('name');
                 if (error) throw error;
                 unitsData = data || [];
                 renderUnits();
                 modifiedUnits.clear();
                 deletedUnits.clear();
+                updateModuleSyncStatus('Units', 'Synced to Supabase');
             } catch (e) { console.error(e); alert('Failed to load units'); }
         }
 
@@ -2324,6 +2499,7 @@
             unit[input.dataset.field] = val;
             modifiedUnits.add(unit.id);
             tr.classList.add('modified');
+            saveUnitsDraft();
         }
 
         function addNewUnit() {
@@ -2333,6 +2509,7 @@
             renderUnits();
             const lastTr = document.getElementById('unitsBody').lastElementChild;
             if (lastTr) lastTr.querySelector('input[data-field="name"]').focus();
+            saveUnitsDraft();
         }
 
         function deleteUnit(index) {
@@ -2344,6 +2521,7 @@
                 modifiedUnits.delete(unit.id);
                 unitsData.splice(index, 1);
                 renderUnits();
+                saveUnitsDraft();
             }
         }
 
@@ -2376,6 +2554,7 @@
                 if (!document.getElementById('view-products').classList.contains('hidden')) {
                     renderGrid(); // Update products dropdowns if visible
                 }
+                clearUnitsDraft();
             } catch (e) { console.error(e); alert('Error saving: ' + e.message); }
         }
 

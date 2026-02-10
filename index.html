@@ -82,8 +82,14 @@
         </div>
     </div>
 
-    <!-- Supabase JS - MUST LOAD FIRST -->
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Fallback CDN if primary fails
+        if (!window.supabase) {
+            document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+        }
+    </script>
 
     <!-- Our Scripts - Load in order -->
     <script src="config.js"></script>
@@ -102,7 +108,19 @@
         const errorText = document.getElementById('errorText');
 
         // Check if user is already logged in
-        checkExistingSession();
+        if (typeof supabase === 'undefined' || !supabase.auth) {
+            console.error('Supabase client is not initialized.');
+            if (window.supabase && window.supabase.auth) {
+                supabase = window.supabase;
+            } else {
+                // Not showing alert yet, maybe it's still loading or just failed once
+                console.warn('Supabase not found yet. Session check skipped.');
+            }
+        }
+
+        if (typeof supabase !== 'undefined' && supabase.auth) {
+            checkExistingSession();
+        }
 
         // Show error message
         function showError(message) {

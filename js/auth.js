@@ -31,7 +31,7 @@ async function getUserRole(userId) {
             .single();
 
         if (error) throw error;
-        return data?.role || null;
+        return (data && data.role) || null;
     } catch (error) {
         console.error('Error fetching user role:', error);
         return null;
@@ -67,7 +67,14 @@ async function getCurrentSession() {
 async function getCurrentUser() {
     try {
         const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
+
+        if (error) {
+            // Silence session missing error as it's normal when not logged in
+            if (error.name === 'AuthSessionMissingError' || error.message.includes('session missing')) {
+                return null;
+            }
+            throw error;
+        }
 
         if (user) {
             const role = await getUserRole(user.id);
