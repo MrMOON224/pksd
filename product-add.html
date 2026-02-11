@@ -403,6 +403,9 @@
 
     <script>
         // Supabase client is already initialized globally in supabase-client.js
+        let refCategories = [];
+        let refBrands = [];
+        let refUnits = [];
 
         // Sidebar Toggle for Mobile
         const menuToggle = document.getElementById('menuToggle');
@@ -440,7 +443,43 @@
                 // Update user info
                 document.getElementById('userName').textContent = currentUser.email;
                 document.getElementById('userRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+
+                // Load reference data
+                await loadReferenceData();
             }
+        }
+
+        async function loadReferenceData() {
+            try {
+                const [cats, brands, units] = await Promise.all([
+                    supabase.from('categories').select('id, name').order('name'),
+                    supabase.from('brands').select('id, name').order('name'),
+                    supabase.from('units').select('id, name').order('name')
+                ]);
+
+                refCategories = cats.data || [];
+                refBrands = brands.data || [];
+                refUnits = units.data || [];
+
+                populateDropdowns();
+            } catch (error) {
+                console.error('Error loading reference data:', error);
+            }
+        }
+
+        function populateDropdowns() {
+            const catSelect = document.getElementById('productCategory');
+            const brandSelect = document.getElementById('productBrand');
+            const unitSelect = document.getElementById('productUnit');
+
+            catSelect.innerHTML = '<option value="">Select Category</option>' +
+                refCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            brandSelect.innerHTML = '<option value="">Select Brand</option>' +
+                refBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
+            unitSelect.innerHTML = '<option value="">Select Unit</option>' +
+                refUnits.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
         }
 
         // Form Submission
@@ -449,11 +488,11 @@
 
             const name = document.getElementById('productName').value;
             const code = document.getElementById('productCode').value;
-            const category = document.getElementById('productCategory').value;
-            const brand = document.getElementById('productBrand').value;
+            const categoryId = document.getElementById('productCategory').value;
+            const brandId = document.getElementById('productBrand').value;
             const cost = parseFloat(document.getElementById('productCost').value) || 0;
             const price = parseFloat(document.getElementById('productPrice').value) || 0;
-            const unit = document.getElementById('productUnit').value;
+            const unitId = document.getElementById('productUnit').value;
             const stock = parseInt(document.getElementById('productStock').value) || 0;
             const description = document.getElementById('productDescription').value;
 
@@ -464,22 +503,22 @@
             }
 
             try {
+                const payload = {
+                    name: name,
+                    code: code,
+                    category_id: categoryId || null,
+                    brand_id: brandId || null,
+                    cost: cost,
+                    price: price,
+                    unit_id: unitId || null,
+                    stock: stock,
+                    description: description,
+                    barcodes: code ? [code] : [] // Default barcode to the code if provided
+                };
+
                 const { data, error } = await supabase
                     .from('products')
-                    .insert([
-                        {
-                            name: name,
-                            code: code,
-                            category: category,
-                            brand: brand,
-                            cost: cost,
-                            price: price,
-                            unit: unit,
-                            stock: stock,
-                            description: description,
-                            // image_url: ... (handle image upload later)
-                        }
-                    ]);
+                    .insert([payload]);
 
                 if (error) throw error;
 

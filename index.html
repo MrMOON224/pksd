@@ -98,14 +98,14 @@
 
     <script>
         // DOM Elements
-        const loginForm = document.getElementById('loginForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const loginBtnText = document.getElementById('loginBtnText');
-        const loginSpinner = document.getElementById('loginSpinner');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
+        var loginForm = document.getElementById('loginForm');
+        var emailInput = document.getElementById('email');
+        var passwordInput = document.getElementById('password');
+        var loginBtn = document.getElementById('loginBtn');
+        var loginBtnText = document.getElementById('loginBtnText');
+        var loginSpinner = document.getElementById('loginSpinner');
+        var errorMessage = document.getElementById('errorMessage');
+        var errorText = document.getElementById('errorText');
 
         // Check if user is already logged in
         if (typeof supabase === 'undefined' || !supabase.auth) {
@@ -127,7 +127,7 @@
             errorText.textContent = message;
             errorMessage.classList.add('show');
 
-            setTimeout(() => {
+            setTimeout(function () {
                 errorMessage.classList.remove('show');
             }, 5000);
         }
@@ -151,19 +151,17 @@
         }
 
         // Handle form submission
-        loginForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', function (e) {
             e.preventDefault();
             hideError();
             setLoading(true);
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
+            var email = emailInput.value.trim();
+            var password = passwordInput.value;
 
-            try {
-                const result = await login(email, password);
-
+            // Use .then() instead of async/await for better legacy support
+            login(email, password).then(function (result) {
                 if (result.success) {
-                    // Login successful, redirect based on role
                     if (result.role) {
                         redirectByRole(result.role);
                     } else {
@@ -171,15 +169,14 @@
                         setLoading(false);
                     }
                 } else {
-                    // Login failed
                     showError(result.error || 'Invalid email or password');
                     setLoading(false);
                 }
-            } catch (error) {
+            }).catch(function (error) {
                 console.error('Login error:', error);
-                showError('An error occurred. Please try again.');
+                showError('An error occurred: ' + (error.message || 'Unknown error'));
                 setLoading(false);
-            }
+            });
         });
 
         // Auto-fill for testing (remove in production)

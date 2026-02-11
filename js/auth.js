@@ -1,20 +1,36 @@
 // Authentication Module
 // Supabase client is already initialized globally in supabase-client.js
 
+// Ensure supabase is defined globally for this script
+if (typeof supabase === 'undefined') {
+    if (window.supabase) {
+        var supabase = window.supabase;
+    } else if (window.supabaseClient) {
+        var supabase = window.supabaseClient;
+    }
+}
+
 // Login function
 async function login(email, password) {
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        // Double-check supabase instance before calling
+        var client = supabase || window.supabase || window.supabaseClient;
+        if (!client) throw new Error("supabase is not defined");
+
+        var response = await client.auth.signInWithPassword({
             email: email,
             password: password
         });
 
+        var data = response.data;
+        var error = response.error;
+
         if (error) throw error;
 
         // Get user role
-        const role = await getUserRole(data.user.id);
+        var role = await getUserRole(data.user.id);
 
-        return { success: true, user: data.user, role };
+        return { success: true, user: data.user, role: role };
     } catch (error) {
         console.error('Login error:', error);
         return { success: false, error: error.message };
@@ -24,11 +40,17 @@ async function login(email, password) {
 // Get user role from database
 async function getUserRole(userId) {
     try {
-        const { data, error } = await supabase
+        var client = supabase || window.supabase || window.supabaseClient;
+        if (!client) return null;
+
+        var response = await client
             .from('user_roles')
             .select('role')
             .eq('user_id', userId)
             .single();
+
+        var data = response.data;
+        var error = response.error;
 
         if (error) throw error;
         return (data && data.role) || null;
@@ -41,8 +63,11 @@ async function getUserRole(userId) {
 // Logout function
 async function logout() {
     try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        var client = supabase || window.supabase || window.supabaseClient;
+        if (!client) return;
+
+        var response = await client.auth.signOut();
+        if (response.error) throw response.error;
 
         // Redirect to login
         window.location.href = 'index.html';
@@ -54,9 +79,12 @@ async function logout() {
 // Get current session
 async function getCurrentSession() {
     try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        return session;
+        var client = supabase || window.supabase || window.supabaseClient;
+        if (!client) return null;
+
+        var response = await client.auth.getSession();
+        if (response.error) throw response.error;
+        return response.data.session;
     } catch (error) {
         console.error('Session error:', error);
         return null;
@@ -66,19 +94,28 @@ async function getCurrentSession() {
 // Get current user with role
 async function getCurrentUser() {
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        var client = supabase || window.supabase || window.supabaseClient;
+        if (!client) return null;
+
+        var response = await client.auth.getUser();
+        var user = response.data.user;
+        var error = response.error;
 
         if (error) {
             // Silence session missing error as it's normal when not logged in
-            if (error.name === 'AuthSessionMissingError' || error.message.includes('session missing')) {
+            if (error.name === 'AuthSessionMissingError' || error.message.indexOf('session missing') !== -1) {
                 return null;
             }
             throw error;
         }
 
         if (user) {
-            const role = await getUserRole(user.id);
-            return { ...user, role };
+            var role = await getUserRole(user.id);
+            return {
+                id: user.id,
+                email: user.email,
+                role: role
+            };
         }
 
         return null;
@@ -90,24 +127,27 @@ async function getCurrentUser() {
 
 // Redirect based on role
 function redirectByRole(role) {
-    const routes = {
+    var routes = {
         'admin': 'admin-dashboard.html',
         'cashier': 'cashier-pos.html',
         'manager': 'manager-dashboard.html'
     };
 
-    const route = routes[role];
+    var route = routes[role];
     if (route) {
         window.location.href = route;
     } else {
         console.error('Unknown role:', role);
-        showError('Invalid user role. Please contact administrator.');
+        if (typeof showError === 'function') {
+            showError('Invalid user role. Please contact administrator.');
+        }
     }
 }
 
 // Auth guard - protect pages that require authentication
-async function requireAuth(allowedRoles = []) {
-    const user = await getCurrentUser();
+async function requireAuth(allowedRoles) {
+    if (!allowedRoles) allowedRoles = [];
+    var user = await getCurrentUser();
 
     if (!user) {
         // Not logged in, redirect to login
@@ -116,7 +156,7 @@ async function requireAuth(allowedRoles = []) {
     }
 
     // Check if user has required role
-    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    if (allowedRoles.length > 0 && allowedRoles.indexOf(user.role) === -1) {
         // User doesn't have permission, redirect to their dashboard
         redirectByRole(user.role);
         return null;
@@ -127,7 +167,7 @@ async function requireAuth(allowedRoles = []) {
 
 // Check if user is already logged in (for login page)
 async function checkExistingSession() {
-    const user = await getCurrentUser();
+    var user = await getCurrentUser();
     if (user && user.role) {
         // Already logged in, redirect to appropriate dashboard
         redirectByRole(user.role);
@@ -137,10 +177,15 @@ async function checkExistingSession() {
 }
 
 // Listen for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-    console.log('Auth state changed:', event, session);
+(function () {
+    var client = supabase || window.supabase || window.supabaseClient;
+    if (client && client.auth) {
+        client.auth.onAuthStateChange(function (event, session) {
+            console.log('Auth state changed:', event, session);
 
-    if (event === 'SIGNED_OUT') {
-        window.location.href = 'index.html';
+            if (event === 'SIGNED_OUT') {
+                window.location.href = 'index.html';
+            }
+        });
     }
-});
+})();
