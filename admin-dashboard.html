@@ -3018,20 +3018,38 @@
                             category_id: product.category_id || null,
                             subcategory_id: product.subcategory_id || null,
                             brand_id: product.brand_id || null,
-                            price: parseFloat(product.price) || 0,
-                            cost: parseFloat(product.cost) || 0,
-                            stock: parseInt(product.stock) || 0,
+                            price: product.price || 0,
+                            cost: product.cost || 0,
+                            stock: product.stock || 0,
                             unit_id: product.unit_id || null,
-                            purchase_unit: product.purchase_unit || 'Box',   // New Field
-                            sale_unit: product.sale_unit || 'Pcs',         // New Field
-                            pcs_per_box: parseInt(product.pcs_per_box) || 1,
-                            supplier: product.supplier,
-                            shop: product.shop,
-                            image_url: product.image_url
+                            image_url: product.image_url || '',
+                            pcs_per_box: product.pcs_per_box || 1,
+                            supplier: product.supplier || null,
+                            shop: product.shop || 'Main Warehouse',
+                            sale_unit: product.sale_unit || null,
+                            purchase_unit: product.purchase_unit || null
                         };
 
-                        // Always include id (new products now have a real UUID)
-                        payload.id = id;
+                        // Ensure proper UUID for ID
+                        if (product.id && product.id.toString().startsWith('new_')) {
+                            // Replace temp ID with real UUID
+                            var realUUID = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                                return v.toString(16);
+                            });
+                            payload.id = realUUID;
+
+                            // Update local product to avoid re-saving issues
+                            product.id = realUUID;
+                            product.isNew = false;
+
+                            // Also update modifiedProducts set
+                            modifiedProducts.delete(id);
+                            modifiedProducts.add(realUUID);
+                        } else {
+                            payload.id = product.id;
+                        }
+
                         upsertData.push(payload);
                     });
 
