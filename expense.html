@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Management</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --radius-md: 8px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Mockup Style Header */
+        .mockup-header {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.5);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px 8px 36px;
+            font-size: 13px;
+            color: white;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .create-btn {
+            background: var(--primary);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .create-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Mockup Table Style */
+        .content-area {
+            flex: 1;
+            overflow: auto;
+            padding: 1.5rem 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0 16px 12px 16px;
+            text-align: left;
+        }
+
+        tr.data-row {
+            background: rgba(30, 41, 59, 0.4);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        tr.data-row:hover {
+            background: rgba(30, 41, 59, 0.6);
+            transform: scale(1.002);
+        }
+
+        td {
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Reference Badge */
+        .ref-badge {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Created On Styling */
+        .created-on-box {
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 6px;
+            padding: 6px 10px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 90px;
+        }
+
+        .time-text {
+            color: #818cf8;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .date-text {
+            color: #6366f1;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            color: #818cf8;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-edit:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-delete {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body onload="init()">
+
+    <!-- Mockup Header -->
+    <div class="mockup-header" id="topHeader">
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" placeholder="Search expenses..." id="searchInput"
+                oninput="filterData()">
+        </div>
+        <button class="create-btn" onclick="addNewExpense()">
+            Create Expense
+        </button>
+    </div>
+
+    <div class="content-area">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Reference</th>
+                    <th>Expense Title</th>
+                    <th>Warehouse</th>
+                    <th>Expense Category</th>
+                    <th style="width: 150px;">Amount</th>
+                    <th style="width: 120px;">Created On</th>
+                    <th style="width: 100px; text-align: center;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="expenseTableBody">
+                <!-- Rows will be populated here -->
+                <tr class="data-row animate-pulse">
+                    <td colspan="7" class="text-center py-10 text-muted">Loading data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Hidden Dialog/Form for Adding/Editing -->
+    <div id="expenseModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center hidden"
+        onclick="if(event.target===this) closeModal()">
+        <div
+            class="bg-slate-800 border border-white/10 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-indigo-500/10">
+                <h3 class="font-bold text-lg" id="modalTitle">Create New Expense</h3>
+                <button onclick="closeModal()" class="text-muted hover:text-white transition-colors"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted uppercase mb-1">Date</label>
+                        <input type="date" id="expDate"
+                            class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-muted uppercase mb-1">Warehouse</label>
+                        <select id="expWarehouse"
+                            class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none">
+                            <!-- Options -->
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-muted uppercase mb-1">Expense Title</label>
+                    <input type="text" id="expTitle" placeholder="e.g. Monthly Electricity Bill"
+                        class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted uppercase mb-1">Category</label>
+                        <select id="expCategory"
+                            class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none">
+                            <!-- Options -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-muted uppercase mb-1">Amount</label>
+                        <div class="relative">
+                            <input type="number" id="expAmount" placeholder="0.00"
+                                class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none pr-8">
+                            <span
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-xs font-bold">Ks</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-muted uppercase mb-1">Payment Method</label>
+                    <select id="expMethod"
+                        class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none">
+                        <option>Cash</option>
+                        <option>Bank Transfer</option>
+                        <option>KBZPay</option>
+                        <option>WavePay</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-muted uppercase mb-1">Remark</label>
+                    <textarea id="expRemark" rows="2"
+                        class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none resize-none"
+                        placeholder="Optional notes..."></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-900/50 flex justify-end gap-3">
+                <button onclick="closeModal()"
+                    class="px-4 py-2 text-sm font-semibold text-muted hover:text-white">Cancel</button>
+                <button onclick="commitSave()"
+                    class="bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-lg"
+                    id="commitBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script>
+        let state = {
+            data: [],
+            filtered: [],
+            categories: [],
+            warehouses: [],
+            editingId: null
+        };
+
+        async function init() {
+            checkEmbeddedMode();
+            await Promise.all([fetchCategories(), fetchWarehouses(), loadExpenses()]);
+            populateSelects();
+        }
+
+        function checkEmbeddedMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'embedded') {
+                // document.getElementById('topHeader').classList.add('hidden');
+            }
+        }
+
+        async function fetchCategories() {
+            const { data } = await supabase.from('expense_categories').select('*').order('name');
+            state.categories = data || [];
+        }
+
+        async function fetchWarehouses() {
+            const { data } = await supabase.from('warehouses').select('id, name').order('name');
+            state.warehouses = data || [];
+        }
+
+        function populateSelects() {
+            const catSelect = document.getElementById('expCategory');
+            catSelect.innerHTML = state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            const whSelect = document.getElementById('expWarehouse');
+            whSelect.innerHTML = state.warehouses.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+        }
+
+        async function loadExpenses() {
+            const { data, error } = await supabase.from('expenses').select(`
+                *,
+                category:category_id (name),
+                warehouse:warehouse_id (name)
+            `).order('created_at', { ascending: false });
+
+            if (data) {
+                state.data = data;
+                state.filtered = data;
+                renderTable();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('expenseTableBody');
+            if (state.filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-20 text-muted">No expenses found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = state.filtered.map(row => {
+                const createdAt = new Date(row.created_at);
+                const timeStr = createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = createdAt.toISOString().split('T')[0];
+
+                return `
+                    <tr class="data-row">
+                        <td><span class="ref-badge">${row.reference_no || 'Pending'}</span></td>
+                        <td class="font-semibold text-white">${row.item}</td>
+                        <td class="opacity-80">${row.warehouse?.name || '-'}</td>
+                        <td class="text-xs italic">${row.category?.name || 'Uncategorized'}</td>
+                        <td class="font-bold text-indigo-400">${parseFloat(row.amount || 0).toLocaleString()} Ks</td>
+                        <td>
+                            <div class="created-on-box">
+                                <span class="time-text">${timeStr}</span>
+                                <span class="date-text">${dateStr}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <button onclick="editExpense('${row.id}')" class="btn-action btn-edit"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteExpense('${row.id}')" class="btn-action btn-delete"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterData() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            state.filtered = state.data.filter(it =>
+                it.item.toLowerCase().includes(query) ||
+                (it.reference_no && it.reference_no.toLowerCase().includes(query)) ||
+                (it.warehouse?.name && it.warehouse.name.toLowerCase().includes(query)) ||
+                (it.category?.name && it.category.name.toLowerCase().includes(query))
+            );
+            renderTable();
+        }
+
+        function addNewExpense() {
+            state.editingId = null;
+            document.getElementById('modalTitle').textContent = 'Create New Expense';
+            document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('expTitle').value = '';
+            document.getElementById('expAmount').value = '';
+            document.getElementById('expRemark').value = '';
+            showModal();
+        }
+
+        function editExpense(id) {
+            const row = state.data.find(r => r.id === id);
+            if (!row) return;
+
+            state.editingId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Expense: ' + row.reference_no;
+            document.getElementById('expDate').value = row.date;
+            document.getElementById('expWarehouse').value = row.warehouse_id || '';
+            document.getElementById('expTitle').value = row.item;
+            document.getElementById('expCategory').value = row.category_id || '';
+            document.getElementById('expAmount').value = row.amount;
+            document.getElementById('expMethod').value = row.payment_method || 'Cash';
+            document.getElementById('expRemark').value = row.remark || '';
+            showModal();
+        }
+
+        async function deleteExpense(id) {
+            if (!confirm('Are you sure you want to delete this expense?')) return;
+            const { error } = await supabase.from('expenses').delete().eq('id', id);
+            if (!error) loadExpenses();
+            else alert('Error deleting: ' + error.message);
+        }
+
+        function showModal() { document.getElementById('expenseModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('expenseModal').classList.add('hidden'); }
+
+        async function commitSave() {
+            const btn = document.getElementById('commitBtn');
+            const item = {
+                date: document.getElementById('expDate').value,
+                warehouse_id: document.getElementById('expWarehouse').value,
+                item: document.getElementById('expTitle').value,
+                category_id: document.getElementById('expCategory').value,
+                amount: parseFloat(document.getElementById('expAmount').value) || 0,
+                payment_method: document.getElementById('expMethod').value,
+                remark: document.getElementById('expRemark').value
+            };
+
+            if (!item.item || !item.amount) return alert('Reference text and amount are required.');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+
+            try {
+                if (state.editingId) {
+                    const { error } = await supabase.from('expenses').update(item).eq('id', state.editingId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from('expenses').insert([item]);
+                    if (error) throw error;
+                }
+                closeModal();
+                loadExpenses();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Save Changes';
+            }
+        }
+
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'REFRESH') loadExpenses();
+            if (e.data.type === 'ADD_ROW') addNewExpense();
+        });
+    </script>
+</body>
+
+</html>

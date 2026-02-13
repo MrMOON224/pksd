@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Transfer - Excel Style</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --radius-md: 8px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Form Controls */
+        .form-section {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Grid Layout */
+        .sheet-container {
+            flex: 1;
+            overflow: auto;
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 1400px;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.8rem 0.5rem;
+            text-align: left;
+        }
+
+        td {
+            border: 1px solid var(--border-color);
+            padding: 0;
+            height: 40px;
+            color: var(--text-primary);
+        }
+
+        .cell-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            position: relative;
+        }
+
+        .cell-editable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cell-editable:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Footer Summary */
+        .footer-summary {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            z-index: 100;
+        }
+
+        .total-value {
+            color: var(--primary-light);
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body onload="init()">
+
+    <div class="toolbar" id="topToolbar">
+        <div class="flex items-center gap-4">
+            <h1 class="text-lg font-extrabold flex items-center gap-2">
+                <i class="fas fa-exchange-alt text-indigo-400"></i> Create Transfer
+            </h1>
+        </div>
+        <div class="flex gap-2">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button
+                class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded flex items-center gap-2 shadow-lg"
+                onclick="saveTransfer()" id="saveBtn">
+                <i class="fas fa-save"></i> Save Transfer
+            </button>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-group">
+            <label>Date:*</label>
+            <input type="date" id="transferDate" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>From Warehouse:*</label>
+            <select id="fromWarehouse" class="form-control">
+                <option value="">Choose Warehouse</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>To Warehouse:*</label>
+            <select id="toWarehouse" class="form-control">
+                <option value="">Choose Warehouse</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="sheet-container overflow-x-auto">
+        <table id="gridTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;" class="text-center">#</th>
+                    <th style="width: 100px;">Date</th>
+                    <th style="width: 100px;">CODE</th>
+                    <th style="width: 130px;">BARCODE</th>
+                    <th style="width: 250px;">DESCRIPTION</th>
+                    <th style="width: 90px; text-align: right;">COST</th>
+                    <th style="width: 70px; text-align: center;">QTY</th>
+                    <th style="width: 100px; text-align: center;">STOCK QTY</th>
+                    <th style="width: 120px; text-align: right;">Amount</th>
+                    <th style="width: 200px;">Remark</th>
+                    <th style="width: 40px;"></th>
+                </tr>
+            </thead>
+            <tbody id="gridBody">
+                <!-- Rows -->
+            </tbody>
+        </table>
+
+        <div class="p-4 flex flex-col items-center gap-4">
+            <button onclick="addNewRow()"
+                class="text-indigo-400 hover:text-indigo-300 text-sm font-bold flex items-center gap-2">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+
+            <div class="mt-8 flex flex-col items-center gap-2">
+                <div class="flex border border-slate-700 rounded overflow-hidden">
+                    <button
+                        class="px-6 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-secondary border-r border-slate-700">import</button>
+                    <button class="px-6 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-secondary">export</button>
+                </div>
+                <div class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+                    excle / word / pdf
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-summary" id="footerSummary">
+        <span>Total Amount:</span>
+        <span class="total-value" id="totalAmount">0.00 Ks</span>
+    </div>
+
+    <div id="ddMenu" class="dropdown-menu"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script>
+        const SCHEMA = [
+            { id: 'date', label: 'Date', type: 'text', readOnly: true },
+            { id: 'item_code', label: 'Code', type: 'text', readOnly: true },
+            { id: 'barcode', label: 'Barcode', type: 'text', readOnly: true },
+            { id: 'product_name', label: 'Description', type: 'dropdown' },
+            { id: 'cost', label: 'Cost', type: 'number', readOnly: true },
+            { id: 'quantity', label: 'Qty', type: 'number' },
+            { id: 'stock_qty', label: 'Stock Qty', type: 'number', readOnly: true },
+            { id: 'amount', label: 'Amount', type: 'number', readOnly: true },
+            { id: 'remark', label: 'Remark', type: 'text' }
+        ];
+
+        let state = {
+            data: [],
+            products: [],
+            warehouses: [],
+            editingRow: null,
+            editingCol: null
+        };
+
+        async function init() {
+            checkEmbeddedMode();
+            document.getElementById('transferDate').valueAsDate = new Date();
+            await Promise.all([fetchWarehouses(), fetchProducts()]);
+            addNewRow();
+        }
+
+        function checkEmbeddedMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'embedded') {
+                document.getElementById('topToolbar').classList.add('hidden');
+            }
+        }
+
+        async function fetchWarehouses() {
+            const { data } = await supabase.from('warehouses').select('*').order('name');
+            state.warehouses = data || [];
+            const fromWh = document.getElementById('fromWarehouse');
+            const toWh = document.getElementById('toWarehouse');
+            state.warehouses.forEach(wh => {
+                const opt = new Option(wh.name, wh.id);
+                fromWh.add(opt.cloneNode(true));
+                toWh.add(opt);
+            });
+        }
+
+        async function fetchProducts() {
+            const { data } = await supabase.from('products').select('*').order('name');
+            state.products = data || [];
+        }
+
+        function addNewRow() {
+            const newRow = {
+                tempId: Date.now() + Math.random(),
+                date: new Date().toLocaleDateString(),
+                product_id: null,
+                product_name: 'Choose Product...',
+                item_code: '-',
+                barcode: '-',
+                cost: 0,
+                quantity: 1,
+                stock_qty: 0,
+                amount: 0,
+                remark: ''
+            };
+            state.data.push(newRow);
+            renderBody();
+        }
+
+        function renderBody() {
+            const body = document.getElementById('gridBody');
+            body.innerHTML = '';
+            state.data.forEach((row, rIdx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center text-xs opacity-50">${rIdx + 1}</td>
+                    <td class="px-3 text-xs opacity-70">${row.date}</td>
+                    <td class="px-3 text-xs font-mono text-indigo-300">${row.item_code}</td>
+                    <td class="px-3 text-xs font-mono">${row.barcode}</td>
+                    <td class="cell-editable" ondblclick="editCell(${rIdx}, 'product_name', this)">
+                        <div class="cell-container">${row.product_name}</div>
+                    </td>
+                    <td class="px-3 text-right font-mono">${(row.cost || 0).toLocaleString()}</td>
+                    <td class="cell-editable text-center font-bold" ondblclick="editCell(${rIdx}, 'quantity', this)">
+                        <div class="cell-container justify-center text-indigo-400">${row.quantity}</div>
+                    </td>
+                    <td class="px-3 text-center opacity-60">${row.stock_qty}</td>
+                    <td class="px-3 text-right font-bold text-indigo-400">${(row.amount || 0).toLocaleString()}</td>
+                    <td class="cell-editable" ondblclick="editCell(${rIdx}, 'remark', this)">
+                        <div class="cell-container">${row.remark || '-'}</div>
+                    </td>
+                    <td class="text-center">
+                        <button onclick="removeRow(${rIdx})" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            updateTotal();
+        }
+
+        function removeRow(rIdx) {
+            state.data.splice(rIdx, 1);
+            if (state.data.length === 0) addNewRow();
+            else renderBody();
+        }
+
+        function editCell(rIdx, colId, td) {
+            const col = SCHEMA.find(c => c.id === colId);
+            if (!col || col.readOnly) return;
+
+            const container = td.querySelector('.cell-container');
+            if (col.type === 'dropdown') {
+                showProductDropdown(rIdx, container);
+                return;
+            }
+
+            const currentVal = state.data[rIdx][colId];
+            const input = document.createElement('input');
+            input.type = col.type === 'number' ? 'number' : 'text';
+            input.className = 'w-full h-8 bg-slate-900 text-white outline-none px-2 border border-indigo-500 rounded';
+            input.value = currentVal === '-' ? '' : (currentVal || '');
+
+            container.innerHTML = '';
+            container.appendChild(input);
+            input.focus();
+            if (input.type === 'text') input.setSelectionRange(0, input.value.length);
+            else input.select();
+
+            const finish = () => {
+                handleInput(rIdx, colId, input.value);
+                renderBody();
+            };
+
+            input.onblur = finish;
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') finish();
+                if (e.key === 'Escape') renderBody();
+            };
+        }
+
+        function handleInput(rIdx, colId, val) {
+            const row = state.data[rIdx];
+            if (colId === 'quantity') {
+                row.quantity = parseInt(val) || 0;
+                row.amount = row.quantity * row.cost;
+            } else {
+                row[colId] = val;
+            }
+        }
+
+        function showProductDropdown(rIdx, container) {
+            const menu = document.getElementById('ddMenu');
+            menu.innerHTML = '';
+            state.products.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-bold">${p.name}</span>
+                        <span class="text-xs opacity-60">${p.item_code} | Stock: ${p.stock || 0}</span>
+                    </div>
+                `;
+                item.onclick = () => selectProduct(rIdx, p);
+                menu.appendChild(item);
+            });
+
+            const rect = container.getBoundingClientRect();
+            menu.style.display = 'block';
+            menu.style.top = (rect.bottom + window.scrollY) + 'px';
+            menu.style.left = rect.left + 'px';
+            menu.style.width = Math.max(rect.width, 250) + 'px';
+        }
+
+        function selectProduct(rIdx, p) {
+            const row = state.data[rIdx];
+            row.product_id = p.id;
+            row.product_name = p.name;
+            row.item_code = p.item_code || '-';
+            row.barcode = p.barcode || '-';
+            row.cost = p.cost || 0;
+            row.stock_qty = p.stock || 0;
+            row.amount = row.quantity * row.cost;
+            hideDropdown();
+            renderBody();
+        }
+
+        function hideDropdown() {
+            document.getElementById('ddMenu').style.display = 'none';
+        }
+
+        function updateTotal() {
+            const total = state.data.reduce((sum, row) => sum + (row.amount || 0), 0);
+            document.getElementById('totalAmount').textContent = total.toLocaleString() + ' Ks';
+        }
+
+        async function saveTransfer() {
+            const fromWh = document.getElementById('fromWarehouse').value;
+            const toWh = document.getElementById('toWarehouse').value;
+            const date = document.getElementById('transferDate').value;
+
+            if (!fromWh || !toWh) return alert('Please select warehouses.');
+            if (fromWh === toWh) return alert('Source and Destination warehouse cannot be the same.');
+
+            const validItems = state.data.filter(i => i.product_id);
+            if (validItems.length === 0) return alert('No valid items to transfer.');
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                // 1. Create Transfer Record
+                const { data: transfer, error: tErr } = await supabase.from('transfers').insert([{
+                    date,
+                    from_warehouse_id: fromWh,
+                    to_warehouse_id: toWh,
+                    total_qty: validItems.reduce((sum, i) => sum + i.quantity, 0),
+                    grand_total: validItems.reduce((sum, i) => sum + i.amount, 0),
+                    remark: 'Bulk Transfer'
+                }]).select().single();
+
+                if (tErr) throw tErr;
+
+                // 2. Insert Items & Update Stock (Simplified for now - just items)
+                const items = validItems.map(i => ({
+                    transfer_id: transfer.id,
+                    product_id: i.product_id,
+                    quantity: i.quantity,
+                    unit_cost: i.cost,
+                    subtotal: i.amount,
+                    remark: i.remark
+                }));
+
+                const { error: iErr } = await supabase.from('transfer_items').insert(items);
+                if (iErr) throw iErr;
+
+                // 3. Stock Update (In a real app, you'd transfer stock between warehouses)
+                // For this project, stock is global in products table, so we don't necessarily change it unless 
+                // the user intended a subtraction from global stock (unlikely for transfer).
+                // Usually transfers don't change global stock count, just relocation.
+
+                alert('Transfer saved successfully!');
+                window.location.reload();
+
+            } catch (e) {
+                console.error(e);
+                alert('Error saving transfer: ' + e.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Transfer';
+            }
+        }
+
+        function goBack() {
+            if (window.parent) window.parent.postMessage({ type: 'BACK' }, '*');
+        }
+
+        window.onclick = (e) => {
+            if (!e.target.closest('.cell-editable') && !e.target.closest('.dropdown-menu')) {
+                hideDropdown();
+            }
+        };
+
+        // Message Handling
+        window.addEventListener('message', (e) => {
+            const { type } = e.data;
+            if (type === 'ADD_ROW') addNewRow();
+            else if (type === 'SAVE_CHANGES') saveTransfer();
+            else if (type === 'REFRESH') window.location.reload();
+        });
+
+    </script>
+</body>
+
+</html>

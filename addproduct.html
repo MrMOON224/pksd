@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Product Manager - POS System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        /* ── Page Layout ── */
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: var(--space-lg);
+            color: var(--text-primary);
+            overflow-y: auto;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+            height: 100%;
+        }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            background: var(--bg-secondary);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            /* Sticky toolbar */
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .toolbar-left h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sync-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        /* ── Master-Detail Layout ── */
+        .editor-section {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .grid-section {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 400px;
+        }
+
+        /* ── Editor Form Grid ── */
+        .form-grid {
+            display: grid;
+            gap: 0;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .form-row {
+            display: grid;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .form-row:last-child {
+            border-bottom: none;
+        }
+
+        .row-3 {
+            grid-template-columns: 1fr 2fr 2.5fr;
+        }
+
+        .row-5 {
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        }
+
+        .row-5b {
+            grid-template-columns: 1fr 1.2fr 1fr 1fr 0.7fr;
+        }
+
+        .row-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .field-cell {
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .field-cell:last-child {
+            border-right: none;
+        }
+
+        .field-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .field-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            padding: 6px 10px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .field-input:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        .field-input[readonly] {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.02);
+            border: none;
+        }
+
+        .editor-actions {
+            margin-top: var(--space-lg);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-md);
+        }
+
+        /* ── Barcode Tags in Editor ── */
+        .barcode-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .barcode-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 24px;
+        }
+
+        .barcode-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .barcode-tag .remove-tag {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .barcode-tag .remove-tag:hover {
+            color: #fca5a5;
+            opacity: 1;
+        }
+
+        /* ── Data Grid ── */
+        .table-container {
+            overflow-x: auto;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
+
+        tbody tr {
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        tbody tr.selected {
+            background: rgba(99, 102, 241, 0.15);
+            border-left: 3px solid var(--primary);
+        }
+
+        tbody tr.selected td {
+            color: white;
+        }
+
+        /* ── Loading/Toast ── */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            .row-3 {
+                grid-template-columns: 1fr !important;
+            }
+
+            .field-cell {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            }
+        }
+
+        /* ── Embedded Mode ── */
+        body.embedded {
+            padding: var(--space-sm);
+        }
+
+        body.embedded .toolbar {
+            position: static;
+            margin-bottom: var(--space-md);
+        }
+
+        body.embedded .page-container {
+            max-width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="page-container">
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <h1>Product Manager</h1>
+                <span class="sync-badge" id="syncBadge"><i class="fas fa-circle"></i> Synced to Supabase</span>
+            </div>
+            <div class="toolbar-actions">
+                <button class="btn btn-secondary" onclick="refreshProducts()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Editor Section (Shell) -->
+        <div class="editor-section">
+            <div class="form-grid">
+                <!-- Row 1 -->
+                <div class="form-row row-3">
+                    <div class="field-cell">
+                        <label class="field-label">Item Code</label>
+                        <input type="text" id="edit-code" class="field-input" placeholder="Enter code">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Barcode (Scan Input)</label>
+                        <div class="barcode-input-container">
+                            <input type="text" id="edit-barcode-input" class="field-input"
+                                placeholder="Scan barcode...">
+                            <div id="edit-barcode-tags" class="barcode-tags"></div>
+                        </div>
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Description</label>
+                        <input type="text" id="edit-name" class="field-input" placeholder="Product Name">
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="form-row row-5">
+                    <div class="field-cell">
+                        <label class="field-label">Category</label>
+                        <select id="edit-category" class="field-input"></select>
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Sub-Category</label>
+                        <select id="edit-subcategory" class="field-input"></select>
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Brand</label>
+                        <select id="edit-brand" class="field-input"></select>
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Cost</label>
+                        <input type="number" id="edit-cost" class="field-input" step="0.01" value="0">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Sale Unit</label>
+                        <select id="edit-unit" class="field-input"></select>
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="form-row row-5b">
+                    <div class="field-cell">
+                        <label class="field-label">Purchase Unit</label>
+                        <input type="text" id="edit-purchase-unit" class="field-input" value="Box">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Conversion (Pcs/Unit)</label>
+                        <input type="number" id="edit-conversion" class="field-input" value="1">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Price</label>
+                        <input type="number" id="edit-price" class="field-input" step="0.01" value="0">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Margin %</label>
+                        <input type="text" id="edit-margin" class="field-input" readonly value="0.00%">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Stock</label>
+                        <input type="number" id="edit-stock" class="field-input" value="0">
+                    </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="form-row row-2">
+                    <div class="field-cell">
+                        <label class="field-label">Supplier</label>
+                        <input type="text" id="edit-supplier" class="field-input" placeholder="Select Supplier">
+                    </div>
+                    <div class="field-cell">
+                        <label class="field-label">Shop</label>
+                        <input type="text" id="edit-shop" class="field-input" placeholder="Select Shop">
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-actions">
+                <button class="btn btn-secondary" onclick="clearEditor()" style="background: var(--bg-tertiary);">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+                <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentProduct()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn btn-success" onclick="saveProduct()">
+                    <i class="fas fa-save"></i> Save Product
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid Section (Table) -->
+        <div class="grid-section">
+            <div class="table-container">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Item Code</th>
+                            <th>Barcode</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Cost</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Rows rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Init Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+        // Detect embedded mode
+        if (new URLSearchParams(window.location.search).get('mode') === 'embedded') {
+            document.body.classList.add('embedded');
+        }
+    </script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+
+    <script>
+        // ── State ──
+        let productsData = [];
+        let currentProductId = null; // null = Add New mode
+        let currentBarcodes = [];    // Temporary storage for editor checkboxes
+
+        let refCategories = [], refSubcategories = [], refBrands = [], refUnits = [];
+
+        // ── UI Helpers ──
+        const EL = (id) => document.getElementById(id);
+        const showLoading = () => EL('loadingOverlay').classList.remove('hidden');
+        const hideLoading = () => EL('loadingOverlay').classList.add('hidden');
+        const escapeHtml = (str) => {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        const showToast = (msg, type = 'success') => {
+            const container = EL('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // ── Data Loading ──
+        async function init() {
+            showLoading();
+            try {
+                await loadReferences();
+                await loadProducts();
+                renderDropdowns();
+                clearEditor();
+            } catch (e) {
+                console.error(e);
+                showToast(e.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadReferences() {
+            const [c, s, b, u] = await Promise.all([
+                supabase.from('categories').select('*').order('name'),
+                supabase.from('subcategories').select('*').order('name'),
+                supabase.from('brands').select('*').order('name'),
+                supabase.from('units').select('*').order('name')
+            ]);
+            refCategories = c.data || [];
+            refSubcategories = s.data || [];
+            refBrands = b.data || [];
+            refUnits = u.data || [];
+        }
+
+        async function loadProducts() {
+            const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            productsData = data || [];
+            renderGrid();
+        }
+
+        async function refreshProducts() {
+            showLoading();
+            await loadProducts();
+            hideLoading();
+            showToast('Refreshed');
+        }
+
+        // ── Rendering ──
+        function renderDropdowns() {
+            const populate = (id, data, placeholder) => {
+                const el = EL(id);
+                el.innerHTML = `<option value="">${placeholder}</option>` +
+                    data.map(i => `<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
+            };
+            populate('edit-category', refCategories, 'Select Category');
+            populate('edit-subcategory', refSubcategories, 'Select Sub-Category'); // Initially all or empty
+            populate('edit-brand', refBrands, 'Select Brand');
+            populate('edit-unit', refUnits, 'Select Unit');
+        }
+
+        function renderGrid() {
+            const tbody = EL('tableBody');
+            tbody.innerHTML = '';
+            productsData.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = p.id;
+                if (currentProductId === p.id) tr.classList.add('selected');
+                tr.onclick = () => selectProduct(p.id);
+
+                // Helper to find names
+                const catName = refCategories.find(c => c.id === p.category_id)?.name || '';
+                const brandName = refBrands.find(b => b.id === p.brand_id)?.name || '';
+                const formatNum = (n) => n ? parseFloat(n).toFixed(2) : '0.00';
+
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${escapeHtml(p.code)}</td>
+                    <td>${(p.barcodes || []).join(', ')}</td>
+                    <td><b>${escapeHtml(p.name)}</b></td>
+                    <td>${escapeHtml(catName)}</td>
+                    <td>${escapeHtml(brandName)}</td>
+                    <td>${formatNum(p.cost)}</td>
+                    <td>${formatNum(p.price)}</td>
+                    <td>${p.stock}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderBarcodeTags() {
+            const container = EL('edit-barcode-tags');
+            container.innerHTML = currentBarcodes.map(b =>
+                `<span class="barcode-tag">${escapeHtml(b)} <i class="fas fa-times remove-tag" onclick="removeBarcode('${escapeHtml(b)}')"></i></span>`
+            ).join('');
+        }
+
+        // ── Logic ──
+        function selectProduct(id) {
+            currentProductId = id;
+            const p = productsData.find(x => x.id === id);
+            if (!p) return;
+
+            // Fill Form
+            EL('edit-code').value = p.code || '';
+            EL('edit-name').value = p.name || '';
+            EL('edit-category').value = p.category_id || '';
+            updateSubcategories(p.category_id); // Filter subs
+            EL('edit-subcategory').value = p.subcategory_id || '';
+            EL('edit-brand').value = p.brand_id || '';
+            EL('edit-cost').value = p.cost || 0;
+            EL('edit-unit').value = p.unit_id || '';
+            EL('edit-purchase-unit').value = p.purchase_unit || 'Box';
+            EL('edit-conversion').value = p.conversion || 1;
+            EL('edit-price').value = p.price || 0;
+            EL('edit-stock').value = p.stock || 0;
+            EL('edit-supplier').value = p.supplier || '';
+            EL('edit-shop').value = p.shop || '';
+
+            currentBarcodes = [...(p.barcodes || [])];
+            renderBarcodeTags();
+            calcMargin();
+
+            EL('btn-delete').classList.remove('hidden');
+            renderGrid(); // Update selection highlight
+
+            // Scroll top
+            document.querySelector('.page-container').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function clearEditor() {
+            currentProductId = null;
+            currentBarcodes = [];
+
+            // Reset inputs
+            const inputs = document.querySelectorAll('.editor-section input, .editor-section select');
+            inputs.forEach(i => {
+                if (i.type === 'number') i.value = 0;
+                else i.value = '';
+            });
+            EL('edit-purchase-unit').value = 'Box';
+            EL('edit-conversion').value = 1;
+            EL('edit-margin').value = '0.00%';
+
+            renderBarcodeTags();
+            EL('btn-delete').classList.add('hidden');
+            renderGrid(); // Clear highlight
+            EL('edit-code').focus();
+        }
+
+        function updateSubcategories(catId) {
+            const subSelect = EL('edit-subcategory');
+            const subs = catId
+                ? refSubcategories.filter(s => s.category_id == catId)
+                : refSubcategories;
+
+            subSelect.innerHTML = `<option value="">Select Sub-Category</option>` +
+                subs.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+        }
+
+        // ── Calculation ──
+        function calcMargin() {
+            const cost = parseFloat(EL('edit-cost').value) || 0;
+            const price = parseFloat(EL('edit-price').value) || 0;
+            if (cost > 0 && price > 0) {
+                const m = ((price - cost) / cost) * 100;
+                EL('edit-margin').value = m.toFixed(2) + '%';
+            } else {
+                EL('edit-margin').value = '0.00%';
+            }
+        }
+
+        // ── Actions ──
+        function addBarcode(val) {
+            if (!val) return;
+            if (!currentBarcodes.includes(val)) {
+                currentBarcodes.push(val);
+                renderBarcodeTags();
+            }
+            EL('edit-barcode-input').value = '';
+        }
+
+        window.removeBarcode = function (val) { // Global for onclick
+            currentBarcodes = currentBarcodes.filter(b => b !== val);
+            renderBarcodeTags();
+        }
+
+        async function saveProduct() {
+            const name = EL('edit-name').value.trim();
+            if (!name) return showToast('Product name is required', 'error');
+
+            const payload = {
+                code: EL('edit-code').value.trim(),
+                name: name,
+                barcodes: currentBarcodes,
+                category_id: EL('edit-category').value || null,
+                subcategory_id: EL('edit-subcategory').value || null,
+                brand_id: EL('edit-brand').value || null,
+                cost: parseFloat(EL('edit-cost').value) || 0,
+                price: parseFloat(EL('edit-price').value) || 0,
+                unit_id: EL('edit-unit').value || null,
+                purchase_unit: EL('edit-purchase-unit').value,
+                conversion: parseInt(EL('edit-conversion').value) || 1,
+                supplier: EL('edit-supplier').value,
+                shop: EL('edit-shop').value,
+                stock: parseInt(EL('edit-stock').value) || 0,
+            };
+
+            showLoading();
+            try {
+                if (currentProductId) {
+                    // Update
+                    const { error } = await supabase.from('products').update(payload).eq('id', currentProductId);
+                    if (error) throw error;
+                    showToast('Product updated');
+                } else {
+                    // Insert
+                    const { error } = await supabase.from('products').insert([payload]);
+                    if (error) throw error;
+                    showToast('Product created');
+                    clearEditor();
+                }
+                await loadProducts();
+            } catch (e) {
+                console.error(e);
+                showToast(e.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function deleteCurrentProduct() {
+            if (!currentProductId || !confirm('Delete this product permanently?')) return;
+
+            showLoading();
+            try {
+                const { error } = await supabase.from('products').delete().eq('id', currentProductId);
+                if (error) throw error;
+                showToast('Product deleted');
+                clearEditor();
+                await loadProducts();
+            } catch (e) {
+                console.error(e);
+                showToast(e.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ── Event Listeners ──
+        EL('edit-cost').addEventListener('input', calcMargin);
+        EL('edit-price').addEventListener('input', calcMargin);
+
+        EL('edit-category').addEventListener('change', (e) => updateSubcategories(e.target.value));
+
+        EL('edit-barcode-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addBarcode(e.target.value.trim());
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+
+</html>

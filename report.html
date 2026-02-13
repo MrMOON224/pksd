@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #fbbf24;
+            --accent-blue: #3b82f6;
+            --radius-md: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 1.5rem;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body.embedded {
+            padding: 1rem;
+            background: transparent !important;
+            min-height: auto;
+        }
+
+        .report-header {
+            background: var(--accent-yellow);
+            color: #000;
+            padding: 8px 32px;
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: inline-block;
+            margin-bottom: 2rem;
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .report-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .report-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-left-width: 6px;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 1rem;
+            left: -0.75rem;
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: white;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .report-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .report-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-light);
+            padding-left: 1rem;
+        }
+
+        .detailed-report-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .report-tabs {
+            display: flex;
+            gap: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tab-item {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-item.active {
+            color: var(--primary-light);
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .filter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 400px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px 10px 36px;
+            font-size: 14px;
+            color: white;
+            outline: none;
+        }
+
+        .date-filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .date-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .report-table-container {
+            overflow-x: auto;
+            min-height: 400px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .report-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .report-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .report-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: capitalize;
+            display: inline-block;
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .badge-blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .badge-indigo {
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+        }
+
+        .date-col {
+            color: #10b981;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .date-col .time {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .btn-page {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-page:hover:not(.disabled) {
+            background: var(--bg-tertiary);
+            color: white;
+        }
+
+        .btn-page.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .loading-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(99, 102, 241, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="report-header">
+        REPORT Dashboard
+    </div>
+
+    <div class="report-grid">
+        <div class="report-card">
+            <div class="card-number">1</div>
+            <h2 class="card-title"><i class="fas fa-shopping-cart"></i> SALE REPORT</h2>
+            <nav class="report-list">
+                <a href="#reportView" class="report-link" onclick="switchReportTab('Sales')">
+                    <i class="fas fa-chevron-right"></i> SALE DETAIL REPORT
+                </a>
+            </nav>
+        </div>
+
+        <div class="report-card" style="border-left-color: var(--accent-green);">
+            <div class="card-number" style="background: var(--accent-green);">2</div>
+            <h2 class="card-title"><i class="fas fa-truck-loading"></i> PURCHASE REPORT</h2>
+            <nav class="report-list">
+                <a href="#reportView" class="report-link" onclick="switchReportTab('Purchases')">
+                    <i class="fas fa-chevron-right"></i> PURCHASE DETAIL REPORT
+                </a>
+            </nav>
+        </div>
+
+        <div class="report-card" style="border-left-color: var(--accent-yellow);">
+            <div class="card-number" style="background: var(--accent-yellow);">3</div>
+            <h2 class="card-title"><i class="fas fa-file-invoice-dollar"></i> EXPENSE REPORT</h2>
+            <nav class="report-list">
+                <a href="#reportView" class="report-link" onclick="switchReportTab('Expenses')">
+                    <i class="fas fa-chevron-right"></i> EXPENSE SUMMARY
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="detailed-report-section" id="reportView">
+        <div class="report-tabs" id="tabBar">
+            <div class="tab-item active" onclick="switchReportTab('Sales')">Sales</div>
+            <div class="tab-item" onclick="switchReportTab('Purchases')">Purchases</div>
+            <div class="tab-item" onclick="switchReportTab('Expenses')">Expenses</div>
+        </div>
+
+        <div class="filter-row">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by reference or partner..."
+                    oninput="handleSearch()">
+            </div>
+            <div class="date-filter-group">
+                <input type="date" id="startDate" class="date-input" onchange="fetchReports()">
+                <span class="text-muted">to</span>
+                <input type="date" id="endDate" class="date-input" onchange="fetchReports()">
+                <button class="bg-indigo-600 px-4 py-2 rounded-lg text-white hover:bg-indigo-500 text-sm font-bold"
+                    onclick="fetchReports()">
+                    Apply
+                </button>
+            </div>
+        </div>
+
+        <div class="report-table-container" id="tableContainer">
+            <!-- Content will be injected by JS -->
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Content will be injected by JS -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script>
+        let state = {
+            currentTab: 'Sales',
+            data: [],
+            totalCount: 0,
+            loading: false,
+            searchQuery: '',
+            startDate: '',
+            endDate: '',
+            page: 0,
+            pageSize: 10
+        };
+
+        const TAB_CONFIG = {
+            'Sales': {
+                table: 'transactions',
+                columns: ['DATE', 'REFERENCE', 'CUSTOMER', 'TOTAL', 'METHOD', 'PAY STATUS', 'STATUS'],
+                select: '*, user_id'
+            },
+            'Purchases': {
+                table: 'purchases',
+                columns: ['DATE', 'REFERENCE', 'SUPPLIER', 'WAREHOUSE', 'GRAND TOTAL', 'METHOD', 'PAY STATUS', 'STATUS'],
+                select: '*, supplier:supplier_id(name), warehouse:warehouse_id(name)'
+            },
+            'Expenses': {
+                table: 'expenses',
+                columns: ['DATE', 'REFERENCE', 'TITLE', 'CATEGORY', 'AMOUNT', 'METHOD', 'REMARK'],
+                select: '*, category:category_id(name), warehouse:warehouse_id(name)'
+            }
+        };
+
+        async function init() {
+            // Set default dates for current month
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const lastDay = now.toISOString().split('T')[0];
+            document.getElementById('startDate').value = firstDay;
+            document.getElementById('endDate').value = lastDay;
+            state.startDate = firstDay;
+            state.endDate = lastDay;
+
+            await fetchReports();
+        }
+
+        async function fetchReports() {
+            state.loading = true;
+            renderLoading();
+
+            const config = TAB_CONFIG[state.currentTab];
+            state.startDate = document.getElementById('startDate').value;
+            state.endDate = document.getElementById('endDate').value;
+
+            try {
+                let query = supabase.from(config.table).select(config.select, { count: 'exact' });
+
+                // Date filtering
+                if (state.startDate) query = query.gte('created_at', state.startDate + 'T00:00:00');
+                if (state.endDate) query = query.lte('created_at', state.endDate + 'T23:59:59');
+
+                // Search logic (simplified string matching)
+                if (state.searchQuery) {
+                    if (state.currentTab === 'Sales') query = query.ilike('voucher_no', `%${state.searchQuery}%`);
+                    else if (state.currentTab === 'Purchases') query = query.ilike('reference_no', `%${state.searchQuery}%`);
+                    else if (state.currentTab === 'Expenses') query = query.or(`reference_no.ilike.%${state.searchQuery}%,item.ilike.%${state.searchQuery}%`);
+                }
+
+                // Pagination
+                const from = state.page * state.pageSize;
+                const to = from + state.pageSize - 1;
+                query = query.order('created_at', { ascending: false }).range(from, to);
+
+                const { data, count, error } = await query;
+                if (error) throw error;
+
+                state.data = data || [];
+                state.totalCount = count || 0;
+            } catch (err) {
+                console.error('Fetch Error:', err);
+            } finally {
+                state.loading = false;
+                renderTable();
+                renderPagination();
+            }
+        }
+
+        function renderLoading() {
+            document.getElementById('tableContainer').innerHTML = `
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            `;
+        }
+
+        function renderTable() {
+            const config = TAB_CONFIG[state.currentTab];
+            let html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>${config.columns.map(c => `<th>${c}</th>`).join('')}</tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            if (state.data.length === 0) {
+                html += `<tr><td colspan="${config.columns.length}" class="text-center py-20 text-muted">No records found.</td></tr>`;
+            } else {
+                state.data.forEach(row => {
+                    html += `<tr>${renderRow(row)}</tr>`;
+                });
+            }
+
+            html += `</tbody></table>`
+            document.getElementById('tableContainer').innerHTML = html;
+        }
+
+        function renderRow(row) {
+            const date = new Date(row.created_at);
+            const dateStr = date.toLocaleDateString('en-GB').replace(/\//g, '-');
+            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (state.currentTab === 'Sales') {
+                return `
+                    <td class="date-col">${dateStr}<br><span class="time">${timeStr}</span></td>
+                    <td class="font-bold">${row.voucher_no || 'N/A'}</td>
+                    <td>${row.user_id ? 'Customer' : 'Guest'}</td>
+                    <td class="font-bold text-white">${parseFloat(row.total || 0).toLocaleString()} Ks</td>
+                    <td><span class="badge badge-blue">${row.payment_method || 'Cash'}</span></td>
+                    <td><span class="badge badge-green">${row.payment_status || 'Paid'}</span></td>
+                    <td><span class="badge ${row.status === 'completed' ? 'badge-green' : 'badge-red'}">${row.status}</span></td>
+                `;
+            }
+
+            if (state.currentTab === 'Purchases') {
+                return `
+                    <td class="date-col">${dateStr}<br><span class="time">${timeStr}</span></td>
+                    <td class="font-bold">${row.reference_no}</td>
+                    <td>${row.supplier?.name || 'N/A'}</td>
+                    <td class="opacity-70">${row.warehouse?.name || '-'}</td>
+                    <td class="font-bold text-white">${parseFloat(row.grand_total || 0).toLocaleString()} Ks</td>
+                    <td><span class="badge badge-indigo">${row.payment_type || 'N/A'}</span></td>
+                    <td><span class="badge badge-green">${row.payment_status}</span></td>
+                    <td><span class="badge badge-green">${row.status}</span></td>
+                `;
+            }
+
+            if (state.currentTab === 'Expenses') {
+                return `
+                    <td class="date-col">${dateStr}<br><span class="time">${timeStr}</span></td>
+                    <td class="font-bold">${row.reference_no || 'N/A'}</td>
+                    <td class="text-white">${row.item}</td>
+                    <td class="italic">${row.category?.name || '-'}</td>
+                    <td class="font-bold text-indigo-400">${parseFloat(row.amount || 0).toLocaleString()} Ks</td>
+                    <td><span class="badge badge-blue">${row.payment_method}</span></td>
+                    <td class="text-xs opacity-60">${row.remark || '-'}</td>
+                `;
+            }
+        }
+
+        function renderPagination() {
+            const startIdx = state.page * state.pageSize + 1;
+            const endIdx = Math.min((state.page + 1) * state.pageSize, state.totalCount);
+            const canPrev = state.page > 0;
+            const canNext = endIdx < state.totalCount;
+
+            document.getElementById('pagination').innerHTML = `
+                <div class="flex items-center gap-4">
+                    <span>Records per page:</span>
+                    <select class="bg-bg-tertiary border-none rounded px-2 py-1 text-xs" onchange="state.pageSize = parseInt(this.value); state.page = 0; fetchReports()">
+                        <option value="10" ${state.pageSize === 10 ? 'selected' : ''}>10</option>
+                        <option value="25" ${state.pageSize === 25 ? 'selected' : ''}>25</option>
+                        <option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50</option>
+                    </select>
+                    <span class="ml-4">${state.totalCount > 0 ? `${startIdx}-${endIdx} of ${state.totalCount}` : '0 of 0'}</span>
+                </div>
+                <div class="page-btns" style="display: flex; gap: 8px;">
+                    <div class="btn-page ${!canPrev ? 'disabled' : ''}" onclick="changePage(0)"><i class="fas fa-angle-double-left"></i></div>
+                    <div class="btn-page ${!canPrev ? 'disabled' : ''}" onclick="changePage(${state.page - 1})"><i class="fas fa-angle-left"></i></div>
+                    <div class="btn-page ${!canNext ? 'disabled' : ''}" onclick="changePage(${state.page + 1})"><i class="fas fa-angle-right"></i></div>
+                    <div class="btn-page ${!canNext ? 'disabled' : ''}" onclick="changePage(${Math.ceil(state.totalCount / state.pageSize) - 1})"><i class="fas fa-angle-double-right"></i></div>
+                </div>
+            `;
+        }
+
+        function changePage(p) {
+            if (p < 0 || (p * state.pageSize >= state.totalCount && state.totalCount > 0)) return;
+            state.page = p;
+            fetchReports();
+        }
+
+        function switchReportTab(tabName) {
+            state.currentTab = tabName;
+            state.page = 0;
+
+            // UI Update
+            const tabs = document.querySelectorAll('.tab-item');
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.innerText === tabName);
+            });
+
+            fetchReports();
+        }
+
+        let searchTimer;
+        function handleSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                state.searchQuery = document.getElementById('searchInput').value;
+                state.page = 0;
+                fetchReports();
+            }, 500);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.location.search.includes('mode=embedded')) {
+                document.body.classList.add('embedded');
+                const header = document.querySelector('.report-header');
+                if (header) header.style.display = 'none';
+            }
+            init();
+        });
+    </script>
+</body>
+
+</html>

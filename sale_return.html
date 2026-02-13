@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sale Return List - POS System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --primary: #f43f5e;
+            /* Rose/Red theme for returns */
+            --primary-light: #fb7185;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+        }
+
+        body {
+            background-color: transparent;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: var(--space-md);
+            overflow-x: hidden;
+        }
+
+        .category-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: calc(100vh - 40px);
+        }
+
+        .bulk-toolbar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            background: var(--bg-primary);
+            padding: 10px var(--space-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--primary);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .selected-count {
+            font-weight: 600;
+            color: var(--primary-light);
+            font-size: 0.9rem;
+        }
+
+        .selection-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .excel-grid-container {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            overflow: auto;
+            max-height: calc(100vh - 250px);
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .excel-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .excel-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .excel-tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-refunded {
+            background: rgba(244, 63, 94, 0.1);
+            color: #f43f5e;
+        }
+
+        .status-cancelled {
+            background: rgba(148, 163, 184, 0.1);
+            color: #94a3b8;
+        }
+
+        .grid-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .sync-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-success {
+            color: #10b981;
+        }
+
+        .status-warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="category-container">
+        <div class="grid-toolbar">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <h1 class="page-title">Sale Return List</h1>
+                <div id="syncStatus" class="sync-status">
+                    <i class="fas fa-database"></i> <span id="syncStatusText">Synced to Supabase</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-sm);">
+                <button class="btn btn-secondary" onclick="loadReturns()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <div id="bulkToolbar" class="bulk-toolbar hidden">
+            <span class="selected-count"><span id="selectedCount">0</span> items selected</span>
+            <div style="flex:1;"></div>
+            <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
+                <i class="fas fa-trash"></i> Bulk Delete
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="clearSelection()" title="Clear Selection">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="excel-grid-container">
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;"><input type="checkbox"
+                                onchange="toggleSelectAll(this)"></th>
+                        <th>Return Date</th>
+                        <th>Orig. Voucher #</th>
+                        <th>Customer</th>
+                        <th>Refund Amount</th>
+                        <th>Status</th>
+                        <th>Reason</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="returnsBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+
+    <script>
+        let returnsData = [];
+        window.selectedIds = new Set();
+
+        async function init() {
+            updateSyncStatus('Returns', 'Loading...');
+            try {
+                await loadReturns();
+            } catch (e) { console.error('Init error:', e); }
+        }
+
+        async function loadReturns() {
+            try {
+                // Filtering for 'refunded' or 'cancelled' status as these represent returns/inversions
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .in('status', ['refunded', 'cancelled'])
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                returnsData = data || [];
+                renderReturns();
+                updateSyncStatus('Returns', 'Synced to Supabase');
+            } catch (e) {
+                console.error('Load error:', e);
+                updateSyncStatus('Returns', 'Sync Error');
+            }
+        }
+
+        function renderReturns() {
+            const body = document.getElementById('returnsBody');
+            body.innerHTML = '';
+
+            if (returnsData.length === 0) {
+                body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-muted);">No return records found.</td></tr>`;
+                return;
+            }
+
+            returnsData.forEach(ret => {
+                const row = document.createElement('tr');
+                row.className = 'excel-tr';
+                const date = new Date(ret.created_at).toLocaleDateString();
+                const status = ret.status || 'refunded';
+
+                row.innerHTML = `
+                    <td style="text-align: center;"><input type="checkbox" class="selection-checkbox" data-id="${ret.id}" onchange="handleSelectionChange(this)"></td>
+                    <td>${date}</td>
+                    <td style="font-weight: 600; color: var(--primary-light);">${ret.id.slice(0, 8).toUpperCase()}</td>
+                    <td>${ret.customer_name || 'Walking Customer'}</td>
+                    <td>${(ret.total || 0).toFixed(2)} Ks</td>
+                    <td><span class="status-badge status-${status.toLowerCase()}">${status}</span></td>
+                    <td>${ret.note || 'No reason provided'}</td>
+                    <td style="text-align: center;">
+                        <button class="btn-icon" onclick="deleteReturn('${ret.id}')" style="color: var(--error);"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        function toggleSelectAll(master) {
+            document.querySelectorAll('#returnsBody .selection-checkbox').forEach(cb => {
+                cb.checked = master.checked;
+                handleSelectionChange(cb);
+            });
+            updateBulkToolbar();
+        }
+
+        function handleSelectionChange(checkbox) {
+            const id = checkbox.dataset.id;
+            checkbox.checked ? window.selectedIds.add(id) : window.selectedIds.delete(id);
+            updateBulkToolbar();
+        }
+
+        function updateBulkToolbar() {
+            const toolbar = document.getElementById('bulkToolbar');
+            const count = window.selectedIds.size;
+            toolbar.classList.toggle('hidden', count === 0);
+            if (count > 0) document.getElementById('selectedCount').textContent = count;
+        }
+
+        function clearSelection() {
+            window.selectedIds.clear();
+            document.querySelectorAll('.selection-checkbox').forEach(cb => cb.checked = false);
+            updateBulkToolbar();
+        }
+
+        async function deleteReturn(id) {
+            if (!confirm('Permanently delete this return record?')) return;
+            try {
+                const { error } = await supabase.from('transactions').delete().eq('id', id);
+                if (error) throw error;
+                await loadReturns();
+            } catch (e) { alert('Error deleting return: ' + e.message); }
+        }
+
+        async function bulkDelete() {
+            if (window.selectedIds.size === 0) return;
+            if (!confirm(`Delete ${window.selectedIds.size} return records?`)) return;
+            try {
+                const { error } = await supabase.from('transactions').delete().in('id', Array.from(window.selectedIds));
+                if (error) throw error;
+                clearSelection();
+                await loadReturns();
+            } catch (e) { alert('Error in bulk delete: ' + e.message); }
+        }
+
+        function updateSyncStatus(module, status) {
+            const el = document.getElementById('syncStatusText');
+            if (el) {
+                el.textContent = status;
+                document.getElementById('syncStatus').className = 'sync-status ' + (status.includes('Synced') ? 'status-success' : 'status-warning');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

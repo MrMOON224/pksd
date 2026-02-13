@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexible Business Spreadsheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* Synchronized with dashboard styles.css */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: transparent;
+            /* Seamless iframe integration */
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        /* Layout */
+        .top-bar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 110;
+        }
+
+        .sheet-container {
+            padding: 0;
+            /* Fully flush for iframe */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        /* The Grid - Fitted to width */
+        .sheet-wrapper {
+            flex: 1;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.8rem 0.5rem;
+        }
+
+        td {
+            border: 1px solid var(--border-color);
+            min-height: 40px;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        /* Interaction Elements */
+        .cell-container {
+            width: 100%;
+            height: 100%;
+            min-height: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            transition: all 0.2s ease;
+        }
+
+        .cell-input {
+            flex: 1;
+            min-width: 20px;
+            height: 32px;
+            padding: 0 4px;
+            border: none;
+            outline: none;
+            font-size: 0.875rem;
+            background: transparent;
+            color: inherit;
+            width: 100%;
+        }
+
+        .cell-container:focus-within {
+            background: rgba(99, 102, 241, 0.15);
+            box-shadow: inset 0 0 0 1px var(--primary);
+            z-index: 10;
+        }
+
+        /* Tag Styling */
+        .tag {
+            background: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .tag-close {
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .tag-close:hover {
+            opacity: 1;
+        }
+
+        .readonly {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+        }
+
+        .resizer {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: col-resize;
+            z-index: 60;
+            transition: background 0.2s;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .resizer:hover {
+            background: var(--primary);
+            width: 6px;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .row-idx {
+            background: var(--bg-secondary);
+            text-align: center;
+            width: 40px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            position: sticky;
+            left: 0;
+            z-index: 45;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .status-bar {
+            height: 28px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            justify-content: space-between;
+        }
+
+        /* === Checkbox Column === */
+        .check-col {
+            width: 30px;
+            text-align: center;
+            position: sticky;
+            left: 0;
+            background: var(--bg-secondary);
+            z-index: 55;
+            border-right: 1px solid var(--border-color);
+        }
+
+        /* Shift index column when checkbox is present */
+        .row-idx {
+            left: 30px;
+        }
+
+        .row-checkbox {
+            cursor: pointer;
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+        }
+
+        /* === Touch Optimization === */
+        .touch-locked-cell {
+            background: rgba(0, 0, 0, 0.02);
+            /* Visual cue */
+        }
+
+        .touch-locked-cell input {
+            cursor: pointer;
+            /* Indicate clickable */
+        }
+
+        .edit-active {
+            background: rgba(99, 102, 241, 0.1) !important;
+            box-shadow: inset 0 0 0 2px var(--primary);
+        }
+
+        /* Increase hit targets for touch */
+        @media (pointer: coarse) {
+            .resizer {
+                width: 10px;
+                right: -5px;
+            }
+
+            .tag-close {
+                padding: 4px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <div class="flex items-center gap-3">
+            <div class="p-1.5 rounded" style="background: var(--primary);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="white" stroke-width="2">
+                    <path d="M3 3h18v18H3zM3 9h18M9 3v18" />
+                </svg>
+            </div>
+            <h1 class="text-sm font-bold" style="color: var(--text-primary);">Inventory Manager</h1>
+        </div>
+        <div class="flex gap-2">
+            <button id="syncBtn" class="text-xs px-4 py-1 rounded"
+                style="background: var(--primary); color: white;">Export JSON</button>
+        </div>
+    </div>
+
+    <div class="sheet-container">
+        <div class="sheet-wrapper" id="gridWrapper">
+            <table id="gridTable">
+                <thead>
+                    <tr id="gridHeader"></tr>
+                </thead>
+                <tbody id="gridBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="ddMenu" class="dropdown-menu"></div>
+
+    <div class="status-bar">
+        <span id="activityLog">Full width enabled. Proportional column resizing optimized.</span>
+        <span id="selectionPath">Ready</span>
+    </div>
+
+    <script>
+        const SCHEMA = [
+            { id: 'code', label: 'Code', width: '7%' },
+            { id: 'barcodes', label: 'Barcode ++', width: '18%', type: 'tags' },
+            { id: 'desc', label: 'Description', width: '15%' },
+            { id: 'category', label: 'Category', width: '10%', type: 'dropdown', options: ['Electronics', 'Clothing', 'Food', 'Home'] },
+            { id: 'subCategory', label: 'Sub Category', width: '10%' },
+            { id: 'cost', label: 'Cost', width: '7%' },
+            { id: 'prices', label: 'Price ++', width: '13%', type: 'tags' },
+            { id: 'unit', label: 'Pcs/Box', width: '8%', type: 'dropdown', options: ['Pcs', 'Box', 'Pack', 'Case'] },
+            { id: 'qty', label: 'Qty', width: '6%' },
+            { id: 'margin', label: 'Margin %', width: '6%', readonly: true }
+        ];
+
+        const COLUMN_ACTIONS = {
+            'prices': (rowIdx) => updateMargin(rowIdx),
+            'cost': (rowIdx) => updateMargin(rowIdx)
+        };
+
+        let state = {
+            data: [], // Start empty, only load from Supabase
+            columns: SCHEMA,
+            selectedRows: new Set()
+        };
+
+        function initGrid() {
+            renderHeader();
+            renderBody();
+            setupResizers();
+            setupTouchEvents();
+        }
+
+        function renderHeader() {
+            const head = document.getElementById('gridHeader');
+            head.innerHTML = `
+                <th class="check-col">
+                    <input type="checkbox" id="masterCheckbox" class="row-checkbox" onchange="toggleAll(this)">
+                </th>
+                <th class="row-idx" style="left: 30px;">#</th>
+            `;
+            state.columns.forEach((col, i) => {
+                const th = document.createElement('th');
+                th.style.width = col.width;
+                th.innerHTML = `
+                    <div class="relative px-1 py-2 truncate text-left">
+                        ${col.label}
+                        <div class="resizer" data-idx="${i}"></div>
+                    </div>
+                `;
+                head.appendChild(th);
+            });
+        }
+
+        function renderBody() {
+            const body = document.getElementById('gridBody');
+            body.innerHTML = '';
+            state.data.forEach((row, rIdx) => {
+                const tr = document.createElement('tr');
+                tr.dataset.row = rIdx;
+
+                const isSelected = state.selectedRows.has(row.id);
+                if (isSelected) tr.style.background = 'rgba(99, 102, 241, 0.1)';
+
+                tr.innerHTML = `
+                    <td class="check-col">
+                        <input type="checkbox" class="row-checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${row.id}', ${rIdx})">
+                    </td>
+                    <td class="row-idx" style="left: 30px;">${rIdx + 1}</td>
+                `;
+
+                state.columns.forEach(col => {
+                    const td = document.createElement('td');
+                    const container = document.createElement('div');
+                    container.className = 'cell-container' + (col.readonly ? ' readonly' : '');
+
+                    // Add touch-locked class by default
+                    container.classList.add('touch-locked-cell');
+
+                    if (col.type === 'tags') {
+                        renderTags(container, rIdx, col.id);
+                    } else {
+                        const input = document.createElement('input');
+                        input.className = 'cell-input';
+                        input.value = row[col.id] || '';
+                        input.readOnly = true;
+                        if (col.readonly) input.dataset.permReadonly = "true";
+
+                        // Touch optimization: Add data attribute
+                        input.dataset.row = rIdx;
+                        input.dataset.col = col.id;
+
+                        input.oninput = (e) => handleInput(rIdx, col.id, e.target.value);
+                        input.onblur = (e) => {
+                            if (!input.dataset.permReadonly) {
+                                input.readOnly = true;
+                                container.classList.remove('edit-active');
+                            }
+                        };
+                        input.onfocus = () => handleFocus(rIdx, col.id);
+                        input.onkeydown = (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                moveFocus(rIdx, col.id, 'right');
+                            } else {
+                                handleArrowNavigation(e, rIdx, col.id);
+                            }
+                        };
+                        container.appendChild(input);
+                    }
+
+                    td.appendChild(container);
+                    tr.appendChild(td);
+                });
+                body.appendChild(tr);
+            });
+        }
+
+        function moveFocus(rowIdx, colId, direction) {
+            const colIdx = state.columns.findIndex(c => c.id === colId);
+            if (direction === 'right' && colIdx < state.columns.length - 1) focusCell(rowIdx, state.columns[colIdx + 1].id);
+            else if (direction === 'left' && colIdx > 0) focusCell(rowIdx, state.columns[colIdx - 1].id);
+            else if (direction === 'down' && rowIdx < state.data.length - 1) focusCell(rowIdx + 1, colId);
+            else if (direction === 'up' && rowIdx > 0) focusCell(rowIdx - 1, colId);
+        }
+
+        function handleArrowNavigation(e, rowIdx, colId) {
+            if (e.key === 'ArrowRight' && (e.target.selectionEnd === e.target.value.length || e.target.type !== 'text')) moveFocus(rowIdx, colId, 'right');
+            else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) moveFocus(rowIdx, colId, 'left');
+            else if (e.key === 'ArrowDown') moveFocus(rowIdx, colId, 'down');
+            else if (e.key === 'ArrowUp') moveFocus(rowIdx, colId, 'up');
+        }
+
+        function focusCell(rowIdx, colId) {
+            setTimeout(() => {
+                const rows = document.getElementById('gridBody').children;
+                const colIdx = state.columns.findIndex(c => c.id === colId);
+                if (rows[rowIdx] && rows[rowIdx].children[colIdx + 1]) {
+                    const input = rows[rowIdx].children[colIdx + 1].querySelector('input');
+                    if (input) {
+                        input.focus();
+                        if (typeof input.select === 'function') input.select();
+                    }
+                }
+            }, 10);
+        }
+
+        function renderTags(container, rowIdx, colId) {
+            container.innerHTML = '';
+            const tags = state.data[rowIdx][colId] || [];
+            tags.forEach((tag, tIdx) => {
+                const tagEl = document.createElement('div');
+                tagEl.className = 'tag';
+                tagEl.innerHTML = `<span>${tag}</span><span class="tag-close" onclick="removeTag(${rowIdx}, '${colId}', ${tIdx})">×</span>`;
+                container.appendChild(tagEl);
+            });
+            const input = document.createElement('input');
+            input.className = 'cell-input';
+            input.placeholder = tags.length === 0 ? '+' : '';
+            input.readOnly = true;
+
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = e.target.value.trim();
+                    if (val !== '') {
+                        if (!state.data[rowIdx][colId]) state.data[rowIdx][colId] = [];
+                        state.data[rowIdx][colId].push(val);
+                        e.target.value = '';
+                        if (COLUMN_ACTIONS[colId]) COLUMN_ACTIONS[colId](rowIdx);
+                        renderTags(container, rowIdx, colId);
+
+                        // FIX: Ensure we focus back to the same tag input to allow multiple entries
+                        setTimeout(() => {
+                            const newInput = container.querySelector('.cell-input');
+                            if (newInput) newInput.focus();
+                        }, 0);
+                    } else moveFocus(rowIdx, colId, 'right');
+                } else handleArrowNavigation(e, rowIdx, colId);
+            };
+            input.onblur = () => { input.readOnly = true; container.classList.remove('edit-active'); };
+            input.onfocus = () => handleFocus(rowIdx, colId);
+            container.appendChild(input);
+        }
+
+        function removeTag(rowIdx, colId, tagIdx) {
+            state.data[rowIdx][colId].splice(tagIdx, 1);
+            if (COLUMN_ACTIONS[colId]) COLUMN_ACTIONS[colId](rowIdx);
+            const rows = document.getElementById('gridBody').children;
+            const colIdx = state.columns.findIndex(c => c.id === colId);
+            renderTags(rows[rowIdx].children[colIdx + 1].querySelector('.cell-container'), rowIdx, colId);
+        }
+
+        // --- Iframe / Parent Communication ---
+        window.addEventListener('message', function (event) {
+            const { type, data } = event.data;
+            if (type === 'LOAD_DATA') {
+                state.data = data.map(p => ({
+                    id: p.id,
+                    code: p.code || '',
+                    barcodes: p.barcodes || [],
+                    desc: p.name || '',
+                    category: p.category_id || '',
+                    subCategory: p.subcategory_id || '',
+                    cost: p.cost || 0,
+                    prices: [p.price || 0],
+                    unit: p.unit_id || 'Pcs',
+                    qty: p.stock || 0,
+                    brand_id: p.brand_id
+                }));
+                // Only load what is in Supabase.
+                renderBody();
+                logActivity("Data loaded from dashboard.");
+            } else if (type === 'IMPORT_DATA') {
+                state.data = data;
+                renderBody();
+                logActivity("Data imported from file.");
+            } else if (type === 'EXPORT_REQUEST') {
+                window.parent.postMessage({ type: 'EXPORT_DATA', data: state.data }, '*');
+            }
+        });
+
+        function notifyUpdate(rowIdx, colId, value) {
+            window.parent.postMessage({
+                type: 'CELL_UPDATE',
+                rowIdx: rowIdx,
+                colId: colId,
+                value: value,
+                rowData: state.data[rowIdx]
+            }, '*');
+        }
+
+        function logActivity(msg) {
+            document.getElementById('activityLog').textContent = msg;
+        }
+
+        function handleInput(rowIdx, colId, val) {
+            state.data[rowIdx][colId] = val;
+            if (COLUMN_ACTIONS[colId]) COLUMN_ACTIONS[colId](rowIdx);
+            notifyUpdate(rowIdx, colId, val);
+        }
+
+        function updateMargin(rowIdx) {
+            const row = state.data[rowIdx];
+            const cost = parseFloat(row.cost) || 0;
+            const prices = row.prices || [];
+            const price = prices.length > 0 ? parseFloat(prices[prices.length - 1]) : 0;
+            row.margin = price > 0 ? (((price - cost) / price) * 100).toFixed(1) + '%' : '-';
+            const rows = document.getElementById('gridBody').children;
+            const input = rows[rowIdx].children[state.columns.findIndex(c => c.id === 'margin') + 1].querySelector('input');
+            if (input) input.value = row.margin;
+            notifyUpdate(rowIdx, 'margin', row.margin);
+        }
+
+        function handleFocus(rowIdx, colId) {
+            document.getElementById('selectionPath').textContent = `Active: ${colId.toUpperCase()} [Row ${rowIdx + 1}]`;
+            const colDef = state.columns.find(c => c.id === colId);
+            if (colDef.type === 'dropdown') showDropdown(rowIdx, colId);
+            else hideDropdown();
+        }
+
+        function showDropdown(rowIdx, colId) {
+            const menu = document.getElementById('ddMenu');
+            const input = document.activeElement;
+            const rect = input.getBoundingClientRect();
+            const options = state.columns.find(c => c.id === colId).options || [];
+            if (options.length === 0) return hideDropdown();
+            menu.innerHTML = options.map(opt => `<div class="dropdown-item">${opt}</div>`).join('');
+            menu.style.display = 'block';
+            menu.style.width = rect.width + 'px';
+            menu.style.left = rect.left + 'px';
+            menu.style.top = (rect.bottom + window.scrollY) + 'px';
+            menu.querySelectorAll('.dropdown-item').forEach(item => {
+                item.onclick = () => {
+                    input.value = item.textContent;
+                    handleInput(rowIdx, colId, item.textContent);
+                    hideDropdown();
+                    moveFocus(rowIdx, colId, 'right');
+                };
+            });
+        }
+
+        function hideDropdown() { document.getElementById('ddMenu').style.display = 'none'; }
+
+        function toggleSelection(id, rowIdx) {
+            if (state.selectedRows.has(id)) {
+                state.selectedRows.delete(id);
+            } else {
+                state.selectedRows.add(id);
+            }
+            renderBody(); // Re-render to update UI (inefficient but safe for now)
+            updateMasterCheckbox();
+            notifySelectionChange();
+        }
+
+        function toggleAll(checkbox) {
+            if (checkbox.checked) {
+                state.data.forEach(row => state.selectedRows.add(row.id));
+            } else {
+                state.selectedRows.clear();
+            }
+            renderBody();
+            notifySelectionChange();
+        }
+
+        function updateMasterCheckbox() {
+            const master = document.getElementById('masterCheckbox');
+            if (!master) return;
+            const allSelected = state.data.length > 0 && state.data.every(row => state.selectedRows.has(row.id));
+            master.checked = allSelected;
+            master.indeterminate = state.selectedRows.size > 0 && !allSelected;
+        }
+
+        function notifySelectionChange() {
+            window.parent.postMessage({
+                type: 'SELECTION_CHANGE',
+                selectedIds: Array.from(state.selectedRows)
+            }, '*');
+        }
+
+        // --- Touch & Interaction Logic ---
+
+        function setupTouchEvents() {
+            let lastTap = 0;
+            let lastTarget = null;
+
+            document.addEventListener('touchstart', function (e) {
+                // Remove existing focus if touching outside
+                if (!e.target.closest('.cell-input') && !e.target.closest('.dropdown-menu')) {
+                    document.activeElement.blur();
+                }
+            }, { passive: true });
+
+            // Double tap listener on container
+            const grid = document.getElementById('gridBody');
+            grid.addEventListener('touchstart', function (e) {
+                const container = e.target.closest('.cell-container');
+                if (!container) return;
+
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+
+                if (tapLength < 500 && tapLength > 0 && container === lastTarget) {
+                    // Double Tap detected
+                    e.preventDefault();
+                    enterEditMode(container);
+                } else {
+                    // Single Tap
+                    lastTarget = container;
+                    lastTap = currentTime;
+
+                    // Highlight row on tap?
+                    // Optional: could trigger selection
+                }
+            });
+        }
+
+        function enterEditMode(container) {
+            const input = container.querySelector('.cell-input');
+            if (input && !input.dataset.permReadonly) {
+                input.readOnly = false;
+                container.classList.add('edit-active');
+                input.focus();
+                if (input.select) input.select();
+            }
+        }
+
+        function setupResizers() {
+            const table = document.getElementById('gridTable');
+            document.querySelectorAll('.resizer').forEach(resizer => {
+
+                // Mouse Events
+                resizer.addEventListener('mousedown', initResize);
+
+                // Touch Events
+                resizer.addEventListener('touchstart', initResize, { passive: false });
+
+                function initResize(e) {
+                    if (e.type === 'mousedown') e.preventDefault();
+                    // Don't prevent default on touchstart immediately or clicking might break? 
+                    // Actually for resizer we want to prevent scroll
+                    if (e.type === 'touchstart') e.preventDefault();
+
+                    const th = resizer.closest('th');
+                    const nextTh = th.nextElementSibling;
+                    if (!nextTh) return;
+
+                    const startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
+                    const startWidth = th.offsetWidth;
+                    const nextStartWidth = nextTh.offsetWidth;
+                    const totalWidth = table.offsetWidth;
+
+                    function onMove(moveEvent) {
+                        const currentX = moveEvent.type === 'mousemove' ? moveEvent.pageX : moveEvent.touches[0].pageX;
+                        const diffX = currentX - startX;
+                        const newWidth = Math.max(startWidth + diffX, 40);
+                        const newNextWidth = Math.max(nextStartWidth - diffX, 40);
+
+                        th.style.width = (newWidth / totalWidth * 100) + '%';
+                        nextTh.style.width = (newNextWidth / totalWidth * 100) + '%';
+                    }
+
+                    function onEnd() {
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onEnd);
+                        document.removeEventListener('touchmove', onMove);
+                        document.removeEventListener('touchend', onEnd);
+
+                        state.columns[parseInt(resizer.dataset.idx)].width = th.style.width;
+                        if (state.columns[parseInt(resizer.dataset.idx) + 1]) {
+                            state.columns[parseInt(resizer.dataset.idx) + 1].width = nextTh.style.width;
+                        }
+                    }
+
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onEnd);
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('touchend', onEnd);
+                }
+            });
+        }
+
+
+
+        // --- View Adjustments (Seamless Mode) ---
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'embedded') {
+            const topBar = document.querySelector('.top-bar');
+            if (topBar) topBar.style.display = 'none';
+            const sheetContainer = document.querySelector('.sheet-container');
+            if (sheetContainer) sheetContainer.style.height = '100vh';
+        }
+
+        document.getElementById('syncBtn').onclick = () => { window.parent.postMessage({ type: 'SYNC_REQUEST' }, '*'); };
+        window.onclick = (e) => { if (!e.target.classList.contains('cell-input')) hideDropdown(); };
+        initGrid();
+    </script>
+</body>
+
+</html>

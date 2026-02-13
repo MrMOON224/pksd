@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Adjustments - Excel Style</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --radius-md: 8px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .sync-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Grid Layout */
+        .sheet-container {
+            flex: 1;
+            overflow: auto;
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 1400px;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.8rem 0.5rem;
+            text-align: left;
+        }
+
+        td {
+            border: 1px solid var(--border-color);
+            padding: 0;
+            height: 40px;
+            color: var(--text-primary);
+        }
+
+        /* Interaction Elements */
+        .cell-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .cell-input {
+            width: 100%;
+            height: 32px;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: inherit;
+            font-size: 0.875rem;
+        }
+
+        .cell-container:focus-within {
+            background: rgba(99, 102, 241, 0.15);
+            box-shadow: inset 0 0 0 1px var(--primary);
+            z-index: 10;
+        }
+
+        .readonly {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+        }
+
+        .cell-editable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cell-editable:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Selection & Checkbox */
+        .check-col {
+            width: 40px;
+            text-align: center;
+            position: sticky;
+            left: 0;
+            background: var(--bg-secondary);
+            z-index: 55;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .row-idx {
+            width: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tr.selected {
+            background: rgba(99, 102, 241, 0.1) !important;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .badge-add {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+        }
+
+        .badge-minus {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer Summary */
+        .footer-summary {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            z-index: 100;
+        }
+
+        .total-value {
+            color: var(--primary-light);
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="toolbar" id="topToolbar">
+        <div class="flex items-center gap-4">
+            <h1 class="text-lg font-extrabold flex items-center gap-2">
+                <i class="fas fa-boxes text-indigo-400"></i> Stock Adjustments
+            </h1>
+            <span id="syncStatus" class="sync-status">Synced to Supabase</span>
+        </div>
+        <div class="flex gap-2">
+            <button class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-4 py-2 rounded flex items-center gap-2"
+                onclick="loadData()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button
+                class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded flex items-center gap-2 shadow-lg"
+                onclick="addNewRow()">
+                <i class="fas fa-plus"></i> Add Row
+            </button>
+            <button
+                class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded flex items-center gap-2 shadow-lg"
+                id="saveBtn" onclick="saveAllChanges()">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+    </div>
+
+    <div class="sheet-container overflow-x-auto">
+        <table id="gridTable">
+            <thead>
+                <tr>
+                    <th class="check-col">
+                        <input type="checkbox" id="masterCheckbox" onchange="toggleAll(this)">
+                    </th>
+                    <th class="row-idx">#</th>
+                    <th style="width: 100px;">Date</th>
+                    <th style="width: 100px;">CODE</th>
+                    <th style="width: 130px;">BARCODE</th>
+                    <th style="width: 250px;">DESCRIPTION</th>
+                    <th style="width: 90px; text-align: right;">COST</th>
+                    <th style="width: 70px; text-align: center;">QTY</th>
+                    <th style="width: 100px; text-align: center;">STOCK QTY</th>
+                    <th style="width: 120px;">ADJ- TYPE</th>
+                    <th style="width: 120px; text-align: right;">Amount</th>
+                    <th style="width: 150px;">REASON</th>
+                    <th style="width: 200px;">Remark</th>
+                </tr>
+            </thead>
+            <tbody id="gridBody">
+                <!-- Rows populated by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer-summary" id="footerSummary">
+        <span>Total Visible Adjustment Value:</span>
+        <span class="total-value" id="totalAdjustmentValue">0.00 Ks</span>
+    </div>
+
+    <input type="file" id="importFile" class="hidden" accept=".csv" onchange="handleFileImport(event)">
+
+    <div id="ddMenu" class="dropdown-menu"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script>
+        const SCHEMA = [
+            { id: 'date', label: 'Date', width: '80px', type: 'text', readOnly: true },
+            { id: 'item_code', label: 'Code', width: '80px', type: 'text', readOnly: true },
+            { id: 'barcode', label: 'Barcode', width: '120px', type: 'text', readOnly: true },
+            { id: 'product_name', label: 'Description', width: '200px', type: 'dropdown' },
+            { id: 'cost', label: 'Cost', width: '80px', type: 'number', readOnly: true },
+            { id: 'quantity', label: 'Qty', width: '60px', type: 'number' },
+            { id: 'stock_qty', label: 'Stock Qty', width: '80px', type: 'number', readOnly: true },
+            { id: 'type', label: 'Adj-Type', width: '100px', type: 'dropdown' },
+            { id: 'amount', label: 'Amount', width: '100px', type: 'number', readOnly: true },
+            { id: 'reason', label: 'Reason', width: '120px', type: 'text' },
+            { id: 'remark', label: 'Remark', width: '150px', type: 'text' }
+        ];
+
+        let state = {
+            data: [],
+            products: [],
+            selectedRows: new Set(),
+            modifiedRows: new Set()
+        };
+
+        async function init() {
+            checkEmbeddedMode();
+            await fetchProducts();
+            await loadData();
+            setupMessaging();
+        }
+
+        function checkEmbeddedMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'embedded') {
+                document.getElementById('topToolbar').classList.add('hidden');
+            }
+        }
+
+        async function fetchProducts() {
+            const { data } = await supabase.from('products').select('*').order('name');
+            state.products = data || [];
+        }
+
+        async function loadData() {
+            try {
+                updateStatus('Loading...');
+                const { data, error } = await supabase
+                    .from('adjustments')
+                    .select('*, products(name, item_code, cost, stock, barcode)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                state.data = (data || []).map(adj => ({
+                    id: adj.id,
+                    created_at: adj.created_at,
+                    date: new Date(adj.created_at).toLocaleDateString(),
+                    product_id: adj.product_id,
+                    product_name: adj.products ? `${adj.products.name} (${adj.products.item_code})` : 'Unknown',
+                    item_code: adj.products ? adj.products.item_code : '',
+                    barcode: adj.products ? adj.products.barcode : '',
+                    stock_qty: adj.products ? adj.products.stock : 0,
+                    type: adj.type,
+                    quantity: adj.quantity,
+                    cost: adj.cost,
+                    amount: adj.amount,
+                    reason: adj.reason,
+                    remark: adj.remark
+                }));
+
+                state.modifiedRows.clear();
+                state.selectedRows.clear();
+                renderBody();
+                updateTotal();
+                updateStatus('Synced to Supabase');
+            } catch (e) {
+                console.error(e);
+                updateStatus('Sync Error');
+            }
+        }
+
+        function updateTotal() {
+            const total = state.data.reduce((sum, row) => sum + (row.amount || 0), 0);
+            document.getElementById('totalAdjustmentValue').textContent = total.toLocaleString() + ' Ks';
+        }
+
+        function renderBody() {
+            const body = document.getElementById('gridBody');
+            body.innerHTML = '';
+
+            state.data.forEach((row, rIdx) => {
+                const tr = document.createElement('tr');
+                if (state.selectedRows.has(row.id || row.tempId)) tr.classList.add('selected');
+
+                tr.innerHTML = `
+                    <td class="check-col"><input type="checkbox" ${state.selectedRows.has(row.id || row.tempId) ? 'checked' : ''} onchange="toggleRow('${row.id}', ${rIdx})"></td>
+                    <td class="row-idx">${rIdx + 1}</td>
+                    <td class="px-3 text-xs opacity-70">${row.date || new Date(row.created_at).toLocaleDateString()}</td>
+                    <td class="px-3 text-xs font-mono text-indigo-300">${row.item_code || ''}</td>
+                    <td class="px-3 text-xs font-mono">${row.barcode || ''}</td>
+                    <td class="cell-editable" ondblclick="editCell(${rIdx}, 'product_name', this)">
+                        <div class="cell-container">${row.product_name}</div>
+                    </td>
+                    <td class="px-3 text-right font-mono">${(row.cost || 0).toLocaleString()}</td>
+                    <td class="cell-editable text-center font-bold" ondblclick="editCell(${rIdx}, 'quantity', this)">
+                        <div class="cell-container justify-center">
+                            <span class="${row.quantity < 0 ? 'text-red-400' : 'text-green-400'}">${row.quantity}</span>
+                        </div>
+                    </td>
+                    <td class="px-3 text-center opacity-60">${row.stock_qty || 0}</td>
+                    <td class="cell-editable" ondblclick="editCell(${rIdx}, 'type', this)">
+                        <div class="cell-container">
+                            <span class="badge ${row.quantity < 0 ? 'badge-minus' : 'badge-add'}">${row.type}</span>
+                        </div>
+                    </td>
+                    <td class="px-3 text-right font-bold text-indigo-400">${(row.amount || 0).toLocaleString()}</td>
+                    <td class="cell-editable" ondblclick="editCell(${rIdx}, 'reason', this)">
+                        <div class="cell-container">${row.reason || '-'}</div>
+                    </td>
+                    <td class="cell-editable" ondblclick="editCell(${rIdx}, 'remark', this)">
+                        <div class="cell-container">${row.remark || '-'}</div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function editCell(rIdx, colId, td) {
+            const col = SCHEMA.find(c => c.id === colId);
+            if (!col || col.readOnly) return;
+
+            const container = td.querySelector('.cell-container');
+
+            if (col.type === 'dropdown') {
+                const options = colId === 'product_name' ? state.products : ['Addition', 'Damage', 'Theft', 'Expired', 'Correction'];
+                showDropdown(rIdx, colId, options, container);
+                return;
+            }
+
+            const currentVal = state.data[rIdx][colId];
+            const input = document.createElement('input');
+            input.type = col.type === 'number' ? 'number' : 'text';
+            input.className = 'w-full h-8 bg-slate-900 text-white outline-none px-2 border border-indigo-500 rounded ring-2 ring-indigo-500/20';
+            input.value = currentVal === '-' ? '' : (currentVal || '');
+
+            container.innerHTML = '';
+            container.appendChild(input);
+            input.focus();
+            if (input.type === 'text') input.setSelectionRange(0, input.value.length);
+            else input.select();
+
+            let finished = false;
+            const finish = () => {
+                if (finished) return;
+                finished = true;
+                handleInput(rIdx, colId, input.value);
+                renderBody();
+            };
+
+            input.onblur = finish;
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') finish();
+                if (e.key === 'Escape') {
+                    finished = true;
+                    renderBody();
+                }
+            };
+        }
+
+        function handleInput(rIdx, colId, val) {
+            const row = state.data[rIdx];
+            row[colId] = colId === 'quantity' ? parseInt(val) || 0 : val;
+
+            if (colId === 'quantity') {
+                updateAmount(rIdx);
+            }
+
+            state.modifiedRows.add(row.tempId || row.id);
+        }
+
+        function updateAmount(rIdx) {
+            const row = state.data[rIdx];
+            row.amount = Math.abs((row.quantity || 0) * (row.cost || 0));
+            updateTotal();
+            renderBody();
+        }
+
+        function addNewRow() {
+            const tempId = 'new-' + Date.now() + '-' + Math.random();
+            const newRow = {
+                id: null,
+                tempId: tempId,
+                created_at: new Date().toISOString(),
+                date: new Date().toLocaleDateString(),
+                product_id: null,
+                product_name: '',
+                item_code: '',
+                barcode: '',
+                stock_qty: 0,
+                type: 'Addition',
+                quantity: 1,
+                cost: 0,
+                amount: 0,
+                reason: '',
+                remark: '',
+                isNew: true
+            };
+            state.data.unshift(newRow);
+            state.modifiedRows.add(tempId);
+            renderBody();
+        }
+
+        function showProductDropdown(rIdx, container) {
+            const menu = document.getElementById('ddMenu');
+            const rect = container.getBoundingClientRect();
+
+            menu.innerHTML = state.products.map(p => `
+                <div class="dropdown-item" onclick="selectProduct(${rIdx}, '${p.id}', '${p.name} (${p.item_code})', ${p.cost || 0})">
+                    ${p.name} (${p.item_code})
+                </div>
+            `).join('');
+
+            menu.style.display = 'block';
+            menu.style.left = rect.left + 'px';
+            menu.style.top = rect.bottom + window.scrollY + 'px';
+            menu.style.width = rect.width + 'px';
+        }
+
+        function selectProduct(rIdx, id, name, cost, item_code, barcode, stock) {
+            const row = state.data[rIdx];
+            row.product_id = id;
+            row.product_name = name;
+            row.cost = cost;
+            row.item_code = item_code || '';
+            row.barcode = barcode || '';
+            row.stock_qty = stock || 0;
+            updateAmount(rIdx);
+            hideDropdown();
+            state.modifiedRows.add(row.tempId || row.id);
+        }
+
+        function showDropdown(rIdx, colId, options, container) {
+            hideDropdown();
+            const menu = document.getElementById('ddMenu');
+            menu.innerHTML = '';
+
+            options.forEach(opt => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                if (colId === 'product_name') {
+                    item.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-bold">${opt.name}</span>
+                            <span class="text-xs opacity-60">${opt.item_code} | ${opt.barcode || 'No Barcode'}</span>
+                            <span class="text-xs text-indigo-300">Stock: ${opt.stock || 0}</span>
+                        </div>
+                    `;
+                } else {
+                    item.textContent = opt;
+                }
+
+                item.onclick = () => {
+                    if (colId === 'product_name') {
+                        selectProduct(rIdx, opt.id, opt.name, opt.cost, opt.item_code, opt.barcode, opt.stock);
+                    } else {
+                        selectOption(rIdx, colId, opt);
+                    }
+                };
+                menu.appendChild(item);
+            });
+
+            const rect = container.getBoundingClientRect();
+            menu.style.display = 'block';
+            menu.style.top = (rect.bottom + window.scrollY) + 'px';
+            menu.style.left = rect.left + 'px';
+            menu.style.width = Math.max(rect.width, 250) + 'px';
+        }
+
+        function selectOption(rIdx, colId, val) {
+            const row = state.data[rIdx];
+            row[colId] = val;
+
+            // Adjust sign if needed
+            if (colId === 'type') {
+                if (['Damage', 'Theft', 'Expired'].includes(val) && row.quantity > 0) {
+                    row.quantity = -row.quantity;
+                } else if (val === 'Addition' && row.quantity < 0) {
+                    row.quantity = Math.abs(row.quantity);
+                }
+            }
+
+            updateAmount(rIdx);
+            hideDropdown();
+            state.modifiedRows.add(row.tempId || row.id);
+        }
+
+        function hideDropdown() {
+            document.getElementById('ddMenu').style.display = 'none';
+        }
+
+        function toggleRow(id, rIdx) {
+            const key = id && id !== 'null' ? id : state.data[rIdx].tempId;
+            if (state.selectedRows.has(key)) state.selectedRows.delete(key);
+            else state.selectedRows.add(key);
+            renderBody();
+        }
+
+        function toggleAll(cb) {
+            state.selectedRows.clear();
+            if (cb.checked) {
+                state.data.forEach((row, rIdx) => state.selectedRows.add(row.id || row.tempId));
+            }
+            renderBody();
+        }
+
+        async function saveAllChanges() {
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.innerHTML;
+
+            try {
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveBtn.disabled = true;
+
+                const toSave = state.data.filter((row, rIdx) => state.modifiedRows.has(row.id || row.tempId));
+                if (toSave.length === 0) return alert('No changes to save.');
+
+                for (const row of toSave) {
+                    if (!row.product_id) continue;
+
+                    // 1. Fetch current stock if we need to adjust
+                    let oldQty = 0;
+                    if (row.id) {
+                        try {
+                            const { data: oldAdj } = await supabase.from('adjustments').select('quantity').eq('id', row.id).single();
+                            oldQty = oldAdj ? oldAdj.quantity : 0;
+                        } catch (e) {
+                            console.warn('Could not find existing adjustment record, assuming 0 old qty');
+                        }
+                    }
+
+                    // 2. Upsert Adjustment
+                    const payload = {
+                        product_id: row.product_id,
+                        type: row.type || 'Addition',
+                        quantity: row.quantity || 0,
+                        cost: row.cost || 0,
+                        amount: row.amount || 0,
+                        reason: row.reason || '',
+                        remark: row.remark || ''
+                    };
+
+                    let res;
+                    if (row.id) {
+                        res = await supabase.from('adjustments').update(payload).eq('id', row.id);
+                    } else {
+                        res = await supabase.from('adjustments').insert([payload]);
+                    }
+                    if (res.error) throw res.error;
+
+                    // 3. Update Product Stock
+                    const { data: p } = await supabase.from('products').select('stock').eq('id', row.product_id).single();
+                    if (p) {
+                        const currentStock = p.stock || 0;
+                        const newStock = currentStock - oldQty + row.quantity;
+                        await supabase.from('products').update({ stock: newStock }).eq('id', row.product_id);
+                    }
+                }
+
+                alert('All changes saved successfully!');
+                await loadData();
+            } catch (err) {
+                console.error(err);
+                alert('Error saving: ' + err.message);
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteSelected() {
+            if (state.selectedRows.size === 0) return alert('Please select rows to delete.');
+            if (!confirm(`Are you sure you want to delete ${state.selectedRows.size} adjustment(s)? This will also revert the stock levels.`)) return;
+
+            try {
+                updateStatus('Deleting...');
+                for (const key of state.selectedRows) {
+                    // key could be id (string) or tempId (string starting with "new-")
+                    if (typeof key === 'string' && key.startsWith('new-')) {
+                        // Just remove from local state
+                        state.data = state.data.filter(row => row.tempId !== key);
+                        continue;
+                    }
+
+                    // 1. Fetch adjustment details to revert stock
+                    const { data: adj, error: fetchErr } = await supabase
+                        .from('adjustments')
+                        .select('product_id, quantity')
+                        .eq('id', key)
+                        .single();
+
+                    if (adj) {
+                        // 2. Revert Stock
+                        const { data: p } = await supabase.from('products').select('stock').eq('id', adj.product_id).single();
+                        if (p) {
+                            const currentStock = p.stock || 0;
+                            const revertedStock = currentStock - adj.quantity;
+                            await supabase.from('products').update({ stock: revertedStock }).eq('id', adj.product_id);
+                        }
+
+                        // 3. Delete Adjustment Record
+                        await supabase.from('adjustments').delete().eq('id', key);
+                    }
+                }
+                alert('Selected adjustments deleted and stock reverted.');
+                await loadData();
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting: ' + err.message);
+            }
+        }
+
+        function updateStatus(msg) {
+            document.getElementById('syncStatus').textContent = msg;
+        }
+
+        function setupMessaging() {
+            window.addEventListener('message', (e) => {
+                const { type } = e.data;
+                if (type === 'ADD_ROW') addNewRow();
+                else if (type === 'SAVE_CHANGES') saveAllChanges();
+                else if (type === 'REFRESH') loadData();
+                else if (type === 'DELETE_SELECTED') deleteSelected();
+                else if (type === 'EXPORT_REQUEST') exportToCSV();
+                else if (type === 'IMPORT_REQUEST') document.getElementById('importFile').click();
+            });
+        }
+
+        function exportToCSV() {
+            if (state.data.length === 0) return alert('No data to export.');
+
+            const headers = ['Date', 'Code', 'Barcode', 'Description', 'Cost', 'Qty', 'Stock Qty', 'Adj-Type', 'Amount', 'Reason', 'Remark'];
+            const rows = state.data.map(row => [
+                row.date || new Date(row.created_at).toLocaleDateString(),
+                row.item_code,
+                row.barcode,
+                row.product_name,
+                row.cost,
+                row.quantity,
+                row.stock_qty,
+                row.type,
+                row.amount,
+                row.reason,
+                row.remark
+            ]);
+
+            // Simple CSV escaping
+            const csvRows = [headers.join(',')];
+            rows.forEach(row => {
+                const escaped = row.map(val => {
+                    const str = String(val === null || val === undefined ? '' : val);
+                    return str.includes(',') ? `"${str.replace(/"/g, '""')}"` : str;
+                });
+                csvRows.push(escaped.join(','));
+            });
+
+            let csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `stock_adjustments_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const text = e.target.result;
+                const rows = text.split('\n').slice(1); // Skip header
+
+                rows.forEach(line => {
+                    const cols = line.split(',');
+                    if (cols.length < 8) return;
+
+                    const productName = cols[3].trim(); // Based on new header
+                    const itemCode = cols[1].trim();
+
+                    const product = state.products.find(p => p.item_code === itemCode || p.name === productName);
+
+                    const tempId = 'new-' + Date.now() + '-' + Math.random();
+                    const newRow = {
+                        id: null,
+                        tempId: tempId,
+                        created_at: new Date().toISOString(),
+                        date: new Date().toLocaleDateString(),
+                        product_id: product ? product.id : null,
+                        product_name: product ? product.name : productName,
+                        item_code: product ? product.item_code : itemCode,
+                        barcode: product ? product.barcode : (cols[2] || ''),
+                        stock_qty: product ? product.stock : (parseInt(cols[6]) || 0),
+                        type: cols[7] || 'Addition',
+                        quantity: parseInt(cols[5]) || 0,
+                        cost: product ? product.cost : (parseFloat(cols[4]) || 0),
+                        amount: Math.abs((parseInt(cols[5]) || 0) * (product ? product.cost : (parseFloat(cols[4]) || 0))),
+                        reason: cols[9] || '',
+                        remark: cols[10] || '',
+                        isNew: true
+                    };
+                    state.data.unshift(newRow);
+                    state.modifiedRows.add(tempId);
+                });
+
+                renderBody();
+                updateTotal();
+                alert('Imported new rows. Review and click "Save Changes" to commit to database.');
+            };
+            reader.readAsText(file);
+        }
+
+        window.onclick = (e) => {
+            if (!e.target.closest('.cell-container') && !e.target.closest('.dropdown-menu')) {
+                hideDropdown();
+            }
+        };
+
+        init();
+    </script>
+</body>
+
+</html>

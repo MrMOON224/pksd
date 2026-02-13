@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Brand Manager - POS System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+        }
+
+        body {
+            background-color: transparent;
+            /* Seamless iframe */
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: var(--space-md);
+            overflow-x: hidden;
+        }
+
+        .brand-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: calc(100vh - 40px);
+        }
+
+        /* Premium Button Styles */
+        .btn-premium-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-premium-danger:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Bulk Action Toolbar */
+        .bulk-toolbar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            background: var(--bg-primary);
+            padding: 10px var(--space-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--primary);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .selected-count {
+            font-weight: 600;
+            color: var(--primary-light);
+            font-size: 0.9rem;
+        }
+
+        /* Custom Checkbox */
+        .selection-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .action-cell {
+            padding: 5px !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Excel-like Table Styles (Matches dashboard) */
+        .excel-grid-container {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            overflow: auto;
+            max-height: 600px;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .excel-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .excel-table td {
+            padding: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .excel-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 8px 10px;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .excel-input:focus {
+            background: rgba(79, 70, 229, 0.1);
+            box-shadow: inset 0 0 0 2px var(--primary);
+        }
+
+        .excel-tr.modified td {
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .excel-tr.new-row td {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .sync-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-success {
+            color: #10b981;
+        }
+
+        .status-warning {
+            color: #f59e0b;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Grid Toolbar */
+        .grid-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="brand-container">
+        <!-- Main Toolbar -->
+        <div class="grid-toolbar">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <h1 class="page-title">Brand Manager</h1>
+                <div id="syncStatus" class="sync-status">
+                    <i class="fas fa-database"></i> <span id="syncStatusText">Synced to Supabase</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-sm);">
+                <button class="btn btn-secondary" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-success" onclick="saveBrandChanges()" id="saveBtn">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+
+        <!-- Bulk Action Toolbar -->
+        <div id="bulkToolbar" class="bulk-toolbar hidden">
+            <span class="selected-count"><span id="selectedCount">0</span> items selected</span>
+            <div style="flex:1;"></div>
+            <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
+                <i class="fas fa-trash"></i> Bulk Delete
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="clearSelection()" title="Clear Selection">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Brands Panel -->
+        <div id="panel-brands" class="fade-in">
+            <div class="excel-grid-container">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;"><input type="checkbox"
+                                    class="selection-checkbox" onchange="toggleSelectAll(this)"></th>
+                            <th style="width: 40px;">#</th>
+                            <th>Brand Name *</th>
+                            <th>Description</th>
+                            <th>Website</th>
+                            <th style="width: 50px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="brandsBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-primary" onclick="addNewBrand()" style="margin-top: var(--space-md);">
+                <i class="fas fa-plus"></i> Add Brand
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/admin-settings.js"></script>
+
+    <script>
+        async function init() {
+            showLoading();
+            try {
+                await loadBrands();
+                updateSyncStatus('Brands', 'Synced to Supabase');
+            } catch (e) {
+                console.error('Init error:', e);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function refreshData() {
+            showLoading();
+            await loadBrands();
+            hideLoading();
+        }
+
+        // Selection Logic
+        window.selectedIds = new Set();
+
+        function toggleSelectAll(master) {
+            const table = master.closest('table');
+            const checkboxes = table.querySelectorAll('tbody .selection-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = master.checked;
+                handleSelectionChange(cb);
+            });
+            updateBulkToolbar();
+        }
+
+        window.handleSelectionChange = function (checkbox) {
+            const id = checkbox.dataset.id;
+            if (checkbox.checked) {
+                window.selectedIds.add(id);
+            } else {
+                window.selectedIds.delete(id);
+            }
+            updateBulkToolbar();
+        }
+
+        function updateBulkToolbar() {
+            const toolbar = document.getElementById('bulkToolbar');
+            const countEl = document.getElementById('selectedCount');
+            const count = window.selectedIds.size;
+
+            if (count > 0) {
+                toolbar.classList.remove('hidden');
+                countEl.textContent = count;
+            } else {
+                toolbar.classList.add('hidden');
+            }
+        }
+
+        window.clearSelection = function () {
+            window.selectedIds.clear();
+            document.querySelectorAll('.selection-checkbox').forEach(cb => cb.checked = false);
+            updateBulkToolbar();
+        }
+
+        function bulkDelete() {
+            if (window.selectedIds.size === 0) return;
+            if (typeof window.executeBulkDelete === 'function') {
+                window.executeBulkDelete(Array.from(window.selectedIds));
+            }
+        }
+
+        // Bridge functions for js/admin-settings.js
+        window.showLoading = function () {
+            document.getElementById('syncStatusText').textContent = 'Loading...';
+            document.getElementById('saveBtn').disabled = true;
+        };
+
+        window.hideLoading = function () {
+            updateSyncStatus('Brands', 'Synced to Supabase');
+            document.getElementById('saveBtn').disabled = false;
+        };
+
+        window.updateModuleSyncStatus = function (module, status) {
+            updateSyncStatus(module, status);
+        };
+
+        function updateSyncStatus(module, status) {
+            const el = document.getElementById('syncStatusText');
+            if (el) {
+                el.textContent = status;
+                const container = document.getElementById('syncStatus');
+                container.className = 'sync-status ' + (status.includes('Synced') ? 'status-success' : 'status-warning');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

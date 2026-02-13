@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Sale List Dashboard</title>
+    <style>
+        /* Modern Dark Theme Variables from the new design */
+        :root {
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f9fafb;
+            --text-dim: #9ca3af;
+            --btn-purple: #6366f1;
+            --btn-pink: #f472b6;
+            --btn-green: #10b981;
+            --search-bg: #ffff00;
+            --border-color: #374151;
+        }
+
+        body {
+            /* Updated to modern clean sans-serif font like the screenshot */
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .pos-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+
+        h2 {
+            text-align: left;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+        /* Top Header Section */
+        .top-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .info-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        /* Updated Action Buttons to match the new design */
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 24px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: capitalize;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-edit {
+            background-color: var(--btn-purple);
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: var(--btn-pink);
+            color: white;
+        }
+
+        .btn-save {
+            background-color: var(--btn-green);
+            color: white;
+        }
+
+        /* Search Bar Styling */
+        .search-container {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--search-bg);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.15);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            width: 100%;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-dim);
+            opacity: 0.7;
+        }
+
+        .search-icon {
+            color: var(--search-bg);
+            font-size: 16px;
+        }
+
+        /* Table Styling with dark theme adjustments */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Totals Row */
+        .total-row {
+            font-weight: bold;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .total-label {
+            text-align: right;
+        }
+
+        /* Interactive row effect */
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .top-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="pos-container">
+        <h2>Sale List</h2>
+
+        <div class="top-controls">
+            <div>
+                <div class="info-row"><span class="label">Dte/Time</span></div>
+                <div class="info-row"><span>Sale Voucher no - SA11022601</span></div>
+            </div>
+            <div>
+                <div class="info-row"><span class="label">Shop</span></div>
+                <div class="info-row"><span>counter no -</span></div>
+            </div>
+            <div>
+                <div class="info-row"><span class="label">Supplier -</span></div>
+                <div class="info-row"><span>Payment status - Cash / Credit / mity pay</span></div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <div class="btn btn-edit" onclick="editSelectedSale()">edit</div>
+            <div class="btn btn-delete" onclick="bulkDeleteSales()">delete</div>
+            <div class="btn btn-save" onclick="refreshSales()">Save</div>
+        </div>
+
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="salesSearch" class="search-input"
+                placeholder="Search by Voucher code, Customer name, or Status..." oninput="filterSales(this.value)">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30px; text-align: center;"><input type="checkbox" onchange="toggleAllSales(this)">
+                    </th>
+                    <th>Date</th>
+                    <th>Voucher no</th>
+                    <th>Supplier</th>
+                    <th>Shop</th>
+                    <th>Total Amnt</th>
+                    <th>Net Amnt</th>
+                    <th>Paid Amnt</th>
+                    <th>Remain Amnt</th>
+                    <th>Status</th>
+                    <th>Type</th>
+                    <th>Discount</th>
+                    <th>Counter</th>
+                </tr>
+            </thead>
+            <tbody id="salesBody">
+                <!-- Data will be populated here -->
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="5" class="total-label">Total</td>
+                    <td id="footerTotal">0</td>
+                    <td id="footerNet">0</td>
+                    <td id="footerPaid" style="color: var(--btn-green)">0</td>
+                    <td id="footerRemain" style="color: var(--btn-pink)">0</td>
+                    <td colspan="4"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+
+    <script>
+        let allSales = [];
+        let selectedIds = new Set();
+
+        async function init() {
+            console.log('Initializing Sales Module...');
+            await refreshSales();
+        }
+
+        async function refreshSales() {
+            console.log('Refreshing sales data...');
+            try {
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                allSales = data || [];
+                renderSales(allSales);
+            } catch (e) {
+                console.error('Error fetching sales:', e);
+            }
+        }
+
+        function renderSales(sales) {
+            const body = document.getElementById('salesBody');
+            body.innerHTML = '';
+
+            let total = 0, net = 0, paid = 0, remain = 0;
+
+            sales.forEach(sale => {
+                const date = new Date(sale.created_at).toLocaleDateString();
+                const bal = (sale.total || 0) - (sale.paid_amount || 0);
+
+                total += (sale.total || 0);
+                paid += (sale.paid_amount || 0);
+                remain += bal;
+                net += (sale.total || 0); // Assuming net is total for now
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="text-align: center;"><input type="checkbox" class="sale-check" data-id="${sale.id}" onchange="updateSelection()"></td>
+                    <td>${date}</td>
+                    <td>${sale.id.slice(0, 8).toUpperCase()}</td>
+                    <td>${sale.customer_name || 'Walking'}</td>
+                    <td>Admin</td>
+                    <td>${(sale.total || 0).toLocaleString()}</td>
+                    <td>${(sale.total || 0).toLocaleString()}</td>
+                    <td>${(sale.paid_amount || 0).toLocaleString()}</td>
+                    <td style="color: ${bal > 0 ? 'var(--btn-pink)' : 'var(--btn-green)'}">${bal.toLocaleString()}</td>
+                    <td>${sale.payment_status || (bal <= 0 ? 'Paid' : 'Partial')}</td>
+                    <td>${sale.payment_method || 'Cash'}</td>
+                    <td>${(sale.discount || 0)}</td>
+                    <td>${sale.counter_id || '-'}</td>
+                `;
+                body.appendChild(row);
+            });
+
+            document.getElementById('footerTotal').textContent = total.toLocaleString();
+            document.getElementById('footerNet').textContent = net.toLocaleString();
+            document.getElementById('footerPaid').textContent = paid.toLocaleString();
+            document.getElementById('footerRemain').textContent = remain.toLocaleString();
+        }
+
+        function filterSales(query) {
+            const q = query.toLowerCase();
+            const filtered = allSales.filter(s =>
+                s.id.toLowerCase().includes(q) ||
+                (s.customer_name && s.customer_name.toLowerCase().includes(q))
+            );
+            renderSales(filtered);
+        }
+
+        function toggleAllSales(master) {
+            document.querySelectorAll('.sale-check').forEach(cb => cb.checked = master.checked);
+            updateSelection();
+        }
+
+        function updateSelection() {
+            selectedIds.clear();
+            document.querySelectorAll('.sale-check:checked').forEach(cb => selectedIds.add(cb.dataset.id));
+        }
+
+        async function bulkDeleteSales() {
+            if (selectedIds.size === 0) return alert('Select items to delete first.');
+            if (!confirm(`Delete ${selectedIds.size} records?`)) return;
+
+            try {
+                const { error } = await supabase.from('transactions').delete().in('id', Array.from(selectedIds));
+                if (error) throw error;
+                await refreshSales();
+                selectedIds.clear();
+            } catch (e) {
+                alert('Delete failed: ' + e.message);
+            }
+        }
+
+        function editSelectedSale() {
+            if (selectedIds.size !== 1) return alert('Select exactly one record to edit.');
+            const id = Array.from(selectedIds)[0];
+
+            // Open POS in parent window with edit ID
+            if (window.parent && typeof window.parent.switchView === 'function') {
+                window.parent.switchView('pos', { editId: id });
+            } else {
+                alert('Editing transaction: ' + id + ' (Parent switchView not found)');
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>

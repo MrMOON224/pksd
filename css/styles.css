@@ -185,6 +185,17 @@ p {
     color: white;
 }
 
+.btn-indigo {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-indigo:hover {
+    background: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), 0 0 15px rgba(79, 70, 229, 0.4);
+}
+
 /* Input Fields */
 .input-group {
     margin-bottom: var(--space-lg);
