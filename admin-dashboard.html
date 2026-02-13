@@ -127,7 +127,7 @@
                     <div class="nav-section-title">Transactions</div>
                     <ul class="nav-menu">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="#" class="nav-link" onclick="switchView('quotation'); return false;">
                                 <i class="fas fa-file-invoice"></i>
                                 <span>Quotations</span>
                             </a>
@@ -885,6 +885,12 @@
                 <div id="view-purchase-return" class="view-section hidden"
                     style="height: calc(100vh - 100px); padding: 0;">
                     <iframe id="purchaseReturnIframe" src="purchase-return.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Quotation View (Iframe) -->
+                <div id="view-quotation" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="quotationIframe" src="quotation.html?mode=embedded"
                         style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
                 </div>
 
