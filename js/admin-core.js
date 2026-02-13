@@ -190,13 +190,10 @@ window.switchView = function (viewName, action = null) {
             break;
         case 'units':
             break;
-        case 'purchase-manager': if (typeof window.loadPurchases === 'function') window.loadPurchases(); break;
-        case 'purchase-add':
-            if (typeof window.resetPurchaseForm === 'function') window.resetPurchaseForm();
-            if (typeof window.loadSuppliers === 'function') window.loadSuppliers();
-            if (typeof window.loadWarehouses === 'function') window.loadWarehouses();
-            break;
-        case 'purchase-return': if (typeof window.loadPurchaseReturns === 'function') window.loadPurchaseReturns(); break;
+        // Purchase views are handled by self-contained iframes
+        case 'purchase-list': break;
+        case 'purchase-add': break;
+        case 'purchase-return': break;
         case 'users': if (typeof window.loadUsersList === 'function') window.loadUsersList(); break;
         case 'adjustments':
             // Handled via iframe src in admin-dashboard.html

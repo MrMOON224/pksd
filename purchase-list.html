@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body.embedded {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: var(--space-lg);
+        }
+
+        .page-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: underline;
+            text-decoration-color: var(--primary);
+            text-underline-offset: 4px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: auto auto auto auto 1fr auto auto auto;
+            gap: var(--space-md);
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-edit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .btn-save {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .voucher-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: var(--space-md);
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            font-size: 0.9rem;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .data-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            color: var(--text-primary);
+        }
+
+        .data-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .total-row {
+            background: rgba(255, 255, 255, 0.08);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .detail-section {
+            margin-top: var(--space-lg);
+            background: var(--primary);
+            color: white;
+            padding: var(--space-md);
+            text-align: center;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+        }
+
+        .clickable-cell {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .clickable-cell:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">Purchase List</div>
+
+            <div class="filter-row">
+                <span class="filter-label">Dte/Time</span>
+                <input type="date" class="filter-input" id="filterDate">
+
+                <span class="filter-label">Shop</span>
+                <select class="filter-select" id="filterShop">
+                    <option value="">All</option>
+                </select>
+
+                <span class="filter-label">Supplier -</span>
+                <select class="filter-select" id="filterSupplier">
+                    <option value="">All</option>
+                </select>
+
+                <span class="filter-label">Payment</span>
+                <select class="filter-select" id="filterPayment">
+                    <option value="">All</option>
+                    <option value="cash">Cash</option>
+                    <option value="credit">Credit</option>
+                    <option value="consignment">Consignment</option>
+                </select>
+
+                <div style="display: flex; gap: 4px;">
+                    <button class="btn-edit">edit</button>
+                    <button class="btn-delete">delete</button>
+                    <button class="btn-save">Save</button>
+                </div>
+            </div>
+
+            <div class="voucher-row">
+                <span class="filter-label">Purchaser Voucher no -</span>
+                <div class="search-row">
+                    <span class="filter-label">User Name -</span>
+                    <input type="text" class="search-input" id="searchBox"
+                        placeholder="Screach ( - Item code / barcode / Description )">
+                </div>
+            </div>
+        </div>
+
+        <table class="data-table" id="purchaseTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Voucher no</th>
+                    <th>Supplier</th>
+                    <th>payment</th>
+                    <th>Shop</th>
+                    <th>Total Amount</th>
+                    <th>Net Amount</th>
+                    <th>paid Amount</th>
+                    <th>Remain Amount</th>
+                    <th>payment Stat</th>
+                    <th>Remark</th>
+                </tr>
+            </thead>
+            <tbody id="purchaseTableBody">
+                <!-- Data will be loaded here -->
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="5" style="text-align: right;">Total</td>
+                    <td id="totalAmount">0</td>
+                    <td id="totalNet">0</td>
+                    <td id="totalPaid">0</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="detail-section" id="detailSection">
+            Report Only For This AA - Detail Page
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/purchase-list.js"></script>
+</body>
+
+</html>

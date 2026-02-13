@@ -37,7 +37,7 @@ window.setupKeybinds = function () {
             const urlParams = new URLSearchParams(window.location.search);
             const view = urlParams.get('view');
             if (view === 'products' || !view) { if (typeof window.addNewRow === 'function') window.addNewRow(); }
-            else if (view === 'purchase-manager') { if (typeof window.switchView === 'function') window.switchView('purchase-add'); }
+            else if (view === 'purchase-list') { if (typeof window.switchView === 'function') window.switchView('purchase-add'); }
             else if (view === 'purchase-add') {
                 const dateInput = document.getElementById('purchaseAddDate');
                 if (dateInput) dateInput.focus();

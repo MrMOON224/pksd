@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Return</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body.embedded {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: var(--space-lg);
+        }
+
+        .page-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .header-row {
+            display: grid;
+            grid-template-columns: auto auto auto auto 1fr auto auto;
+            gap: var(--space-md);
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .label {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .input,
+        .select {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        .input:focus,
+        .select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            opacity: 0.8;
+        }
+
+        .btn-save {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            opacity: 0.8;
+        }
+
+        .voucher-row {
+            margin-bottom: var(--space-md);
+        }
+
+        .voucher-input {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            width: 200px;
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            font-size: 0.85rem;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: var(--space-lg);
+        }
+
+        .products-table th {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 6px;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+
+        .products-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4px 6px;
+            color: var(--text-primary);
+        }
+
+        .products-table input {
+            width: 100%;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .products-table input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .summary-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+        }
+
+        .summary-left,
+        .summary-right {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+        }
+
+        .summary-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: var(--space-md);
+            align-items: center;
+            margin-bottom: var(--space-sm);
+        }
+
+        .summary-input {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .summary-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .remark-section {
+            margin-top: var(--space-md);
+        }
+
+        .remark-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .remark-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn-remove:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="header-row">
+                <span class="label">Dte/Time</span>
+                <input type="date" class="input" id="returnDate">
+
+                <span class="label">Shop</span>
+                <select class="select" id="shopSelect">
+                    <option value="">Select Shop</option>
+                </select>
+
+                <span class="label">Supplier -</span>
+                <select class="select" id="supplierSelect">
+                    <option value="">Select Supplier</option>
+                </select>
+
+                <span class="label">Payment</span>
+                <select class="select" id="paymentMethod">
+                    <option value="cash">Cash</option>
+                    <option value="credit">Credit</option>
+                    <option value="consignment">Consignment</option>
+                </select>
+
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-add" id="btnAddReturn">Add Return</button>
+                    <button class="btn-save" id="btnSave">Save</button>
+                </div>
+            </div>
+
+            <div class="voucher-row">
+                <span class="label">Return Voucher no - </span>
+                <input type="text" class="voucher-input" id="voucherNo" placeholder="Auto-generated">
+            </div>
+        </div>
+
+        <table class="products-table" id="productsTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">no</th>
+                    <th style="width: 100px;">Item Code</th>
+                    <th style="width: 150px;">Barcode / add 1 +++++</th>
+                    <th>Description</th>
+                    <th style="width: 60px;">QTY</th>
+                    <th style="width: 80px;">PCS/BOX</th>
+                    <th style="width: 80px;">Cost</th>
+                    <th style="width: 80px;">Discount (%)</th>
+                    <th style="width: 80px;">Amount</th>
+                    <th style="width: 150px;">Remark ( for , Exchage / Damage )</th>
+                    <th style="width: 50px;"></th>
+                </tr>
+            </thead>
+            <tbody id="productsTableBody">
+                <tr>
+                    <td>1</td>
+                    <td><input type="text" placeholder="Item Code"></td>
+                    <td><input type="text" placeholder="Scan/Enter Barcode"></td>
+                    <td><input type="text" placeholder="Description"></td>
+                    <td><input type="number" value="0" min="0"></td>
+                    <td><input type="number" value="0" min="0"></td>
+                    <td><input type="number" value="0" min="0" step="0.01"></td>
+                    <td><input type="number" value="0" min="0" max="100" step="0.1"></td>
+                    <td><input type="number" value="0" readonly></td>
+                    <td><input type="text" placeholder="Remark"></td>
+                    <td><button class="btn-remove" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="summary-section">
+            <div class="summary-left">
+                <div class="summary-row">
+                    <span class="label">Tax %</span>
+                    <input type="number" class="summary-input" id="taxPercent" value="0" min="0" step="0.1">
+                </div>
+                <div class="summary-row">
+                    <span class="label">Discoint ( % or kyats )</span>
+                    <input type="text" class="summary-input" id="discount" value="0">
+                </div>
+                <div class="summary-row">
+                    <span class="label">Shipping</span>
+                    <input type="number" class="summary-input" id="shipping" value="0" min="0" step="0.01">
+                </div>
+                <div class="summary-row">
+                    <span class="label">Status</span>
+                    <select class="summary-input" id="status">
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Payment Type</span>
+                    <select class="summary-input" id="paymentType">
+                        <option value="cash">Cash</option>
+                        <option value="credit">Credit</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="summary-right">
+                <div class="summary-row">
+                    <span class="label">Grand Total</span>
+                    <input type="number" class="summary-input" id="grandTotal" value="0" readonly>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Tax</span>
+                    <input type="number" class="summary-input" id="taxAmount" value="0" readonly>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Discount</span>
+                    <input type="number" class="summary-input" id="discountAmount" value="0" readonly>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Shiping</span>
+                    <input type="number" class="summary-input" id="shippingAmount" value="0" readonly>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Net Amont</span>
+                    <input type="number" class="summary-input" id="netAmount" value="0" readonly>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Payment Status</span>
+                    <select class="summary-input" id="paymentStatus">
+                        <option value="unpaid">Unpaid</option>
+                        <option value="partial">Partial</option>
+                        <option value="paid">Paid</option>
+                    </select>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Refund Amount</span>
+                    <input type="number" class="summary-input" id="refundAmount" value="0" min="0" step="0.01">
+                </div>
+                <div class="summary-row">
+                    <span class="label">Remain Amount</span>
+                    <input type="number" class="summary-input" id="remainAmount" value="0" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="remark-section">
+            <span class="label">Remark</span>
+            <textarea class="remark-textarea" id="remarkText"
+                placeholder="Enter return reason and remarks..."></textarea>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/purchase-return.js"></script>
+</body>
+
+</html>
