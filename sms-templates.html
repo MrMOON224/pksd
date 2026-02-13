@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Templates</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body.embedded {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .btn-primary {
+            padding: var(--space-md) var(--space-lg);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .templates-grid {
+            display: grid;
+            gap: var(--space-lg);
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .template-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .template-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+        }
+
+        .template-content {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: var(--space-xl);
+            border-radius: var(--radius-md);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: var(--space-sm);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .excel-input,
+        .excel-textarea {
+            width: 100%;
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+        }
+
+        .excel-textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            padding: var(--space-md) var(--space-lg);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="color: var(--text-primary); margin: 0;">SMS Templates</h2>
+            <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Add Template</button>
+        </div>
+        <div class="templates-grid" id="templatesGrid"></div>
+    </div>
+
+    <div class="modal" id="templateModal">
+        <div class="modal-content">
+            <h3 style="color: var(--text-primary); margin-bottom: var(--space-lg);">SMS Template</h3>
+            <form id="templateForm">
+                <div class="form-group">
+                    <label class="field-label">Template Name:*</label>
+                    <input type="text" id="templateName" class="excel-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="field-label">Message:*</label>
+                    <textarea id="templateMessage" class="excel-textarea" required
+                        placeholder="Enter SMS message template"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/sms-templates.js"></script>
+</body>
+
+</html>

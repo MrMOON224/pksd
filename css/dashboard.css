@@ -287,6 +287,61 @@ tr:hover {
     }
 }
 
+/* Sidebar Dropdown & Submenu */
+.submenu {
+    display: none;
+    padding-left: 15px;
+    list-style: none;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 5px 0 10px 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.nav-item.active .submenu,
+.nav-item.open .submenu {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Ensure flex layout for dropdown toggle */
+.nav-link.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-link.dropdown-toggle span {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.nav-arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+/* Rotate arrow when open/active */
+.nav-item.active .nav-arrow,
+.nav-item.open .nav-arrow {
+    transform: rotate(90deg);
+    opacity: 1;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @media (max-width: 768px) {
     .stats-grid {
         grid-template-columns: 1fr;
@@ -298,5 +353,16 @@ tr:hover {
 
     .user-info {
         display: none;
+    }
+}
+
+/* Tablet view - hide sidebar */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        display: none !important;
+    }
+
+    .main-wrapper {
+        margin-left: 0 !important;
     }
 }

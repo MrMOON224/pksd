@@ -46,14 +46,20 @@
 
             <!-- Sidebar Navigation -->
             <nav class="sidebar-nav">
-                <!-- Main Section -->
+                <!-- Analysis Section -->
                 <div class="nav-section">
-                    <div class="nav-section-title">Main</div>
+                    <div class="nav-section-title">Analysis</div>
                     <ul class="nav-menu">
                         <li class="nav-item">
                             <a href="#" class="nav-link active" onclick="switchView(''); return false;">
                                 <i class="fas fa-th-large"></i>
                                 <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" onclick="switchView('reports'); return false;">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reports</span>
                             </a>
                         </li>
                     </ul>
@@ -212,54 +218,89 @@
                 <div class="nav-section">
                     <div class="nav-section-title">People</div>
                     <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-users"></i>
-                                <span>Peoples</span>
+                        <li class="nav-item has-submenu">
+                            <a href="#" class="nav-link dropdown-toggle">
+                                <div style="display:flex; align-items:center; gap:var(--space-md); flex:1;">
+                                    <i class="fas fa-users"></i>
+                                    <span>People</span>
+                                </div>
+                                <i class="fas fa-chevron-right nav-arrow"></i>
                             </a>
+                            <ul class="submenu">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('suppliers'); return false;">Suppliers</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('customers'); return false;">Customers</a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-item" data-permissions="admin">
-                            <a href="#" class="nav-link" onclick="switchView('users')">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link dropdown-toggle">
                                 <i class="fas fa-users-cog"></i>
                                 <span>User Management</span>
+                                <i class="fas fa-chevron-right nav-arrow"></i>
                             </a>
+                            <ul class="submenu">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link" onclick="switchView('users'); return false;">Users</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link" onclick="switchView('roles'); return false;">Roles &
+                                        Permission</a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
 
-                <div class="nav-section">
-                    <div class="nav-section-title">Analytics</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="switchView('reports'); return false;">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Reports</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
 
                 <!-- Settings Section -->
                 <div class="nav-section" data-permissions="admin">
                     <div class="nav-section-title">Settings</div>
                     <ul class="nav-menu">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-dollar-sign"></i>
+                            <a href="#" class="nav-link" onclick="switchView('currencies'); return false;">
+                                <i class="fas fa-money-bill-wave"></i>
                                 <span>Currencies</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-language"></i>
-                                <span>Languages</span>
+                            <a href="#" class="nav-link" onclick="switchView('settings'); return false;">
+                                <i class="fas fa-cogs"></i>
+                                <span>Settings</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-file-alt"></i>
-                                <span>Templates</span>
+                            <a href="#" class="nav-link" onclick="switchView('languages'); return false;">
+                                <i class="fas fa-globe"></i>
+                                <span>Languages</span>
                             </a>
+                        </li>
+                        <li class="nav-item has-submenu">
+                            <a href="#" class="nav-link dropdown-toggle">
+                                <div style="display:flex; align-items:center; gap:var(--space-md); flex:1;">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Templates</span>
+                                </div>
+                                <i class="fas fa-chevron-right nav-arrow"></i>
+                            </a>
+                            <ul class="submenu">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('sms-templates'); return false;">SMS Templates</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('email-templates'); return false;">Email Templates</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('api-settings'); return false;">API</a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
@@ -277,7 +318,15 @@
                     <h1 class="page-title-nav">Dashboard</h1>
                 </div>
 
+
                 <div class="navbar-right">
+                    <!-- Open POS Button -->
+                    <a href="pos.html" target="_blank" class="btn-open-pos"
+                        style="padding: var(--space-md) var(--space-lg); background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: var(--space-sm); margin-right: var(--space-md);">
+                        <i class="fas fa-cash-register"></i>
+                        <span>Open POS</span>
+                    </a>
+
                     <!-- Search Bar -->
                     <div class="navbar-search">
                         <i class="fas fa-search"></i>
@@ -983,6 +1032,18 @@
                         style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
                 </div>
 
+                <!-- Suppliers View (Iframe) -->
+                <div id="view-suppliers" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="suppliersIframe" src="suppliers.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Customers View (Iframe) -->
+                <div id="view-customers" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="customersIframe" src="customers.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
                 <!-- Reports View (Iframe) -->
                 <div id="view-reports" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
                     <iframe id="reportsIframe" src="report.html?mode=embedded"
@@ -1090,43 +1151,55 @@
                     </div>
                 </div>
 
-                <!-- User Management View -->
-                <div id="view-users" class="hidden">
-                    <div class="page-header">
-                        <h1 class="page-title">User Management</h1>
-                        <p class="page-subtitle">Manage system users and their permissions</p>
-                    </div>
+                <!-- User Management View (Iframe) -->
+                <div id="view-users" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="usersIframe" src="users.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
 
-                    <div class="grid-toolbar">
-                        <div style="display: flex; gap: var(--space-md); flex: 1;">
-                            <button class="btn btn-primary" onclick="showAddUserModal()">
-                                <i class="fas fa-user-plus"></i> Add New User
-                            </button>
-                        </div>
-                    </div>
+                <!-- Roles Management View (Iframe) -->
+                <div id="view-roles" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="rolesIframe" src="roles.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
 
-                    <div class="excel-grid-container" style="margin-top: var(--space-md);">
-                        <table class="excel-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50px;">#</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Full Name</th>
-                                    <th>Last Login</th>
-                                    <th style="width: 100px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersBody">
-                                <!-- Populated by JS -->
-                                <tr>
-                                    <td colspan="6" class="text-center" style="padding: 40px;">
-                                        <div class="spinner"></div> Loading users...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- Currencies View (Iframe) -->
+                <div id="view-currencies" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="currenciesIframe" src="currencies.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Languages View (Iframe) -->
+                <div id="view-languages" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="languagesIframe" src="languages.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Settings View (Iframe) -->
+                <div id="view-settings" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="settingsIframe" src="settings.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- SMS Templates View (Iframe) -->
+                <div id="view-sms-templates" class="view-section hidden"
+                    style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="smsTemplatesIframe" src="sms-templates.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Email Templates View (Iframe) -->
+                <div id="view-email-templates" class="view-section hidden"
+                    style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="emailTemplatesIframe" src="email-templates.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- API Settings View (Iframe) -->
+                <div id="view-api-settings" class="view-section hidden"
+                    style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="apiSettingsIframe" src="api-settings.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
                 </div>
 
                 <style>
@@ -1356,48 +1429,7 @@
         </div>
     </div>
 
-    <!-- Add User Modal -->
-    <div id="addUserModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Add New User</h3>
-                <button class="btn-icon" onclick="closeAddUserModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" style="padding: var(--space-lg);">
-                <form id="addUserForm" onsubmit="handleCreateUser(event)">
-                    <div class="form-group">
-                        <label class="field-label">Email Address *</label>
-                        <input type="email" id="newUserEmail" class="excel-input" required
-                            placeholder="user@example.com">
-                    </div>
-                    <div class="form-group" style="margin-top: var(--space-md);">
-                        <label class="field-label">Password *</label>
-                        <input type="password" id="newUserPassword" class="excel-input" required
-                            placeholder="Minimum 6 characters">
-                    </div>
-                    <div class="form-group" style="margin-top: var(--space-md);">
-                        <label class="field-label">Role *</label>
-                        <select id="newUserRole" class="excel-input" required>
-                            <option value="cashier">Cashier</option>
-                            <option value="manager">Manager</option>
-                            <option value="admin">Administrator</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: var(--space-md);">
-                        <label class="field-label">Full Name</label>
-                        <input type="text" id="newUserFullName" class="excel-input" placeholder="Optional">
-                    </div>
-                    <div
-                        style="margin-top: var(--space-xl); display: flex; justify-content: flex-end; gap: var(--space-md);">
-                        <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">Cancel</button>
-                        <button type="submit" id="createUserBtn" class="btn btn-primary">Create User</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Add User Modal Removed - Now in users.html -->
     </div>
     </div>
 
@@ -1419,7 +1451,6 @@
     <script src="js/admin-settings.js"></script>
     <script src="js/purchases.js"></script>
 
-    <script src="js/admin-users.js"></script>
     <script src="js/admin-events.js"></script>
 
     <script>

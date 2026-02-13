@@ -30,6 +30,11 @@ async function login(email, password) {
         // Get user role
         var role = await getUserRole(data.user.id);
 
+        // Load permissions if available globally
+        if (window.fetchUserPermissions) {
+            await window.fetchUserPermissions(role);
+        }
+
         return { success: true, user: data.user, role: role };
     } catch (error) {
         console.error('Login error:', error);

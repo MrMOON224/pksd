@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body.embedded {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+        }
+
+        .header {
+            margin-bottom: var(--space-xl);
+        }
+
+        .api-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: var(--space-sm);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .excel-input {
+            width: 100%;
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            padding: var(--space-md) var(--space-xl);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .api-key-display {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .api-key-value {
+            flex: 1;
+            padding: var(--space-md);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="color: var(--text-primary); margin: 0;">API Settings</h2>
+        </div>
+
+        <div class="api-section">
+            <div class="section-title">SMS API Configuration</div>
+            <form id="smsApiForm">
+                <div class="form-group">
+                    <label class="field-label">Provider:</label>
+                    <select id="smsProvider" class="excel-input">
+                        <option value="twilio">Twilio</option>
+                        <option value="nexmo">Nexmo</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="field-label">API Key:</label>
+                    <input type="text" id="smsApiKey" class="excel-input" placeholder="Enter API key">
+                </div>
+                <div class="form-group">
+                    <label class="field-label">API Secret:</label>
+                    <input type="password" id="smsApiSecret" class="excel-input" placeholder="Enter API secret">
+                </div>
+                <div class="form-group">
+                    <label class="field-label">Sender ID:</label>
+                    <input type="text" id="smsSenderId" class="excel-input" placeholder="Enter sender ID">
+                </div>
+                <button type="submit" class="btn-primary">Save SMS API</button>
+            </form>
+        </div>
+
+        <div class="api-section">
+            <div class="section-title">Payment Gateway API</div>
+            <form id="paymentApiForm">
+                <div class="form-group">
+                    <label class="field-label">Gateway:</label>
+                    <select id="paymentGateway" class="excel-input">
+                        <option value="stripe">Stripe</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="field-label">Publishable Key:</label>
+                    <input type="text" id="paymentPublicKey" class="excel-input" placeholder="Enter publishable key">
+                </div>
+                <div class="form-group">
+                    <label class="field-label">Secret Key:</label>
+                    <input type="password" id="paymentSecretKey" class="excel-input" placeholder="Enter secret key">
+                </div>
+                <button type="submit" class="btn-primary">Save Payment API</button>
+            </form>
+        </div>
+
+        <div class="api-section">
+            <div class="section-title">Webhook URL</div>
+            <div class="form-group">
+                <label class="field-label">Your Webhook Endpoint:</label>
+                <div class="api-key-display">
+                    <div class="api-key-value" id="webhookUrl">https://yourapp.com/api/webhook</div>
+                    <button class="btn-icon" onclick="copyWebhook()"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api-settings.js"></script>
+</body>
+
+</html>

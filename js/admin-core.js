@@ -87,8 +87,8 @@ window.init = async function () {
  * Role-Based Access Control
  */
 window.hasPermission = function (role, viewName) {
-    const adminOnly = ['users', 'variations'];
-    const managerOnly = ['products', 'categories', 'brands', 'units', 'barcodes', 'purchase-manager', 'purchase-add', 'purchase-return', 'warehouses', 'sales', 'sales-return', 'expense-categories'];
+    const adminOnly = ['users', 'variations', 'currencies', 'roles'];
+    const managerOnly = ['products', 'categories', 'brands', 'units', 'barcodes', 'purchase-manager', 'purchase-add', 'purchase-return', 'warehouses', 'sales', 'sales-return', 'expense-categories', 'suppliers', 'customers'];
 
     if (role === 'admin') return true;
     if (role === 'manager') {

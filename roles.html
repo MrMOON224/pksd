@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roles & Permissions - POS System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --primary: #4f46e5;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: transparent;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .role-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .role-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .role-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .role-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bg-admin {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .bg-manager {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .bg-cashier {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .bg-default {
+            background: rgba(79, 70, 229, 0.2);
+            color: #818cf8;
+        }
+
+        .role-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .role-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Permission Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1e293b;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 16px 16px;
+        }
+
+        .perm-category {
+            margin-bottom: 24px;
+        }
+
+        .perm-cat-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .perm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .perm-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .perm-checkbox:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .perm-checkbox input {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .perm-label {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            user-select: none;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Roles & Permissions</h1>
+            <p style="color: var(--text-muted); margin: 4px 0 0 0; font-size: 0.9rem;">Manage user roles and access
+                levels</p>
+        </div>
+        <button class="btn btn-primary" onclick="openRoleModal()">
+            <i class="fas fa-plus"></i> Add New Role
+        </button>
+    </div>
+
+    <div id="rolesList" class="roles-grid">
+        <!-- Roles populated here -->
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Loading roles...
+        </div>
+    </div>
+
+    <!-- Edit Permissions Modal -->
+    <div id="permModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title" style="margin: 0; font-size: 1.25rem;">Edit Permissions</h2>
+                    <p id="permRoleName" style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.9rem;"></p>
+                </div>
+                <button class="btn-icon" onclick="closePermModal()"
+                    style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="permForm">
+                    <!-- Permissions generated here -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePermModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="savePermissions()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script>
+        // --- Permission Definitions ---
+        const PERMISSION_STRUCTURE = [
+            {
+                category: 'System & Admin',
+                modules: [
+                    { name: 'Dashboard', key: 'Dashboard', actions: ['View'] },
+                    { name: 'Settings', key: 'Setting', actions: ['View', 'Edit'] },
+                    { name: 'Users', key: 'Users', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Roles', key: 'Roles', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Logs', key: 'Register', actions: ['View'] }
+                ]
+            },
+            {
+                category: 'Inventory Management',
+                modules: [
+                    { name: 'Products', key: 'Products', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Categories', key: 'Product Categories', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Brands', key: 'Brands', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Units', key: 'Units', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Variations', key: 'Variations', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Warehouses', key: 'Warehouses', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Adjustments', key: 'Adjustments', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Transfers', key: 'Transfers', actions: ['View', 'Create', 'Edit', 'Delete'] }
+                ]
+            },
+            {
+                category: 'People',
+                modules: [
+                    { name: 'Suppliers', key: 'Suppliers', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Customers', key: 'Customers', actions: ['View', 'Create', 'Edit', 'Delete'] }
+                ]
+            },
+            {
+                category: 'Sales & POS',
+                modules: [
+                    { name: 'POS Screen', key: 'Pos Screen', actions: ['View'] },
+                    { name: 'Sales', key: 'Sale', actions: ['View', 'Edit', 'Delete'] },
+                    { name: 'Returns', key: 'Sale Return', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Quotations', key: 'Quotations', actions: ['View', 'Create', 'Edit', 'Delete'] }
+                ]
+            },
+            {
+                category: 'Purchases',
+                modules: [
+                    { name: 'Purchases', key: 'Purchase', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Returns', key: 'Purchase Return', actions: ['View', 'Create', 'Edit', 'Delete'] }
+                ]
+            },
+            {
+                category: 'Finance & Expenses',
+                modules: [
+                    { name: 'Expenses', key: 'Expenses', actions: ['View', 'Create', 'Edit', 'Delete'] },
+                    { name: 'Categories', key: 'Expense Categories', actions: ['View', 'Create', 'Edit', 'Delete'] }
+                ]
+            },
+            {
+                category: 'Reports',
+                modules: [
+                    { name: 'General Reports', key: 'Reports', actions: ['View'] },
+                    { name: 'Warehouse Report', key: 'Report Warehouse', actions: ['View'] },
+                    { name: 'Sales Report', key: 'Report Sale', actions: ['View'] },
+                    { name: 'Stock Report', key: 'Report Stock', actions: ['View'] },
+                    { name: 'Profit/Loss', key: 'Report Profit Loss', actions: ['View'] }
+                ]
+            }
+        ];
+
+        let currentRoleId = null;
+        let allRoles = [];
+
+        async function loadRoles() {
+            try {
+                const { data, error } = await window.supabase
+                    .from('roles')
+                    .select('*')
+                    .order('name');
+
+                if (error) throw error;
+                allRoles = data || [];
+                renderRoles();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('rolesList').innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
+            }
+        }
+
+        function renderRoles() {
+            const container = document.getElementById('rolesList');
+            if (allRoles.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No roles found.</div>`;
+                return;
+            }
+
+            container.innerHTML = allRoles.map(role => {
+                const bgClass = `bg-${role.name.toLowerCase()}` in { 'bg-admin': 1, 'bg-manager': 1, 'bg-cashier': 1 } ? `bg-${role.name.toLowerCase()}` : 'bg-default';
+                const permCount = Array.isArray(role.permissions) ? role.permissions.length : 0;
+
+                return `
+                <div class="role-card">
+                    <div class="role-header">
+                        <span class="role-name">${role.name}</span>
+                        <span class="role-badge ${bgClass}">${role.name}</span>
+                    </div>
+                    <p class="role-desc">${role.description || 'No description provided.'}</p>
+                    <div style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
+                        <i class="fas fa-shield-alt" style="margin-right: 6px;"></i> ${permCount} Permissions Granted
+                    </div>
+                    <div class="role-footer" style="padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="openPermModal('${role.id}')">
+                            <i class="fas fa-lock"></i> Permissions
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        window.openPermModal = function (roleId) {
+            currentRoleId = roleId;
+            const role = allRoles.find(r => r.id === roleId);
+            if (!role) return;
+
+            document.getElementById('permRoleName').textContent = `Editing permissions for: ${role.name}`;
+
+            const form = document.getElementById('permForm');
+            let html = '<div class="perm-table-container">';
+
+            const rolePerms = new Set(Array.isArray(role.permissions) ? role.permissions : []);
+
+            PERMISSION_STRUCTURE.forEach(cat => {
+                html += `<div class="perm-category"><h3 class="perm-cat-title">${cat.category}</h3>`;
+                html += `<table class="premium-table" style="width:100%; font-size:0.9rem;">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.02);">
+                                    <th style="text-align:left; padding:10px;">Module</th>
+                                    <th style="width:80px; text-align:center;">View</th>
+                                    <th style="width:80px; text-align:center;">Create</th>
+                                    <th style="width:80px; text-align:center;">Edit</th>
+                                    <th style="width:80px; text-align:center;">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                cat.modules.forEach(mod => {
+                    html += `<tr>
+                        <td style="padding:10px; font-weight:500;">${mod.name}</td>`;
+
+                    ['View', 'Create', 'Edit', 'Delete'].forEach(action => {
+                        html += `<td style="text-align:center; padding:8px;">`;
+                        if (mod.actions.includes(action)) {
+                            // Construct perm key: "Delete Products" or "Manage Products" (legacy/compat)
+                            // User wants: View, Edit, Delete. "Manage" usually implies all.
+                            // Let's standarize to: "Action Key" e.g., "Delete Products"
+                            // If key is 'Sale', action 'Delete' -> Delete Sale
+                            // If key is 'Products', action 'Delete' -> Delete Products
+
+                            // Special case: View is often "Manage [Key]" in the old system
+                            let permString = `${action} ${mod.key}`;
+                            if (action === 'View') permString = `Manage ${mod.key}`; // Backward compat for "Manage X" being the view permission
+
+                            const checked = rolePerms.has(permString) ? 'checked' : '';
+                            const disabled = role.name === 'admin' ? 'disabled' : '';
+
+                            html += `<input type="checkbox" name="perms" value="${permString}" ${checked} ${disabled} 
+                                    style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;">`;
+                        } else {
+                            html += `<span style="color:var(--text-muted);">-</span>`;
+                        }
+                        html += `</td>`;
+                    });
+                    html += `</tr>`;
+                });
+                html += `</tbody></table></div>`;
+            });
+
+            html += '</div>';
+            form.innerHTML = html;
+
+            document.getElementById('permModal').classList.add('active');
+        };
+
+        window.toggleCategory = function (checkbox, category) {
+            // Deprecated in table view, but keeping compatible just in case
+        };
+
+        window.closePermModal = function () {
+            document.getElementById('permModal').classList.remove('active');
+        };
+
+        window.savePermissions = async function () {
+            if (!currentRoleId) return;
+
+            const checkboxes = document.querySelectorAll('input[name="perms"]:checked');
+            const selectedPerms = Array.from(checkboxes).map(cb => cb.value);
+
+            // Special check for All Permissions
+            if (selectedPerms.includes('All Permissions')) {
+                // If 'All Permissions' is selected, maybe we just store that or we store all? 
+                // Let's store what is selected.
+            }
+
+            try {
+                const { error } = await window.supabase
+                    .from('roles')
+                    .update({ permissions: selectedPerms })
+                    .eq('id', currentRoleId);
+
+                if (error) throw error;
+
+                alert('Permissions updated successfully!');
+                closePermModal();
+                loadRoles();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        };
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', loadRoles);
+
+    </script>
+</body>
+
+</html>
