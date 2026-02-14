@@ -457,6 +457,7 @@
         let productsData = [];
         let modifiedRows = new Set();
         let deletedRows = new Set();
+        let refUnits = []; // Store units from DB
 
         async function init() {
             // Check authentication and role
@@ -467,8 +468,20 @@
                 document.getElementById('userName').textContent = currentUser.email;
                 document.getElementById('userRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
 
-                // Load products
+                // Load references and products
+                await loadReferences();
                 await loadProducts();
+            }
+        }
+
+        async function loadReferences() {
+            try {
+                const { data, error } = await supabase.from('units').select('*').order('name');
+                if (error) throw error;
+                refUnits = data || [];
+                addDatalists(); // Still keep datalists for backup or other fields
+            } catch (error) {
+                console.error('Error loading units:', error);
             }
         }
 
@@ -531,7 +544,12 @@
                     <td><input type="number" class="excel-input" name="price" value="${product.price || ''}" step="0.01" onchange="markModified(this)"></td>
                     <td><input type="number" class="excel-input" name="cost" value="${product.cost || ''}" step="0.01" onchange="markModified(this)"></td>
                     <td><input type="number" class="excel-input" name="stock" value="${product.stock || 0}" onchange="markModified(this)"></td>
-                    <td><input type="text" class="excel-input" name="unit" value="${escapeHtml(product.unit || '')}" onchange="markModified(this)" list="units"></td>
+                    <td>
+                        <select class="excel-input" name="unit" onchange="markModified(this)">
+                            <option value="">Unit</option>
+                            ${refUnits.map(u => `<option value="${u.short_name}" ${product.unit === u.short_name ? 'selected' : ''}>${u.short_name}</option>`).join('')}
+                        </select>
+                    </td>
                     <td class="action-cell">
                         <button class="btn-icon" onclick="deleteRow(this)" title="Delete Row"><i class="fas fa-trash-alt"></i></button>
                     </td>
@@ -577,7 +595,12 @@
                 <td><input type="number" class="excel-input" name="price" value="" step="0.01" onchange="markModified(this)"></td>
                 <td><input type="number" class="excel-input" name="cost" value="" step="0.01" onchange="markModified(this)"></td>
                 <td><input type="number" class="excel-input" name="stock" value="0" onchange="markModified(this)"></td>
-                <td><input type="text" class="excel-input" name="unit" value="pc" onchange="markModified(this)" list="units"></td>
+                <td>
+                    <select class="excel-input" name="unit" onchange="markModified(this)">
+                        <option value="pc" selected>pc</option>
+                        ${refUnits.filter(u => u.short_name !== 'pc').map(u => `<option value="${u.short_name}">${u.short_name}</option>`).join('')}
+                    </select>
+                </td>
                 <td class="action-cell">
                     <button class="btn-icon" onclick="deleteRow(this)" title="Remove Row"><i class="fas fa-times"></i></button>
                 </td>

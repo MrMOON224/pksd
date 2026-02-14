@@ -455,7 +455,7 @@
                 <div class="form-row row-5b">
                     <div class="field-cell">
                         <label class="field-label">Purchase Unit</label>
-                        <input type="text" id="edit-purchase-unit" class="field-input" value="Box">
+                        <select id="edit-purchase-unit" class="field-input"></select>
                     </div>
                     <div class="field-cell">
                         <label class="field-label">Conversion (Pcs/Unit)</label>
@@ -615,10 +615,16 @@
                 el.innerHTML = `<option value="">${placeholder}</option>` +
                     data.map(i => `<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
             };
+            const populateUnits = (id, data, placeholder, useShortName = false) => {
+                const el = EL(id);
+                el.innerHTML = `<option value="">${placeholder}</option>` +
+                    data.map(u => `<option value="${useShortName ? escapeHtml(u.short_name) : u.id}">${escapeHtml(u.short_name)}</option>`).join('');
+            };
             populate('edit-category', refCategories, 'Select Category');
-            populate('edit-subcategory', refSubcategories, 'Select Sub-Category'); // Initially all or empty
+            populate('edit-subcategory', refSubcategories, 'Select Sub-Category');
             populate('edit-brand', refBrands, 'Select Brand');
-            populate('edit-unit', refUnits, 'Select Unit');
+            populateUnits('edit-unit', refUnits, 'Select Unit', false); // Uses ID for unit_id
+            populateUnits('edit-purchase-unit', refUnits, 'Select Purchase Unit', true); // Uses short_name for purchase_unit
         }
 
         function renderGrid() {
@@ -673,7 +679,7 @@
             EL('edit-cost').value = p.cost || 0;
             EL('edit-unit').value = p.unit_id || '';
             EL('edit-purchase-unit').value = p.purchase_unit || 'Box';
-            EL('edit-conversion').value = p.conversion || 1;
+            EL('edit-conversion').value = p.pcs_per_box || 1;
             EL('edit-price').value = p.price || 0;
             EL('edit-stock').value = p.stock || 0;
             EL('edit-supplier').value = p.supplier || '';
@@ -762,7 +768,7 @@
                 price: parseFloat(EL('edit-price').value) || 0,
                 unit_id: EL('edit-unit').value || null,
                 purchase_unit: EL('edit-purchase-unit').value,
-                conversion: parseInt(EL('edit-conversion').value) || 1,
+                pcs_per_box: parseInt(EL('edit-conversion').value) || 1,
                 supplier: EL('edit-supplier').value,
                 shop: EL('edit-shop').value,
                 stock: parseInt(EL('edit-stock').value) || 0,
