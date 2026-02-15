@@ -46,8 +46,10 @@ window.addEventListener('message', function (event) {
             const field = fieldMap[colId] || colId;
 
             // Special handling for prices array -> single price field
-            if (colId === 'prices' && Array.isArray(value)) {
-                product.price = value[0] || 0;
+            // Special handling for tag arrays (take first for primary DB field)
+            if ((colId === 'prices' || colId === 'code') && Array.isArray(value)) {
+                if (colId === 'prices') product.price = parseFloat(value[0]) || 0;
+                if (colId === 'code') product.code = value[0] || '';
             } else {
                 product[field] = value;
             }
@@ -170,7 +172,13 @@ window.renderGrid = function () {
 
     iframe.contentWindow.postMessage({
         type: 'LOAD_DATA',
-        data: window.productsData
+        data: window.productsData,
+        references: {
+            categories: window.refCategories || [],
+            subcategories: window.refSubcategories || [],
+            brands: window.refBrands || [],
+            units: window.refUnits || []
+        }
     }, '*');
 };
 
@@ -197,6 +205,20 @@ window.addNewRow = function () {
     window.renderGrid();
     window.updateSaveButton();
     window.saveProductDraft();
+
+    // Focus the first cell of the new row in the iframe
+    setTimeout(() => {
+        const iframe = document.getElementById('productGridIframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+                type: 'FOCUS_CELL',
+                data: {
+                    rowIdx: window.productsData.length - 1,
+                    colId: 'code'
+                }
+            }, '*');
+        }
+    }, 100);
 };
 
 /**

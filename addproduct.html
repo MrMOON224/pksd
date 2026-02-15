@@ -22,10 +22,10 @@
         /* ── Page Layout ── */
         body {
             background: var(--bg-primary);
-            min-height: 100vh;
-            padding: var(--space-lg);
+            height: 100vh;
+            padding: var(--space-md);
             color: var(--text-primary);
-            overflow-y: auto;
+            overflow: hidden;
         }
 
         .page-container {
@@ -33,8 +33,9 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: var(--space-lg);
+            gap: var(--space-md);
             height: 100%;
+            overflow: hidden;
         }
 
         /* ── Toolbar ── */
@@ -45,13 +46,10 @@
             flex-wrap: wrap;
             gap: var(--space-md);
             background: var(--bg-secondary);
-            padding: var(--space-md) var(--space-lg);
+            padding: 8px 16px;
             border-radius: var(--radius-lg);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            /* Sticky toolbar */
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-shrink: 0;
         }
 
         .toolbar-left {
@@ -93,11 +91,12 @@
         /* ── Master-Detail Layout ── */
         .editor-section {
             background: var(--bg-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-lg);
-            padding: var(--space-lg);
+            padding: 0;
             box-shadow: var(--shadow-lg);
-            animation: fadeIn 0.3s ease-out;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .grid-section {
@@ -109,21 +108,19 @@
             display: flex;
             flex-direction: column;
             flex: 1;
-            min-height: 400px;
+            min-height: 0;
         }
 
         /* ── Editor Form Grid ── */
         .form-grid {
             display: grid;
             gap: 0;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: var(--radius-md);
-            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .form-row {
             display: grid;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .form-row:last-child {
@@ -147,11 +144,11 @@
         }
 
         .field-cell {
-            padding: 8px 12px;
+            padding: 5px 12px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.04);
-            background: rgba(255, 255, 255, 0.015);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            background: transparent;
         }
 
         .field-cell:last-child {
@@ -159,22 +156,22 @@
         }
 
         .field-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .field-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             color: var(--text-primary);
-            font-size: 0.9rem;
-            padding: 6px 10px;
+            font-size: 0.88rem;
+            padding: 5px 10px;
             outline: none;
             transition: all 0.2s;
         }
@@ -238,7 +235,7 @@
         /* ── Data Grid ── */
         .table-container {
             overflow-x: auto;
-            max-height: 50vh;
+            flex: 1;
             overflow-y: auto;
         }
 
@@ -398,7 +395,17 @@
                 <span class="sync-badge" id="syncBadge"><i class="fas fa-circle"></i> Synced to Supabase</span>
             </div>
             <div class="toolbar-actions">
-                <button class="btn btn-secondary" onclick="refreshProducts()">
+                <button class="btn btn-secondary btn-sm" onclick="clearEditor()"
+                    style="background: var(--bg-tertiary);">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+                <button class="btn btn-danger btn-sm hidden" id="btn-delete" onclick="deleteCurrentProduct()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn btn-success btn-sm" onclick="saveProduct()">
+                    <i class="fas fa-save"></i> Save Product
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="refreshProducts()">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
@@ -410,11 +417,15 @@
                 <!-- Row 1 -->
                 <div class="form-row row-3">
                     <div class="field-cell">
-                        <label class="field-label">Item Code</label>
-                        <input type="text" id="edit-code" class="field-input" placeholder="Enter code">
+                        <label class="field-label">Item Code ++</label>
+                        <div class="barcode-input-container">
+                            <input type="text" id="edit-code-input" class="field-input" placeholder="Enter code...">
+                            <div id="edit-code-tags" class="barcode-tags"></div>
+                        </div>
+                        <input type="hidden" id="edit-code">
                     </div>
                     <div class="field-cell">
-                        <label class="field-label">Barcode (Scan Input)</label>
+                        <label class="field-label">Barcode ++</label>
                         <div class="barcode-input-container">
                             <input type="text" id="edit-barcode-input" class="field-input"
                                 placeholder="Scan barcode...">
@@ -462,8 +473,12 @@
                         <input type="number" id="edit-conversion" class="field-input" value="1">
                     </div>
                     <div class="field-cell">
-                        <label class="field-label">Price</label>
-                        <input type="number" id="edit-price" class="field-input" step="0.01" value="0">
+                        <label class="field-label">Price ++</label>
+                        <div class="barcode-input-container">
+                            <input type="text" id="edit-price-input" class="field-input" placeholder="Enter price...">
+                            <div id="edit-price-tags" class="barcode-tags"></div>
+                        </div>
+                        <input type="hidden" id="edit-price">
                     </div>
                     <div class="field-cell">
                         <label class="field-label">Margin %</label>
@@ -488,17 +503,6 @@
                 </div>
             </div>
 
-            <div class="editor-actions">
-                <button class="btn btn-secondary" onclick="clearEditor()" style="background: var(--bg-tertiary);">
-                    <i class="fas fa-eraser"></i> Clear
-                </button>
-                <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentProduct()">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-                <button class="btn btn-success" onclick="saveProduct()">
-                    <i class="fas fa-save"></i> Save Product
-                </button>
-            </div>
         </div>
 
         <!-- Grid Section (Table) -->
@@ -543,6 +547,8 @@
         let productsData = [];
         let currentProductId = null; // null = Add New mode
         let currentBarcodes = [];    // Temporary storage for editor checkboxes
+        let currentCodes = [];
+        let currentPrices = [];
 
         let refCategories = [], refSubcategories = [], refBrands = [], refUnits = [];
 
@@ -663,6 +669,23 @@
             ).join('');
         }
 
+        function renderCodeTags() {
+            const container = EL('edit-code-tags');
+            container.innerHTML = currentCodes.map(c =>
+                `<span class="barcode-tag">${escapeHtml(c)} <i class="fas fa-times remove-tag" onclick="removeCode('${escapeHtml(c)}')"></i></span>`
+            ).join('');
+            EL('edit-code').value = currentCodes[0] || '';
+        }
+
+        function renderPriceTags() {
+            const container = EL('edit-price-tags');
+            container.innerHTML = currentPrices.map(p =>
+                `<span class="barcode-tag">${escapeHtml(p)} <i class="fas fa-times remove-tag" onclick="removePrice('${escapeHtml(p)}')"></i></span>`
+            ).join('');
+            EL('edit-price').value = currentPrices[0] || 0;
+            calcMargin();
+        }
+
         // ── Logic ──
         function selectProduct(id) {
             currentProductId = id;
@@ -670,6 +693,10 @@
             if (!p) return;
 
             // Fill Form
+            currentCodes = p.code ? [p.code] : [];
+            currentPrices = p.price ? [p.price.toString()] : [];
+            currentBarcodes = [...(p.barcodes || [])];
+
             EL('edit-code').value = p.code || '';
             EL('edit-name').value = p.name || '';
             EL('edit-category').value = p.category_id || '';
@@ -687,6 +714,8 @@
 
             currentBarcodes = [...(p.barcodes || [])];
             renderBarcodeTags();
+            renderCodeTags();
+            renderPriceTags();
             calcMargin();
 
             EL('btn-delete').classList.remove('hidden');
@@ -699,6 +728,8 @@
         function clearEditor() {
             currentProductId = null;
             currentBarcodes = [];
+            currentCodes = [];
+            currentPrices = [];
 
             // Reset inputs
             const inputs = document.querySelectorAll('.editor-section input, .editor-section select');
@@ -711,6 +742,8 @@
             EL('edit-margin').value = '0.00%';
 
             renderBarcodeTags();
+            renderCodeTags();
+            renderPriceTags();
             EL('btn-delete').classList.add('hidden');
             renderGrid(); // Clear highlight
             EL('edit-code').focus();
@@ -751,6 +784,34 @@
         window.removeBarcode = function (val) { // Global for onclick
             currentBarcodes = currentBarcodes.filter(b => b !== val);
             renderBarcodeTags();
+        }
+
+        window.removeCode = function (val) {
+            currentCodes = currentCodes.filter(c => c !== val);
+            renderCodeTags();
+        }
+
+        window.removePrice = function (val) {
+            currentPrices = currentPrices.filter(p => p !== val);
+            renderPriceTags();
+        }
+
+        function addCode(val) {
+            if (!val) return;
+            if (!currentCodes.includes(val)) {
+                currentCodes.push(val);
+                renderCodeTags();
+            }
+            EL('edit-code-input').value = '';
+        }
+
+        function addPrice(val) {
+            if (!val) return;
+            if (!currentPrices.includes(val)) {
+                currentPrices.push(val);
+                renderPriceTags();
+            }
+            EL('edit-price-input').value = '';
         }
 
         async function saveProduct() {
@@ -822,9 +883,32 @@
         EL('edit-category').addEventListener('change', (e) => updateSubcategories(e.target.value));
 
         EL('edit-barcode-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addBarcode(e.target.value.trim());
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                const val = e.target.value.trim();
+                if (val) {
+                    e.preventDefault();
+                    addBarcode(val);
+                }
+            }
+        });
+
+        EL('edit-code-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                const val = e.target.value.trim();
+                if (val) {
+                    e.preventDefault();
+                    addCode(val);
+                }
+            }
+        });
+
+        EL('edit-price-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                const val = e.target.value.trim();
+                if (val) {
+                    e.preventDefault();
+                    addPrice(val);
+                }
             }
         });
 

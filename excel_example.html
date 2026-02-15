@@ -146,6 +146,36 @@
             opacity: 1;
         }
 
+        /* Condensed Tag View for Code, Barcodes and Prices */
+        .cell-container.code:not(.edit-active) .tag:not(:first-child),
+        .cell-container.barcodes:not(.edit-active) .tag:not(:first-child),
+        .cell-container.prices:not(.edit-active) .tag:not(:first-child) {
+            display: none;
+        }
+
+        /* Only hide the input in code/barcode/price tag containers when not editing */
+        .cell-container.code.has-tags:not(.edit-active) .cell-input,
+        .cell-container.barcodes.has-tags:not(.edit-active) .cell-input,
+        .cell-container.prices.has-tags:not(.edit-active) .cell-input {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cell-container.code:not(.edit-active) .tag:first-child::after,
+        .cell-container.barcodes:not(.edit-active) .tag:first-child::after,
+        .cell-container.prices:not(.edit-active) .tag:first-child::after {
+            content: ' ++';
+            opacity: 0.6;
+            margin-left: 4px;
+            display: none;
+        }
+
+        .cell-container.code.has-multiple:not(.edit-active) .tag:first-child::after,
+        .cell-container.barcodes.has-multiple:not(.edit-active) .tag:first-child::after,
+        .cell-container.prices.has-multiple:not(.edit-active) .tag:first-child::after {
+            display: inline;
+        }
+
         .readonly {
             background: rgba(255, 255, 255, 0.03);
             color: var(--text-muted);
@@ -310,21 +340,45 @@
 
     <script>
         const SCHEMA = [
-            { id: 'code', label: 'Code', width: '7%' },
+            { id: 'code', label: 'Code ++', width: '10%', type: 'tags' },
             { id: 'barcodes', label: 'Barcode ++', width: '18%', type: 'tags' },
             { id: 'desc', label: 'Description', width: '15%' },
-            { id: 'category', label: 'Category', width: '10%', type: 'dropdown', options: ['Electronics', 'Clothing', 'Food', 'Home'] },
-            { id: 'subCategory', label: 'Sub Category', width: '10%' },
+            { id: 'category', label: 'Category', width: '10%', type: 'dropdown', ref: 'categories' },
+            { id: 'subCategory', label: 'Sub Category', width: '10%', type: 'dropdown', ref: 'subcategories', parent: 'category' },
+            { id: 'brand_id', label: 'Brand', width: '10%', type: 'dropdown', ref: 'brands' },
             { id: 'cost', label: 'Cost', width: '7%' },
             { id: 'prices', label: 'Price ++', width: '13%', type: 'tags' },
-            { id: 'unit', label: 'Pcs/Box', width: '8%', type: 'dropdown', options: ['Pcs', 'Box', 'Pack', 'Case'] },
-            { id: 'qty', label: 'Qty', width: '6%' },
+            { id: 'unit', label: 'Unit', width: '8%', type: 'dropdown', ref: 'units' },
+            { id: 'qty', label: 'Stock', width: '6%' },
             { id: 'margin', label: 'Margin %', width: '6%', readonly: true }
         ];
 
+        let references = {
+            categories: [],
+            subcategories: [],
+            brands: [],
+            units: []
+        };
+
+        function getDisplayName(colId, val) {
+            if (!val) return '';
+            const colDef = SCHEMA.find(c => c.id === colId);
+            if (!colDef || !colDef.ref || !references[colDef.ref]) return val;
+            const ref = references[colDef.ref].find(r => r.id === val || r.name === val);
+            return ref ? ref.name : val;
+        }
+
         const COLUMN_ACTIONS = {
-            'prices': (rowIdx) => updateMargin(rowIdx),
-            'cost': (rowIdx) => updateMargin(rowIdx)
+            'prices': (idx) => updateMargin(idx),
+            'cost': (idx) => updateMargin(idx),
+            'category': (idx) => {
+                state.data[idx].subCategory = '';
+                const rows = document.getElementById('gridBody').children;
+                const subCatColIdx = state.columns.findIndex(c => c.id === 'subCategory') + 2;
+                const input = rows[idx].children[subCatColIdx] ? rows[idx].children[subCatColIdx].querySelector('input') : null;
+                if (input) input.value = '';
+                notifyUpdate(idx, 'subCategory', '');
+            }
         };
 
         let state = {
@@ -381,17 +435,18 @@
                 state.columns.forEach(col => {
                     const td = document.createElement('td');
                     const container = document.createElement('div');
-                    container.className = 'cell-container' + (col.readonly ? ' readonly' : '');
+                    container.className = `cell-container ${col.id} ${col.readonly ? 'readonly' : ''}`;
 
                     // Add touch-locked class by default
                     container.classList.add('touch-locked-cell');
 
                     if (col.type === 'tags') {
                         renderTags(container, rIdx, col.id);
+                        container.onclick = () => enterEditMode(container); // Allow clicking empty area/tags to edit
                     } else {
                         const input = document.createElement('input');
                         input.className = 'cell-input';
-                        input.value = row[col.id] || '';
+                        input.value = getDisplayName(col.id, row[col.id]);
                         input.readOnly = true;
                         if (col.readonly) input.dataset.permReadonly = "true";
 
@@ -407,6 +462,7 @@
                             }
                         };
                         input.onfocus = () => handleFocus(rIdx, col.id);
+                        input.onclick = () => enterEditMode(container); // Allow single-click to edit on desktop
                         input.onkeydown = (e) => {
                             if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -434,18 +490,21 @@
         }
 
         function handleArrowNavigation(e, rowIdx, colId) {
-            if (e.key === 'ArrowRight' && (e.target.selectionEnd === e.target.value.length || e.target.type !== 'text')) moveFocus(rowIdx, colId, 'right');
-            else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) moveFocus(rowIdx, colId, 'left');
-            else if (e.key === 'ArrowDown') moveFocus(rowIdx, colId, 'down');
-            else if (e.key === 'ArrowUp') moveFocus(rowIdx, colId, 'up');
+            const menu = document.getElementById('ddMenu');
+            if (menu && menu.style.display === 'block') return;
+
+            if (e.key === 'ArrowRight') { e.preventDefault(); moveFocus(rowIdx, colId, 'right'); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); moveFocus(rowIdx, colId, 'left'); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); moveFocus(rowIdx, colId, 'down'); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); moveFocus(rowIdx, colId, 'up'); }
         }
 
         function focusCell(rowIdx, colId) {
             setTimeout(() => {
                 const rows = document.getElementById('gridBody').children;
                 const colIdx = state.columns.findIndex(c => c.id === colId);
-                if (rows[rowIdx] && rows[rowIdx].children[colIdx + 1]) {
-                    const input = rows[rowIdx].children[colIdx + 1].querySelector('input');
+                if (rows[rowIdx] && rows[rowIdx].children[colIdx + 2]) {
+                    const input = rows[rowIdx].children[colIdx + 2].querySelector('input');
                     if (input) {
                         input.focus();
                         if (typeof input.select === 'function') input.select();
@@ -456,7 +515,14 @@
 
         function renderTags(container, rowIdx, colId) {
             container.innerHTML = '';
-            const tags = state.data[rowIdx][colId] || [];
+            container.classList.add('has-tags'); // Mark as tag container
+            let rawData = state.data[rowIdx][colId] || [];
+            let tags = Array.isArray(rawData) ? rawData : (typeof rawData === 'string' ? rawData.split(',').map(s => s.trim()).filter(Boolean) : []);
+            state.data[rowIdx][colId] = tags;
+
+            if (tags.length > 1) container.classList.add('has-multiple');
+            else container.classList.remove('has-multiple');
+
             tags.forEach((tag, tIdx) => {
                 const tagEl = document.createElement('div');
                 tagEl.className = 'tag';
@@ -469,26 +535,42 @@
             input.readOnly = true;
 
             input.onkeydown = (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
+                if (e.key === 'Enter' || e.key === 'Tab') {
                     const val = e.target.value.trim();
+                    const isSticky = (colId === 'barcodes' || colId === 'prices');
+
                     if (val !== '') {
+                        e.preventDefault();
                         if (!state.data[rowIdx][colId]) state.data[rowIdx][colId] = [];
                         state.data[rowIdx][colId].push(val);
                         e.target.value = '';
                         if (COLUMN_ACTIONS[colId]) COLUMN_ACTIONS[colId](rowIdx);
+                        notifyUpdate(rowIdx, colId, state.data[rowIdx][colId]);
                         renderTags(container, rowIdx, colId);
 
-                        // FIX: Ensure we focus back to the same tag input to allow multiple entries
-                        setTimeout(() => {
-                            const newInput = container.querySelector('.cell-input');
-                            if (newInput) newInput.focus();
-                        }, 0);
-                    } else moveFocus(rowIdx, colId, 'right');
-                } else handleArrowNavigation(e, rowIdx, colId);
+                        if (isSticky) {
+                            setTimeout(() => {
+                                const newInput = container.querySelector('.cell-input');
+                                if (newInput) {
+                                    newInput.readOnly = false;
+                                    container.classList.add('edit-active');
+                                    newInput.focus();
+                                }
+                            }, 0);
+                        } else {
+                            moveFocus(rowIdx, colId, 'right');
+                        }
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        moveFocus(rowIdx, colId, 'right');
+                    }
+                } else {
+                    handleArrowNavigation(e, rowIdx, colId);
+                }
             };
             input.onblur = () => { input.readOnly = true; container.classList.remove('edit-active'); };
             input.onfocus = () => handleFocus(rowIdx, colId);
+            input.onclick = () => enterEditMode(container); // Allow single-click to edit on desktop
             container.appendChild(input);
         }
 
@@ -497,22 +579,25 @@
             if (COLUMN_ACTIONS[colId]) COLUMN_ACTIONS[colId](rowIdx);
             const rows = document.getElementById('gridBody').children;
             const colIdx = state.columns.findIndex(c => c.id === colId);
-            renderTags(rows[rowIdx].children[colIdx + 1].querySelector('.cell-container'), rowIdx, colId);
+            renderTags(rows[rowIdx].children[colIdx + 2].querySelector('.cell-container'), rowIdx, colId);
         }
 
         // --- Iframe / Parent Communication ---
         window.addEventListener('message', function (event) {
             const { type, data } = event.data;
             if (type === 'LOAD_DATA') {
+                if (event.data.references) {
+                    references = event.data.references;
+                }
                 state.data = data.map(p => ({
                     id: p.id,
-                    code: p.code || '',
+                    code: p.code ? [p.code] : [],
                     barcodes: p.barcodes || [],
                     desc: p.name || '',
                     category: p.category_id || '',
                     subCategory: p.subcategory_id || '',
                     cost: p.cost || 0,
-                    prices: [p.price || 0],
+                    prices: p.price ? [p.price.toString()] : [],
                     unit: p.unit_id || 'Pcs',
                     qty: p.stock || 0,
                     brand_id: p.brand_id
@@ -526,6 +611,8 @@
                 logActivity("Data imported from file.");
             } else if (type === 'EXPORT_REQUEST') {
                 window.parent.postMessage({ type: 'EXPORT_DATA', data: state.data }, '*');
+            } else if (type === 'FOCUS_CELL') {
+                focusCell(data.rowIdx, data.colId);
             }
         });
 
@@ -547,6 +634,12 @@
             state.data[rowIdx][colId] = val;
             if (COLUMN_ACTIONS[colId]) COLUMN_ACTIONS[colId](rowIdx);
             notifyUpdate(rowIdx, colId, val);
+
+            // If it's a dropdown, we might want to refresh the display immediately
+            const rows = document.getElementById('gridBody').children;
+            const colIdx = state.columns.findIndex(c => c.id === colId) + 2;
+            const input = rows[rowIdx].children[colIdx].querySelector('input');
+            if (input) input.value = getDisplayName(colId, val);
         }
 
         function updateMargin(rowIdx) {
@@ -556,13 +649,19 @@
             const price = prices.length > 0 ? parseFloat(prices[prices.length - 1]) : 0;
             row.margin = price > 0 ? (((price - cost) / price) * 100).toFixed(1) + '%' : '-';
             const rows = document.getElementById('gridBody').children;
-            const input = rows[rowIdx].children[state.columns.findIndex(c => c.id === 'margin') + 1].querySelector('input');
+            const targetTdIdx = state.columns.findIndex(c => c.id === 'margin') + 2; // +2 for Checkbox and #
+            const input = rows[rowIdx].children[targetTdIdx].querySelector('input');
             if (input) input.value = row.margin;
             notifyUpdate(rowIdx, 'margin', row.margin);
         }
 
         function handleFocus(rowIdx, colId) {
             document.getElementById('selectionPath').textContent = `Active: ${colId.toUpperCase()} [Row ${rowIdx + 1}]`;
+
+            // Trigger edit mode on focus for desktop flow
+            const container = document.activeElement.closest('.cell-container');
+            if (container) enterEditMode(container);
+
             const colDef = state.columns.find(c => c.id === colId);
             if (colDef.type === 'dropdown') showDropdown(rowIdx, colId);
             else hideDropdown();
@@ -572,17 +671,37 @@
             const menu = document.getElementById('ddMenu');
             const input = document.activeElement;
             const rect = input.getBoundingClientRect();
-            const options = state.columns.find(c => c.id === colId).options || [];
+            const colDef = state.columns.find(c => c.id === colId);
+
+            let options = [];
+            if (colDef.ref && references[colDef.ref]) {
+                const rawRefs = references[colDef.ref];
+                if (colDef.id === 'subCategory' && colDef.parent) {
+                    const parentVal = state.data[rowIdx][colDef.parent];
+                    options = rawRefs
+                        .filter(s => s.category_id === parentVal)
+                        .map(s => ({ id: s.id, name: s.name }));
+                } else {
+                    options = rawRefs.map(r => ({ id: r.id, name: r.name || r }));
+                }
+            } else if (colDef.options) {
+                options = colDef.options.map(o => ({ id: o, name: o }));
+            }
+
             if (options.length === 0) return hideDropdown();
-            menu.innerHTML = options.map(opt => `<div class="dropdown-item">${opt}</div>`).join('');
+            menu.innerHTML = options.map(opt => `<div class="dropdown-item" data-id="${opt.id}">${opt.name}</div>`).join('');
             menu.style.display = 'block';
-            menu.style.width = rect.width + 'px';
+            menu.style.width = Math.max(rect.width, 150) + 'px';
             menu.style.left = rect.left + 'px';
             menu.style.top = (rect.bottom + window.scrollY) + 'px';
             menu.querySelectorAll('.dropdown-item').forEach(item => {
+                // Prevent input blur before click can fire
+                item.onmousedown = (e) => e.preventDefault();
                 item.onclick = () => {
-                    input.value = item.textContent;
-                    handleInput(rowIdx, colId, item.textContent);
+                    const id = item.dataset.id;
+                    const name = item.textContent;
+                    input.value = name;
+                    handleInput(rowIdx, colId, id);
                     hideDropdown();
                     moveFocus(rowIdx, colId, 'right');
                 };
@@ -666,10 +785,12 @@
 
         function enterEditMode(container) {
             const input = container.querySelector('.cell-input');
-            if (input && !input.dataset.permReadonly) {
+            if (input && !input.dataset.permReadonly && input.readOnly) {
                 input.readOnly = false;
                 container.classList.add('edit-active');
-                input.focus();
+                if (document.activeElement !== input) {
+                    input.focus();
+                }
                 if (input.select) input.select();
             }
         }
