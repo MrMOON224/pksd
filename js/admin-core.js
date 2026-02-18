@@ -88,7 +88,7 @@ window.init = async function () {
  */
 window.hasPermission = function (role, viewName) {
     const adminOnly = ['users', 'variations', 'currencies', 'roles'];
-    const managerOnly = ['products', 'categories', 'brands', 'units', 'barcodes', 'purchase-manager', 'purchase-add', 'purchase-return', 'warehouses', 'sales', 'sales-return', 'expense-categories', 'suppliers', 'customers'];
+    const managerOnly = ['products', 'categories', 'brands', 'units', 'barcodes', 'purchase-manager', 'purchase-order', 'purchase-add', 'purchase-return', 'warehouses', 'sales', 'sales-return', 'expense-categories', 'suppliers', 'customers'];
 
     if (role === 'admin') return true;
     if (role === 'manager') {
@@ -192,13 +192,25 @@ window.switchView = function (viewName, action = null) {
             break;
         // Purchase views are handled by self-contained iframes
         case 'purchase-list': break;
-        case 'purchase-add': break;
+        case 'purchase-add':
+            if (action && typeof action === 'object' && action.id) {
+                const addIframe = document.getElementById('purchaseAddIframe');
+                if (addIframe) {
+                    addIframe.src = `purchase-add.html?id=${action.id}&mode=embedded`;
+                }
+            } else {
+                const addIframe = document.getElementById('purchaseAddIframe');
+                if (addIframe) {
+                    addIframe.src = 'purchase-add.html?mode=embedded';
+                }
+            }
+            break;
         case 'purchase-return': break;
         case 'users': if (typeof window.loadUsersList === 'function') window.loadUsersList(); break;
         case 'adjustments':
             // Handled via iframe src in admin-dashboard.html
             break;
-        case 'warehouses': if (typeof window.loadWarehousesList === 'function') window.loadWarehousesList(); break;
+        case 'warehouses': break;
     }
 
     // Handle POS-specific logic (e.g. loading a translation)

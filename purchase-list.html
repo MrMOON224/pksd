@@ -4,305 +4,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase List</title>
+    <title>Purchase List - Glass Grid Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        body.embedded {
-            background: transparent;
-            padding: 0;
-            margin: 0;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-top: var(--bg-primary);
+            --accent-indigo: var(--primary);
+            --glass-panel: var(--bg-glass);
+            --text-primary: #f8fafc;
+            --text-muted: var(--text-muted);
+            --success-green: var(--success);
+            --warning-alert: var(--error);
         }
 
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: var(--space-lg);
-        }
-
-        .page-header {
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-md);
-            padding: var(--space-lg);
-            margin-bottom: var(--space-lg);
-        }
-
-        .page-title {
-            font-size: 1.4rem;
-            font-weight: 700;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent !important;
             color: var(--text-primary);
-            text-decoration: underline;
-            text-decoration-color: var(--primary);
-            text-underline-offset: 4px;
-            margin-bottom: var(--space-lg);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 1rem;
         }
 
-        .filter-row {
-            display: grid;
-            grid-template-columns: auto auto auto auto 1fr auto auto auto;
-            gap: var(--space-md);
+        /* Unified Glass Pill Design System */
+        .toolbar-pill {
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 19px;
+            display: inline-flex;
             align-items: center;
-            margin-bottom: var(--space-md);
+            gap: 8px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            cursor: default;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .pill-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .pill-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .pill-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .pill-primary {
+            background: rgba(79, 70, 229, 0.1);
+            color: #818cf8;
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .pill-ghost {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .pill-action {
+            cursor: pointer;
+        }
+
+        .pill-action:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .pill-icon-only {
+            width: 38px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Custom Checkbox */
+        .checkbox-container {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            width: 18px;
+            height: 18px;
+            margin: 0 auto;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 18px;
+            width: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-container:hover input~.checkmark {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .checkbox-container input:checked~.checkmark {
+            background: var(--accent-indigo);
+            border-color: var(--accent-indigo);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 5px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-container input:checked~.checkmark:after {
+            display: block;
+        }
+
+        /* Sheet Styles */
+        .sheet-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 1rem;
+        }
+
+        .sheet-wrapper {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .excel-table th {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+        }
+
+        .excel-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 0.6rem 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+        }
+
+        .excel-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Filters */
+        .filter-pill {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .filter-label {
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            white-space: nowrap;
-            font-weight: 500;
-        }
-
-        .filter-input,
-        .filter-select {
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            min-width: 120px;
-            transition: all 0.3s ease;
-        }
-
-        .filter-input:focus,
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .btn-edit {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-edit:hover {
-            opacity: 0.8;
-            transform: translateY(-1px);
-        }
-
-        .btn-delete {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-delete:hover {
-            opacity: 0.8;
-            transform: translateY(-1px);
-        }
-
-        .btn-save {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-save:hover {
-            opacity: 0.8;
-            transform: translateY(-1px);
-        }
-
-        .voucher-row {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: var(--space-md);
-            align-items: center;
-            margin-bottom: var(--space-md);
-        }
-
-        .search-row {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .search-input::placeholder {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
             color: var(--text-muted);
+            letter-spacing: 0.02em;
         }
 
-        .search-input:focus {
+        .filter-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-weight: 600;
             outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .data-table {
+            padding: 0;
             width: 100%;
-            border-collapse: collapse;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            font-size: 0.9rem;
-            border-radius: var(--radius-md);
-            overflow: hidden;
         }
 
-        .data-table th {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 12px;
-            color: var(--text-primary);
-            font-weight: 600;
-            text-align: left;
-            font-size: 0.85rem;
-        }
-
-        .data-table td {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 12px;
-            color: var(--text-primary);
-        }
-
-        .data-table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .data-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .total-row {
-            background: rgba(255, 255, 255, 0.08);
-            font-weight: 700;
-            font-size: 0.95rem;
-        }
-
-        .detail-section {
-            margin-top: var(--space-lg);
-            background: var(--primary);
-            color: white;
-            padding: var(--space-md);
-            text-align: center;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
-        }
-
-        .clickable-cell {
-            color: var(--primary);
-            cursor: pointer;
-            text-decoration: underline;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .clickable-cell:hover {
-            opacity: 0.8;
+        .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
 
-<body>
-    <div class="container">
-        <div class="page-header">
-            <div class="page-title">Purchase List</div>
-
-            <div class="filter-row">
-                <span class="filter-label">Dte/Time</span>
-                <input type="date" class="filter-input" id="filterDate">
-
-                <span class="filter-label">Shop</span>
-                <select class="filter-select" id="filterShop">
-                    <option value="">All</option>
-                </select>
-
-                <span class="filter-label">Supplier -</span>
-                <select class="filter-select" id="filterSupplier">
-                    <option value="">All</option>
-                </select>
-
-                <span class="filter-label">Payment</span>
-                <select class="filter-select" id="filterPayment">
-                    <option value="">All</option>
-                    <option value="cash">Cash</option>
-                    <option value="credit">Credit</option>
-                    <option value="consignment">Consignment</option>
-                </select>
-
-                <div style="display: flex; gap: 4px;">
-                    <button class="btn-edit">edit</button>
-                    <button class="btn-delete">delete</button>
-                    <button class="btn-save">Save</button>
-                </div>
-            </div>
-
-            <div class="voucher-row">
-                <span class="filter-label">Purchaser Voucher no -</span>
-                <div class="search-row">
-                    <span class="filter-label">User Name -</span>
-                    <input type="text" class="search-input" id="searchBox"
-                        placeholder="Screach ( - Item code / barcode / Description )">
-                </div>
-            </div>
+<body class="bg-transparent flex flex-col h-screen p-4 overflow-hidden">
+    <!-- Unified Toolbar (Individual Glass Pills) -->
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
+        <!-- Sync Status Pill -->
+        <div id="syncStatus" class="toolbar-pill pill-success">
+            <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
         </div>
 
-        <table class="data-table" id="purchaseTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Voucher no</th>
-                    <th>Supplier</th>
-                    <th>payment</th>
-                    <th>Shop</th>
-                    <th>Total Amount</th>
-                    <th>Net Amount</th>
-                    <th>paid Amount</th>
-                    <th>Remain Amount</th>
-                    <th>payment Stat</th>
-                    <th>Remark</th>
-                </tr>
-            </thead>
-            <tbody id="purchaseTableBody">
-                <!-- Data will be loaded here -->
-            </tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td colspan="5" style="text-align: right;">Total</td>
-                    <td id="totalAmount">0</td>
-                    <td id="totalNet">0</td>
-                    <td id="totalPaid">0</td>
-                    <td colspan="3"></td>
-                </tr>
-            </tfoot>
-        </table>
+        <!-- Selection Segment (Pill) -->
+        <div id="bulkToolbar" class="toolbar-pill pill-primary hidden">
+            <span class="selected-count" style="color: inherit; font-size: inherit;"><span id="selectedCount">0</span>
+                Selected</span>
+            <i class="fas fa-trash pill-action" onclick="bulkDelete()" style="margin-left: 8px; color: #ef4444;"
+                title="Bulk Delete"></i>
+            <i class="fas fa-times pill-action" onclick="clearSelection()" style="margin-left: 4px; opacity: 0.6;"
+                title="Clear Selection"></i>
+        </div>
 
-        <div class="detail-section" id="detailSection">
-            Report Only For This AA - Detail Page
+        <!-- Spacer -->
+        <div style="flex: 1;"></div>
+
+        <!-- Action Pills -->
+        <div class="toolbar-pill pill-ghost pill-icon-only pill-action" onclick="refreshData()" title="Refresh">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+
+        <div class="toolbar-pill pill-primary pill-action" onclick="exportToExcel()" title="Export to Excel">
+            <i class="fas fa-file-excel"></i> Export
+        </div>
+
+        <div class="toolbar-pill pill-success pill-action"
+            onclick="if(window.parent && window.parent.switchView) window.parent.switchView('purchase-add'); else window.location.href='purchase-add.html';">
+            <i class="fas fa-plus"></i> New Purchase
         </div>
     </div>
 
+    <!-- Filters Section (Glass Layout) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4">
+        <div class="filter-pill">
+            <label class="filter-label">Date Filter</label>
+            <input type="date" id="filterDate" class="filter-input" onchange="applyFilters()">
+        </div>
+        <div class="filter-pill">
+            <label class="filter-label">Warehouse</label>
+            <select id="filterShop" class="filter-input" onchange="applyFilters()">
+                <option value="">All Warehouses</option>
+            </select>
+        </div>
+        <div class="filter-pill">
+            <label class="filter-label">Supplier</label>
+            <select id="filterSupplier" class="filter-input" onchange="applyFilters()">
+                <option value="">All Suppliers</option>
+            </select>
+        </div>
+        <div class="filter-pill">
+            <label class="filter-label">Payment</label>
+            <select id="filterPayment" class="filter-input" onchange="applyFilters()">
+                <option value="">All Types</option>
+                <option value="Cash">Cash</option>
+                <option value="Credit">Credit</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+        </div>
+        <div class="filter-pill lg:col-span-1 md:col-span-2 col-span-2">
+            <label class="filter-label">Global Search</label>
+            <input type="text" id="searchBox" class="filter-input" placeholder="Voucher / Supplier / Notes..."
+                oninput="applyFilters()">
+        </div>
+    </div>
+
+    <!-- Data Grid -->
+    <div class="sheet-container">
+        <div class="sheet-wrapper" id="gridWrapper">
+            <table class="excel-table" id="gridTable">
+                <thead>
+                    <tr id="gridHeader">
+                        <!-- Headers rendered by JS -->
+                    </tr>
+                </thead>
+                <tbody id="gridBody">
+                    <!-- Data loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals Footer (Integrated into sheet container for sticky effect) -->
+        <div
+            class="bg-[var(--bg-secondary)] border-t border-white/10 px-4 py-2 flex justify-between items-center text-[10px] font-black uppercase tracking-wider">
+            <div class="flex gap-6">
+                <div class="flex flex-col">
+                    <span class="text-[var(--text-muted)]">Subtotal</span>
+                    <span id="totalAmount" class="text-indigo-400 text-sm">0</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[var(--text-muted)]">Net Total</span>
+                    <span id="totalNet" class="text-emerald-400 text-sm">0</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[var(--text-muted)]">Paid</span>
+                    <span id="totalPaid" class="text-blue-400 text-sm">0</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[var(--text-muted)]">Remaining</span>
+                    <span id="totalRemain" class="text-rose-500 text-sm">0</span>
+                </div>
+            </div>
+            <div id="activityLog" class="text-[var(--text-muted)] text-[8px] italic">
+                Grid Ready
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState"
+            class="hidden absolute inset-0 flex flex-col items-center justify-center text-white/20 bg-black/40 backdrop-blur-sm z-[100]">
+            <i class="fas fa-inbox text-3xl mb-3"></i>
+            <span class="text-[10px] font-bold uppercase tracking-widest">No matching records</span>
+            <button onclick="resetFilters()"
+                class="mt-2 text-[var(--accent-indigo)] text-[9px] hover:underline uppercase font-bold">Reset
+                Filters</button>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="flex justify-between items-center px-1 pb-1 opacity-50">
+        <div class="flex items-center gap-2 text-[9px] font-bold uppercase tracking-wider">
+            <i class="fas fa-history"></i>
+            Last Sync: <span id="lastUpdated">...</span>
+        </div>
+        <div class="flex items-center gap-2 text-[9px] font-bold uppercase tracking-wider">
+            <i class="fas fa-check-circle text-emerald-500"></i>
+            Secure Database Connection Active
+        </div>
+    </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/purchase-list.js"></script>
 </body>
 

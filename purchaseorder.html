@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Return - Glass Pro</title>
+    <title>Purchase Order - Compact Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -133,29 +133,33 @@
         <div class="flex justify-between items-center px-1">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
-                    <label class="font-bold text-[var(--text-muted)] uppercase text-[9px]">Return Date</label>
-                    <input type="date" id="returnDate" class="glass-input !w-32">
+                    <label class="font-bold text-[var(--text-muted)] uppercase text-[9px]">Order Date</label>
+                    <input type="date" id="orderDate" class="glass-input !w-32">
                 </div>
                 <div class="flex items-center gap-2">
-                    <label class="font-bold text-[var(--text-muted)] uppercase text-[9px]">From Shop</label>
+                    <label class="font-bold text-[var(--text-muted)] uppercase text-[9px]">Requested Shop</label>
                     <select id="warehouseId" class="glass-input !w-48">
                         <option value="">Select Warehouse...</option>
                     </select>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="viewPurchaseOrders()"
-                    class="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-4 py-1.5 rounded font-bold text-[10px] transition-all">LOAD
-                    FROM PURCHASE</button>
-                <button onclick="viewRecentReturns()"
+                <button onclick="viewRecentOrders()"
                     class="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded font-bold text-[10px] transition-all">RECENT
-                    RETURNS</button>
-                <button onclick="submitReturn()"
-                    class="btn-submit px-5 py-1.5 rounded font-bold text-[10px] text-white">SAVE RETURN</button>
+                    ORDERS</button>
+                <button onclick="viewDrafts()"
+                    class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 px-4 py-1.5 rounded font-bold text-[10px] transition-all">DRAFT
+                    LIST</button>
+                <button onclick="saveDraft()"
+                    class="bg-slate-700 hover:bg-slate-600 px-5 py-1.5 rounded font-bold text-[10px] text-white transition-all">SAVE
+                    DRAFT</button>
+                <button onclick="submitOrder()"
+                    class="btn-submit px-5 py-1.5 rounded font-bold text-[10px] text-white">SUBMIT
+                    ORDER</button>
             </div>
         </div>
 
-        <!-- Return Header Metadata Block -->
+        <!-- Order Header Metadata Block -->
         <div class="glass-card rounded-lg p-3 grid grid-cols-4 gap-4">
             <div class="space-y-1">
                 <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Voucher Code</label>
@@ -168,25 +172,22 @@
                 </div>
             </div>
             <div class="space-y-1">
-                <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">To Supplier</label>
+                <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Target Supplier</label>
                 <select id="supplierId" class="glass-input">
                     <option value="">Select Supplier...</option>
                 </select>
             </div>
             <div class="space-y-1">
                 <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Reference No.</label>
-                <input type="text" id="purchaseRef" class="glass-input" placeholder="Optional reference to original PO">
+                <input type="text" id="referenceNo" class="glass-input" placeholder="-">
             </div>
             <div class="space-y-1">
-                <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Status</label>
-                <select id="returnStatus" class="glass-input">
-                    <option value="Completed">Completed</option>
-                    <option value="Pending">Pending</option>
-                </select>
+                <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Expected Delivery</label>
+                <input type="date" id="expectedDelivery" class="glass-input">
             </div>
         </div>
 
-        <!-- Main Items Table Area -->
+        <!-- Main Order Table Area -->
         <div class="table-container">
             <table class="w-full border-collapse" id="itemsTable">
                 <thead class="table-header">
@@ -200,12 +201,12 @@
                         <th class="w-24 text-right">Cost</th>
                         <th class="w-16 text-right">Disco</th>
                         <th class="w-24 text-right">Amount</th>
-                        <th class="w-48 remark-header">Reason ( Damage / Expiry / Other )</th>
+                        <th class="w-48 remark-header">Remark ( foc / Exchange / Damage )</th>
                         <th class="w-6 border-none"></th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="divide-y divide-white/5">
-                    <!-- Items will be rendered here -->
+                    <!-- Order Items will be rendered here -->
                 </tbody>
             </table>
         </div>
@@ -219,36 +220,38 @@
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Add New Item to Return
+                Add New Item to Order
             </button>
             <div id="loadedIndicator"
                 class="hidden text-amber-500 font-bold text-[9px] uppercase flex items-center gap-2">
-                <i class="fas fa-edit"></i> Editing Saved Return
+                <i class="fas fa-edit"></i> Editing Saved Order
                 <button onclick="window.location.reload()" class="text-white/20 hover:text-white">Clear</button>
             </div>
         </div>
 
         <!-- Order Footer Summary -->
+        <!-- Order Footer Summary -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <!-- Footer Inputs -->
             <div class="glass-card rounded-lg p-3 grid grid-cols-2 gap-3 col-span-3">
                 <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Return Tax (%)</label>
+                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Order Tax (%)</label>
                     <input type="number" id="taxPercent" oninput="calculateTotals()" value="0"
                         class="glass-input no-spinner" placeholder="0">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Total Discount</label>
+                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Order Discount</label>
                     <input type="number" id="overallDiscount" oninput="calculateTotals()" value="0"
                         class="glass-input no-spinner" placeholder="0">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Shipping / Other Cost</label>
+                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Shipping Cost</label>
                     <input type="number" id="shipping" oninput="calculateTotals()" value="0"
                         class="glass-input no-spinner" placeholder="0">
                 </div>
                 <div class="space-y-1 relative">
                     <label class="text-[9px] font-bold uppercase text-[var(--text-muted)] flex justify-between">
-                        Refund Amount (Paid)
+                        Paid Amount
                         <span id="remainBadge" class="text-[var(--warning-alert)] text-[9px] font-bold hidden">Rem:
                             0</span>
                     </label>
@@ -256,28 +259,31 @@
                         class="glass-input text-[var(--success-green)] font-bold no-spinner" placeholder="0">
                 </div>
 
+                <!-- Metadata -->
                 <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Refund Method</label>
-                    <select id="paymentType" class="glass-input">
-                        <option value="Cash">Cash</option>
-                        <option value="Credit Note">Credit Note</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
+                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Order Tax Code</label>
+                    <select id="taxCode" class="glass-input">
+                        <option value="0">Non-Taxable</option>
+                        <option value="7">Standard GST (7%)</option>
                     </select>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Payment Status</label>
-                    <select id="paymentStatus" class="glass-input">
-                        <option value="Paid">Received</option>
-                        <option value="Unpaid">Pending</option>
+                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)]">Payment Type</label>
+                    <select id="paymentType" class="glass-input">
+                        <option value="Cash">Cash</option>
+                        <option value="Credit">Credit</option>
+                        <option value="Consignment">Consignment</option>
                     </select>
                 </div>
 
+
+                <!-- Long Remark Bar -->
                 <div class="col-span-2 flex items-center gap-3">
-                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)] whitespace-nowrap">Return
-                        Notes</label>
+                    <label class="text-[9px] font-bold uppercase text-[var(--text-muted)] whitespace-nowrap">Notes /
+                        Remarks</label>
                     <input type="text" id="orderNote"
                         class="glass-input !rounded-none border-x-0 border-t-0 border-b border-white/20 bg-transparent focus:bg-white/5"
-                        placeholder="Enter general notes for this return...">
+                        placeholder="Enter general notes for this purchase order...">
                 </div>
             </div>
 
@@ -288,7 +294,7 @@
                     <span id="displaySubTotal" class="font-bold">0</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-white/5 pb-1">
-                    <span class="text-[var(--text-muted)] uppercase font-bold text-[8px]">Return Tax</span>
+                    <span class="text-[var(--text-muted)] uppercase font-bold text-[8px]">Order Tax</span>
                     <span id="displayTax" class="text-right">0</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-white/5 pb-1">
@@ -300,27 +306,26 @@
                     <span id="displayShipping" class="text-right">0</span>
                 </div>
                 <div class="mt-2 text-[var(--primary)] flex flex-col items-end">
-                    <span class="uppercase font-black text-[9px] mb-1">Total Refundable</span>
+                    <span class="uppercase font-black text-[9px] mb-1">Total Payable</span>
                     <div id="displayNet" class="text-2xl font-black leading-none">0</div>
                 </div>
                 <div class="pt-2 border-t border-white/10 flex justify-between items-center">
-                    <span class="text-[var(--warning-alert)] uppercase font-bold text-[8px]">Remain Balance</span>
+                    <span class="text-[var(--warning-alert)] uppercase font-bold text-[8px]">Remain Amount</span>
                     <span id="remainAmount" class="font-bold text-[var(--warning-alert)]">0</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Script stays here for now, as requested to be same design -->
     <script>
         let items = [];
         let suppliers = [];
         let warehouses = [];
         let productsMap = new Map();
-        let loadedReturnId = null;
+        let loadedOrderId = null;
 
         window.onload = () => {
-            document.getElementById('returnDate').valueAsDate = new Date();
+            document.getElementById('orderDate').valueAsDate = new Date();
             setTimeout(initData, 150);
         };
 
@@ -349,7 +354,7 @@
                 });
 
                 // Load Products
-                const { data: prodData } = await supabase.from('products').select('id, code, name, barcodes, cost, price, pcs_per_box');
+                const { data: prodData } = await supabase.from('products').select('id, code, name, barcodes, cost, price');
                 (prodData || []).forEach(p => {
                     productsMap.set(p.id, p);
                     if (p.code) productsMap.set(p.code, p);
@@ -364,6 +369,8 @@
                 alert('Failed to load data: ' + err.message);
             }
         }
+
+        let activeSearchIdx = -1;
 
         function renderTable() {
             const tbody = document.getElementById('tableBody');
@@ -389,11 +396,11 @@
                                onkeydown="handleGridKey(${index}, event)"
                                class="bg-transparent w-full outline-none p-2 ${isP && item.lastTyped !== 'description' ? 'preview-text' : ''}" placeholder="Description..."></td>
                     <td><input type="number" value="${item.qty || 0}" oninput="updateItem(${index}, 'qty', this.value)" class="bg-transparent w-full text-center outline-none no-spinner font-bold p-2"></td>
-                    <td><input type="text" value="${item.pcsBox || ''}" onchange="updateItem(${index}, 'pcsBox', this.value)" class="bg-transparent w-full outline-none p-2 text-center text-white/50"></td>
+                    <td><input type="text" value="${item.pcsBox || ''}" onchange="updateItem(${index}, 'pcsBox', this.value)" class="bg-transparent w-full outline-none p-2 text-center"></td>
                     <td><input type="number" value="${item.cost || 0}" oninput="updateItem(${index}, 'cost', this.value)" class="bg-transparent w-full outline-none text-right p-2 no-spinner ${isP ? 'preview-text' : ''}"></td>
                     <td><input type="text" value="${item.discount || '0'}" oninput="updateItem(${index}, 'discount', this.value)" class="bg-transparent w-full outline-none text-right p-2"></td>
                     <td class="text-right font-bold pr-3">${(item.amount || 0).toLocaleString()}</td>
-                    <td><input type="text" value="${item.remark || ''}" onchange="updateItem(${index}, 'remark', this.value)" class="bg-transparent w-full outline-none italic text-[var(--warning-alert)] px-2" placeholder="Damage?"></td>
+                    <td><input type="text" value="${item.remark || ''}" onchange="updateItem(${index}, 'remark', this.value)" class="bg-transparent w-full outline-none italic text-[var(--warning-alert)] px-2"></td>
                     <td class="text-center border-none"><button onclick="removeRow(${index})" class="text-white/20 hover:text-red-500 font-bold transition-all px-2 text-lg">×</button></td>
                 `;
                 tbody.appendChild(tr);
@@ -408,6 +415,7 @@
             if (!query || query.length < 1) {
                 items[idx].isPreview = false;
                 items[idx].tempProductId = null;
+                // Don't clear EVERYTHING, let user type
                 return;
             }
 
@@ -427,14 +435,17 @@
                 items[idx].description = product.name || items[idx].description;
                 items[idx].cost = product.cost || product.price || 0;
 
+                // Surgical update to UI to show "demo" state
                 const row = document.getElementById('tableBody').children[idx];
                 if (row) {
                     const inputs = row.querySelectorAll('input');
+                    // indices: 0:itemCode, 1:barcode, 2:description, 3:qty, 4:pcsBox, 5:cost, 6:discount
                     if (field !== 'itemCode') inputs[0].value = product.code || '';
                     if (field !== 'barcode') inputs[1].value = product.barcodes?.[0] || '';
                     if (field !== 'description') inputs[2].value = product.name || '';
                     inputs[5].value = product.cost || product.price || 0;
 
+                    // Apply preview styling
                     inputs.forEach((inp, i) => {
                         if ([0, 1, 2, 5].includes(i)) {
                             const fNames = ['itemCode', 'barcode', 'description', 'cost'];
@@ -447,6 +458,7 @@
             } else {
                 items[idx].isPreview = false;
                 items[idx].tempProductId = null;
+                // Remove preview styling
                 const row = document.getElementById('tableBody').children[idx];
                 if (row) {
                     row.querySelectorAll('input').forEach(inp => inp.classList.remove('preview-text'));
@@ -490,6 +502,7 @@
 
             renderTable();
 
+            // Focus quantity field
             setTimeout(() => {
                 const row = document.getElementById('tableBody').children[idx];
                 if (row) {
@@ -502,6 +515,7 @@
             }, 50);
         }
 
+
         function updateItem(index, field, value) {
             items[index][field] = value;
             if (['qty', 'cost', 'discount', 'pcsBox'].includes(field)) {
@@ -511,6 +525,9 @@
                 let d = dStr.includes('%') ? (parseFloat(dStr) / 100) * (qty * cost) : parseFloat(dStr) || 0;
                 items[index].amount = (qty * cost) - d;
 
+                // Don't re-render if it's just a value update (to prevent losing focus)
+                // However, renderTable is needed to update the 'Amount' display
+                // We'll surgically update the amount cell
                 const row = document.getElementById('tableBody').children[index];
                 if (row) {
                     const amountCell = row.children[8];
@@ -519,7 +536,6 @@
                 calculateTotals();
             }
         }
-
         function addRow() {
             items.push({
                 product_id: null,
@@ -574,11 +590,15 @@
         function generateVoucherCode() {
             const now = new Date();
             const date = now.toISOString().slice(0, 10).replace(/-/g, '');
-            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            return `PR-${date}-${random}`;
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `PO-${date}-${random}`;
         }
 
-        async function submitReturn() {
+        async function saveDraft() {
+            await submitOrder('Draft');
+        }
+
+        async function submitOrder(status = 'Ordered') {
             try {
                 const supplier_id = document.getElementById('supplierId').value;
                 const warehouse_id = document.getElementById('warehouseId').value;
@@ -588,14 +608,15 @@
                     return;
                 }
 
-                const validItems = items.filter(i => i.product_id && i.qty > 0);
-                if (validItems.length === 0) {
-                    alert('⚠️ Please add at least one valid item to return.');
+                const validItems = items.filter(i => (i.product_id || status === 'Draft') && (i.qty > 0 || status === 'Draft'));
+                if (validItems.length === 0 && status !== 'Draft') {
+                    alert('⚠️ Please add at least one valid item.');
                     return;
                 }
 
                 let ref_code = document.getElementById('voucherCode').value || generateVoucherCode();
 
+                // Calculate totals for saving
                 const sub = validItems.reduce((acc, i) => acc + i.amount, 0);
                 const taxP = parseFloat(document.getElementById('taxPercent').value) || 0;
                 const disc = parseFloat(document.getElementById('overallDiscount').value) || 0;
@@ -605,14 +626,15 @@
                 const taxA = (sub * taxP) / 100;
                 const net = sub + taxA + ship - disc;
 
-                const returnData = {
+                const orderData = {
                     reference_no: ref_code,
-                    date: document.getElementById('returnDate').value || new Date().toISOString().split('T')[0],
+                    date: document.getElementById('orderDate').value || new Date().toISOString().split('T')[0],
                     supplier_id,
                     warehouse_id,
-                    status: document.getElementById('returnStatus').value,
+                    status: status,
                     payment_status: paid >= net ? 'Paid' : (paid > 0 ? 'Partial' : 'Unpaid'),
                     payment_type: document.getElementById('paymentType').value,
+                    total_qty: validItems.reduce((acc, i) => acc + (parseFloat(i.qty) || 0), 0),
                     grand_total: net,
                     order_tax_percentage: taxP,
                     order_tax_amount: taxA,
@@ -620,113 +642,216 @@
                     shipping_amount: ship,
                     paid_amount: paid,
                     note: document.getElementById('orderNote').value || null,
-                    // original_purcase_ref linked optionally
-                    note: (document.getElementById('purchaseRef').value ? `[PO REF: ${document.getElementById('purchaseRef').value}] ` : '') + (document.getElementById('orderNote').value || '')
+                    // Additional Metadata
+                    shipping_method: document.getElementById('shippingMethod').value,
+                    priority: document.getElementById('priority').value,
+                    agent_name: document.getElementById('agentName').value,
+                    instructions: document.getElementById('orderInstructions').value,
+                    expected_delivery: document.getElementById('expectedDelivery').value || null
                 };
 
-                const { data: retData, error: retErr } = await supabase.from('purchase_returns').insert(returnData).select().single();
-                if (retErr) throw retErr;
-                const returnId = retData.id;
+                let purchaseId;
+                if (loadedOrderId) {
+                    const { data: pData, error: pErr } = await supabase.from('purchases').update(orderData).eq('id', loadedOrderId).select().single();
+                    if (pErr) throw pErr;
+                    purchaseId = pData.id;
+                    // Delete old items for clean re-insertion
+                    await supabase.from('purchase_items').delete().eq('purchase_id', purchaseId);
+                } else {
+                    const { data: pData, error: pErr } = await supabase.from('purchases').insert(orderData).select().single();
+                    if (pErr) throw pErr;
+                    purchaseId = pData.id;
+                }
 
                 // Insert items
                 const itemsToInsert = validItems.map(item => ({
-                    return_id: returnId,
+                    purchase_id: purchaseId,
                     product_id: item.product_id,
                     quantity: parseFloat(item.qty) || 0,
                     unit_cost: parseFloat(item.cost) || 0,
                     discount_amount: parseFloat(item.discount) || 0,
+                    discount_amount: parseFloat(item.discount) || 0,
                     subtotal: item.amount,
+                    pcs_box: item.pcsBox,
                     remark: item.remark
                 }));
 
-                const { error: itemErr } = await supabase.from('purchase_return_items').insert(itemsToInsert);
-                if (itemErr) throw itemErr;
-
-                // UPDATE STOCK (DECREMENT)
-                if (returnData.status === 'Completed') {
-                    for (const item of validItems) {
-                        const amount = -(parseFloat(item.qty) * (parseFloat(item.pcsBox) || 1));
-                        const { error: stockErr } = await supabase.rpc('increment_stock', {
-                            row_id: item.product_id,
-                            amount: amount
-                        });
-                        if (stockErr) console.error('Stock Update Error:', stockErr);
-                    }
+                if (itemsToInsert.length > 0) {
+                    const { error: itemErr } = await supabase.from('purchase_items').insert(itemsToInsert);
+                    if (itemErr) throw itemErr;
                 }
 
                 document.getElementById('voucherCode').value = ref_code;
                 document.getElementById('copyBtn').classList.remove('hidden');
-                showSuccessModal(ref_code);
+
+                const isDraft = status === 'Draft';
+                showSuccessModal(ref_code, isDraft);
 
             } catch (err) {
                 console.error('Save error:', err);
-                alert('❌ Failed to save return: ' + err.message);
+                alert('❌ Failed to save order: ' + err.message);
             }
         }
 
-        function showSuccessModal(code) {
+        function showSuccessModal(code, isDraft) {
             let modalHtml = `
-                <div id="successModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15, 23, 42, 0.85);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);">
-                    <div class="glass-card" style="padding:40px;max-width:420px;width:95%;text-align:center;border-radius:24px;box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-                        <div style="font-size:50px;margin-bottom:20px;">🔄</div>
-                        <h2 style="color:#fff;margin-bottom:10px;font-size:24px;font-weight:800;letter-spacing:-0.5px;">Return Saved!</h2>
-                        <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">The purchase return and stock adjustments have been processed.</p>
-                        
-                        <div style="background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;margin-bottom:24px;border:1px dashed var(--primary); display:flex; align-items:center; justify-content:center; gap:10px;">
-                            <span style="color:var(--primary);font-family:monospace;font-size:20px;font-weight:800;letter-spacing:1px;">${code}</span>
-                        </div>
+                    <div id="successModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15, 23, 42, 0.85);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);">
+                        <div class="glass-card" style="padding:40px;max-width:420px;width:95%;text-align:center;border-radius:24px;box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                            <div style="font-size:50px;margin-bottom:20px;">${isDraft ? '💾' : '✨'}</div>
+                            <h2 style="color:#fff;margin-bottom:10px;font-size:24px;font-weight:800;letter-spacing:-0.5px;">${isDraft ? 'Draft Saved!' : 'Order Submitted!'}</h2>
+                            <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">${isDraft ? 'Your progress has been saved as a draft.' : 'Purchase order successfully synced to system.'}</p>
+                            
+                            <div style="background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;margin-bottom:24px;border:1px dashed var(--primary); display:flex; align-items:center; justify-content:center; gap:10px;">
+                                <span style="color:var(--primary);font-family:monospace;font-size:20px;font-weight:800;letter-spacing:1px;">${code}</span>
+                                <button onclick="copyToClipboard('${code}')" class="text-white/20 hover:text-white transition-colors" title="Copy Code">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
 
-                        <div style="display:flex;gap:12px;justify-content:center;">
-                            <button onclick="window.location.reload()" style="flex:1;background:rgba(255,255,255,0.1);color:white;padding:12px;border-radius:12px;font-weight:700;font-size:12px;border:none;">NEW RETURN</button>
-                            <button onclick="document.getElementById('successModal').remove()" style="flex:1;background:var(--primary);color:white;padding:12px;border-radius:12px;font-weight:700;font-size:12px;">CLOSE</button>
+                            <div style="display:flex;gap:12px;justify-content:center;">
+                                <button onclick="window.location.reload()" style="flex:1;background:rgba(255,255,255,0.1);color:white;padding:12px;border-radius:12px;font-weight:700;font-size:12px;cursor:pointer;border:none;">NEW ORDER</button>
+                                <button onclick="document.getElementById('successModal').remove()" style="flex:1;background:var(--primary);color:white;padding:12px;border-radius:12px;font-weight:700;font-size:12px;">KEEP EDITING</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
-        async function viewPurchaseOrders() {
+        async function viewRecentOrders() {
+            await listOrders('Ordered', '📋 RECENT PURCHASE ORDERS');
+        }
+
+        async function viewDrafts() {
+            await listOrders('Draft', '💾 SAVED DRAFTS');
+        }
+
+        async function listOrders(status, title) {
             try {
                 const { data, error } = await supabase
                     .from('purchases')
                     .select('*, supplier:suppliers(name)')
-                    .eq('status', 'Received')
+                    .eq('status', status)
                     .order('date', { ascending: false })
                     .limit(20);
 
                 if (error) throw error;
-                if (!data || data.length === 0) { alert('No received purchase orders found.'); return; }
+
+                if (!data || data.length === 0) {
+                    alert(`No ${status.toLowerCase()} orders found.`);
+                    return;
+                }
 
                 let html = `<div id="listModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15, 23, 42, 0.9);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(15px);" onclick="this.remove()">`;
-                html += `<div class="glass-card" style="padding:30px;max-width:900px;width:95%;max-height:85vh;overflow-y:auto;border-radius:24px;" onclick="event.stopPropagation()">`;
-                html += `<h2 style="color:var(--primary);font-size:20px;font-weight:800;margin-bottom:20px;">📦 SELECT PURCHASE TO RETURN</h2>`;
-                html += `<table style="width:100%; border-collapse:collapse;">`;
-                html += `<thead><tr style="border-bottom:2px solid rgba(255,255,255,0.1);"><th style="text-align:left;padding:10px;font-size:10px;color:var(--text-muted);">REF</th><th style="padding:10px;font-size:10px;color:var(--text-muted);">SUPPLIER</th><th style="text-align:right;padding:10px;font-size:10px;color:var(--text-muted);">TOTAL</th><th style="text-align:center;padding:10px;font-size:10px;color:var(--text-muted);">ACTION</th></tr></thead><tbody>`;
+                html += `<div class="glass-card" style="padding:30px;max-width:900px;width:95%;max-height:85vh;overflow-y:auto;border-radius:24px; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.6);" onclick="event.stopPropagation()">`;
+                html += `<div class="flex justify-between items-center mb-6">`;
+                html += `<h2 style="color:var(--primary);font-size:20px;font-weight:800;letter-spacing:-0.5px;">${title}</h2>`;
+                html += `<button onclick="this.closest('#listModal').remove()" style="color:var(--text-muted);font-size:28px;line-height:1;">×</button>`;
+                html += `</div>`;
+                html += `<table style="width:100%;border-collapse:collapse;">`;
+                html += `<thead><tr style="border-bottom:2px solid rgba(255,255,255,0.1);"><th style="text-align:left;padding:12px;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;">Reference</th><th style="text-align:left;padding:12px;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;">Date</th><th style="text-align:left;padding:12px;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;">Supplier</th><th style="text-align:right;padding:12px;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;">Grand Total</th><th style="text-align:center;padding:12px;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;">Action</th></tr></thead>`;
+                html += `<tbody>`;
 
-                data.forEach(p => {
-                    html += `<tr class="border-b border-white/5 hover:bg-white/5">
-                        <td class="p-3 text-[var(--primary)] font-bold">${p.reference_no}</td>
-                        <td class="p-3">${p.supplier?.name}</td>
-                        <td class="p-3 text-right">${p.grand_total.toLocaleString()} Ks</td>
-                        <td class="p-3 text-center"><button onclick="loadFromPurchase('${p.id}'); this.closest('#listModal').remove();" class="bg-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded font-bold">LOAD</button></td>
-                    </tr>`;
+                data.forEach(order => {
+                    html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);" class="hover:bg-white/5 transition-colors">`;
+                    html += `<td style="padding:12px;color:var(--primary);font-weight:700;font-size:12px;">
+                        <div class="flex items-center gap-2">
+                            ${order.reference_no}
+                            <button onclick="copyToClipboard('${order.reference_no}')" class="w-6 h-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/20 text-indigo-300 hover:text-white transition-all border border-white/5 hover:border-white/20" title="Copy">
+                                <i class="fas fa-copy text-[10px]"></i>
+                            </button>
+                        </div>
+                    </td>`;
+                    html += `<td style="padding:12px;color:#f1f5f9;font-size:12px;">${new Date(order.date).toLocaleDateString()}</td>`;
+                    html += `<td style="padding:12px;color:#f1f5f9;font-size:12px;">${order.supplier?.name || 'N/A'}</td>`;
+                    html += `<td style="padding:12px;color:var(--success);font-weight:700;text-align:right;font-size:12px;">${order.grand_total.toLocaleString()} Ks</td>`;
+                    html += `<td style="padding:12px;text-align:center;">
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="loadOrder('${order.id}'); this.closest('#listModal').remove();" class="bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-400 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all">LOAD</button>
+                            <button onclick="deleteOrder('${order.id}', '${status}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>`;
+                    html += `</tr>`;
                 });
-                html += `</tbody></table></div></div>`;
+
+                html += `</tbody></table>`;
+                html += `</div></div>`;
+
                 document.body.insertAdjacentHTML('beforeend', html);
-            } catch (err) { alert(err.message); }
+
+            } catch (err) {
+                console.error('Load orders error:', err);
+                alert('Failed to load orders: ' + err.message);
+            }
         }
 
-        async function loadFromPurchase(id) {
+        async function deleteOrder(id, currentStatus) {
+            if (!confirm(`Are you sure you want to delete this ${currentStatus.toLowerCase()}? This cannot be undone.`)) return;
+
             try {
-                const { data: purchase, error } = await supabase.from('purchases').select('*, purchase_items(*)').eq('id', id).single();
+                // Delete items first (foreign key constraint)
+                const { error: itemErr } = await supabase.from('purchase_items').delete().eq('purchase_id', id);
+                if (itemErr) throw itemErr;
+
+                // Delete purchase
+                const { error: pErr } = await supabase.from('purchases').delete().eq('id', id);
+                if (pErr) throw pErr;
+
+                alert('Successfully deleted.');
+
+                // Refresh list if modal is open
+                const modal = document.getElementById('listModal');
+                if (modal) {
+                    modal.remove();
+                    listOrders(currentStatus, currentStatus === 'Draft' ? '💾 SAVED DRAFTS' : '📋 RECENT PURCHASE ORDERS');
+                }
+
+                // If we were editing this specific order, clear the form
+                if (loadedOrderId === id) {
+                    window.location.reload();
+                }
+
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('Failed to delete order: ' + err.message);
+            }
+        }
+
+        async function loadOrder(id) {
+            try {
+                const { data: order, error } = await supabase
+                    .from('purchases')
+                    .select('*, purchase_items(*)')
+                    .eq('id', id)
+                    .single();
+
                 if (error) throw error;
 
-                document.getElementById('supplierId').value = purchase.supplier_id;
-                document.getElementById('warehouseId').value = purchase.warehouse_id;
-                document.getElementById('purchaseRef').value = purchase.reference_no;
+                loadedOrderId = order.id;
+                document.getElementById('voucherCode').value = order.reference_no;
+                document.getElementById('orderDate').value = order.date;
+                document.getElementById('supplierId').value = order.supplier_id;
+                document.getElementById('warehouseId').value = order.warehouse_id;
+                document.getElementById('referenceNo').value = order.reference_no_ext || '';
+                document.getElementById('orderNote').value = order.note || '';
+                document.getElementById('shippingMethod').value = order.shipping_method || '';
+                document.getElementById('priority').value = order.priority || 'Normal';
+                document.getElementById('agentName').value = order.agent_name || '';
+                document.getElementById('orderInstructions').value = order.instructions || '';
+                document.getElementById('expectedDelivery').value = order.expected_delivery || '';
 
-                items = purchase.purchase_items.map(pi => {
+                // Restore Financials
+                document.getElementById('taxPercent').value = order.order_tax_percentage || 0;
+                document.getElementById('overallDiscount').value = order.discount_amount || 0;
+                document.getElementById('shipping').value = order.shipping_amount || 0;
+                document.getElementById('paidAmount').value = order.paid_amount || 0;
+                document.getElementById('paymentType').value = order.payment_type || 'Cash';
+                // taxCode might differ per implementation, assuming defaults for now or if saved
+
+                document.getElementById('copyBtn').classList.remove('hidden');
+                document.getElementById('loadedIndicator').classList.remove('hidden');
+
+                items = order.purchase_items.map(pi => {
                     const prod = productsMap.get(pi.product_id);
                     return {
                         product_id: pi.product_id,
@@ -734,124 +859,34 @@
                         barcode: prod?.barcodes?.[0] || '',
                         description: prod?.name || '',
                         qty: pi.quantity,
-                        pcsBox: pi.pcs_box || prod?.pcs_per_box || 1,
+                        pcsBox: pi.pcs_box,
                         cost: pi.unit_cost,
-                        discount: pi.discount_amount || 0,
+                        discount: pi.discount_amount,
                         amount: pi.subtotal,
-                        remark: '',
-                        isPreview: false
-                    };
-                });
-
-                renderTable();
-            } catch (err) { alert(err.message); }
-        }
-
-        async function viewRecentReturns() {
-            try {
-                const { data, error } = await supabase
-                    .from('purchase_returns')
-                    .select('*, supplier:suppliers(name)')
-                    .order('date', { ascending: false })
-                    .limit(20);
-
-                if (error) throw error;
-                if (!data || data.length === 0) { alert('No returns found.'); return; }
-
-                let html = `<div id="listModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15, 23, 42, 0.9);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(15px);" onclick="this.remove()">`;
-                html += `<div class="glass-card" style="padding:30px;max-width:900px;width:95%;max-height:85vh;overflow-y:auto;border-radius:24px;" onclick="event.stopPropagation()">`;
-                html += `<div class="flex justify-between items-center mb-6">`;
-                html += `<h2 style="color:var(--primary);font-size:20px;font-weight:800;">🔄 RECENT PURCHASE RETURNS</h2>`;
-                html += `<button onclick="this.closest('#listModal').remove()" style="color:var(--text-muted);font-size:28px;line-height:1;">×</button>`;
-                html += `</div>`;
-                html += `<table style="width:100%; border-collapse:collapse;">`;
-                html += `<thead><tr style="border-bottom:2px solid rgba(255,255,255,0.1);"><th style="text-align:left;padding:10px;font-size:10px;color:var(--text-muted);">REF</th><th style="padding:10px;font-size:10px;color:var(--text-muted);">DATE</th><th style="padding:10px;font-size:10px;color:var(--text-muted);">SUPPLIER</th><th style="text-align:right;padding:10px;font-size:10px;color:var(--text-muted);">TOTAL</th><th style="text-align:center;padding:10px;font-size:10px;color:var(--text-muted);">ACTION</th></tr></thead><tbody>`;
-
-                data.forEach(r => {
-                    html += `<tr class="border-b border-white/5 hover:bg-white/5">
-                        <td class="p-3 text-[var(--primary)] font-bold">${r.reference_no}</td>
-                        <td class="p-3">${new Date(r.date).toLocaleDateString()}</td>
-                        <td class="p-3">${r.supplier?.name || 'N/A'}</td>
-                        <td class="p-3 text-right font-bold text-white">${(r.grand_total || 0).toLocaleString()} Ks</td>
-                        <td class="p-3 text-center">
-                            <div class="flex gap-2 justify-center">
-                                <button onclick="loadReturn('${r.id}'); this.closest('#listModal').remove();" class="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded font-bold text-[10px]">LOAD</button>
-                                <button onclick="deleteReturn('${r.id}')" class="bg-red-500/10 text-red-400 px-3 py-1 rounded font-bold text-[10px]"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>`;
-                });
-                html += `</tbody></table></div></div>`;
-                document.body.insertAdjacentHTML('beforeend', html);
-            } catch (err) { alert(err.message); }
-        }
-
-        async function loadReturn(id) {
-            try {
-                const { data: ret, error } = await supabase.from('purchase_returns').select('*, purchase_return_items(*)').eq('id', id).single();
-                if (error) throw error;
-
-                loadedReturnId = ret.id;
-                document.getElementById('returnDate').value = ret.date;
-                document.getElementById('warehouseId').value = ret.warehouse_id;
-                document.getElementById('supplierId').value = ret.supplier_id;
-                document.getElementById('voucherCode').value = ret.reference_no;
-                document.getElementById('taxPercent').value = ret.order_tax_percentage || 0;
-                document.getElementById('overallDiscount').value = ret.discount_amount || 0;
-                document.getElementById('shipping').value = ret.shipping_amount || 0;
-                document.getElementById('paidAmount').value = ret.paid_amount || 0;
-                document.getElementById('paymentType').value = ret.payment_type || 'Cash';
-                document.getElementById('paymentStatus').value = ret.payment_status || 'Paid';
-
-                // Note handling
-                let cleanedNote = ret.note || '';
-                const poMatch = cleanedNote.match(/\[PO REF: (.*?)\]/);
-                if (poMatch) {
-                    document.getElementById('purchaseRef').value = poMatch[1];
-                    cleanedNote = cleanedNote.replace(/\[PO REF: (.*?)\]\s*/, '');
-                }
-                document.getElementById('orderNote').value = cleanedNote;
-
-                items = ret.purchase_return_items.map(ri => {
-                    const prod = productsMap.get(ri.product_id);
-                    return {
-                        product_id: ri.product_id,
-                        itemCode: prod?.code || '',
-                        barcode: prod?.barcodes?.[0] || '',
-                        description: prod?.name || '',
-                        qty: ri.quantity,
-                        pcsBox: ri.pcs_box || prod?.pcs_per_box || 1,
-                        cost: ri.unit_cost,
-                        discount: ri.discount_amount || 0,
-                        amount: ri.subtotal,
-                        remark: ri.remark || '',
-                        isPreview: false
+                        remark: pi.remark,
+                        isPreview: false,
+                        tempProductId: null
                     };
                 });
 
                 if (items.length === 0) addRow();
                 renderTable();
+                calculateTotals();
 
-                document.getElementById('loadedIndicator').classList.remove('hidden');
-                document.getElementById('copyBtn').classList.remove('hidden');
-
-            } catch (err) { alert(err.message); }
-        }
-
-        async function deleteReturn(id) {
-            if (!confirm('Are you sure you want to delete this return? Stock will NOT be automatically reverted.')) return;
-            try {
-                await supabase.from('purchase_return_items').delete().eq('return_id', id);
-                const { error } = await supabase.from('purchase_returns').delete().eq('id', id);
-                if (error) throw error;
-                alert('Deleted successfully.');
-                if (typeof viewRecentReturns === 'function') viewRecentReturns(); // Refresh list
-            } catch (err) { alert(err.message); }
+            } catch (err) {
+                console.error('Load error:', err);
+                alert('Failed to load order detalles.');
+            }
         }
 
         function copyToClipboard(text) {
+            if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
-                alert('Copied: ' + text);
+                const toast = document.createElement('div');
+                toast.style = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:10px 20px;border-radius:30px;font-weight:700;font-size:12px;z-index:100000;box-shadow:var(--shadow-glow);";
+                toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Copied to Clipboard!`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
             });
         }
     </script>

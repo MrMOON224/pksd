@@ -17,68 +17,236 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/dashboard.css">
 
     <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+        }
+
+        body {
+            background-color: transparent;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: var(--space-md);
+            overflow-x: hidden;
+        }
+
+        /* Unified Glass Pill Design System */
+        .toolbar-pill {
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 19px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            cursor: default;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .pill-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .pill-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .pill-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .pill-primary {
+            background: rgba(79, 70, 229, 0.1);
+            color: #818cf8;
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .pill-ghost {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .pill-action {
+            cursor: pointer;
+        }
+
+        .pill-action:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .pill-icon-only {
+            width: 38px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Row Action & Checkbox Styles */
+        .btn-premium-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-premium-delete:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Custom Checkbox */
+        .checkbox-container {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            width: 20px;
+            height: 20px;
+            margin: 0 auto;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-container:hover input~.checkmark {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .checkbox-container input:checked~.checkmark {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-container input:checked~.checkmark:after {
+            display: block;
+        }
+
         /* Excel-like Grid Styles */
         .excel-grid-container {
-            overflow-x: auto;
+            overflow: auto;
             background: var(--bg-secondary);
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            height: calc(100vh - 100px);
         }
 
         .excel-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
-            /* Ensure horizontal scroll on small screens */
+            table-layout: fixed;
         }
 
         .excel-table th,
         .excel-table td {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 0;
             position: relative;
         }
 
         .excel-table th {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
             padding: var(--space-sm) var(--space-md);
             text-align: left;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .excel-input {
             width: 100%;
-            height: 100%;
+            height: 44px;
             background: transparent;
             border: none;
             color: var(--text-primary);
-            padding: var(--space-sm) var(--space-md);
+            padding: 0 var(--space-md);
             font-family: 'Inter', sans-serif;
-            font-size: 0.9375rem;
-            min-height: 44px;
-            /* Touch friendly */
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s ease;
         }
 
         .excel-input:focus {
-            outline: 2px solid var(--primary);
             background: rgba(255, 255, 255, 0.05);
-            z-index: 10;
-            position: relative;
+            box-shadow: inset 0 0 0 1px var(--primary);
         }
 
         .excel-tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .excel-tr.new-row td {
-            background: rgba(99, 102, 241, 0.05);
+            background: rgba(255, 255, 255, 0.01);
         }
 
         .excel-tr.modified td::after {
@@ -90,329 +258,91 @@
             height: 0;
             border-style: solid;
             border-width: 0 6px 6px 0;
-            border-color: transparent var(--warning) transparent transparent;
-        }
-
-        .action-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding: 0 5px;
-        }
-
-        .btn-icon {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 5px;
-            font-size: 1rem;
-            transition: color 0.2s;
-        }
-
-        .btn-icon:hover {
-            color: var(--error);
+            border-color: transparent #f59e0b transparent transparent;
         }
 
         /* Toolbar */
         .grid-toolbar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 8px;
             margin-bottom: var(--space-md);
             flex-wrap: wrap;
-            gap: var(--space-md);
-        }
-
-        /* Touch Optimization Highlighting */
-        @media (pointer: coarse) {
-            .excel-input {
-                min-height: 50px;
-                /* Even larger for touch */
-                font-size: 1rem;
-            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Sidebar Overlay for Mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Dashboard Layout -->
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <!-- Sidebar Header -->
-            <div class="sidebar-header">
-                <a href="admin-dashboard.html" class="sidebar-logo">
-                    <i class="fas fa-cash-register"></i>
-                    <span>POS System</span>
-                </a>
-            </div>
-
-            <!-- Sidebar Navigation -->
-            <nav class="sidebar-nav">
-                <!-- Main Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Main</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="admin-dashboard.html" class="nav-link">
-                                <i class="fas fa-th-large"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Inventory Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Inventory</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item has-submenu active">
-                            <a href="#" class="nav-link dropdown-toggle">
-                                <div style="display:flex; align-items:center; gap:var(--space-md); flex:1;">
-                                    <i class="fas fa-boxes"></i>
-                                    <span>Products</span>
-                                </div>
-                                <i class="fas fa-chevron-right nav-arrow"></i>
-                            </a>
-                            <ul class="submenu">
-                                <li class="nav-item">
-                                    <a href="products.html" class="nav-link active">Product Manager</a>
-                                </li>
-                                <!-- Removed separate Add Product link as it's now integrated -->
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Product Categories</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Variations</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Brands</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Units</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Base Units</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Print Barcode</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-sliders-h"></i>
-                                <span>Adjustments</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-warehouse"></i>
-                                <span>Warehouse</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Sales & Purchases Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Transactions</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-file-invoice"></i>
-                                <span>Quotations</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Purchases</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-cash-register"></i>
-                                <span>Sales</span>
-                                <span class="nav-badge">NEW</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-exchange-alt"></i>
-                                <span>Transfers</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Finance Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Finance</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-receipt"></i>
-                                <span>Expenses</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- People Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">People</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-users"></i>
-                                <span>Peoples</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-user-shield"></i>
-                                <span>Roles/Permissions</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Reports Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Analytics</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Reports</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Settings Section -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Settings</div>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-dollar-sign"></i>
-                                <span>Currencies</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-language"></i>
-                                <span>Languages</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-file-alt"></i>
-                                <span>Templates</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Main Content Wrapper -->
-        <div class="main-wrapper">
-            <!-- Top Navbar -->
-            <nav class="top-navbar">
-                <div class="navbar-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="page-title-nav">Products</h1>
-                </div>
-
-                <div class="navbar-right">
-                    <!-- Search Bar -->
-                    <div class="navbar-search">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search products...">
-                    </div>
-
-                    <!-- Navbar Icons -->
-                    <div class="navbar-icons">
-                        <button class="navbar-icon">
-                            <i class="fas fa-bell"></i>
-                            <span class="badge">3</span>
-                        </button>
-                        <button class="navbar-icon">
-                            <i class="fas fa-envelope"></i>
-                            <span class="badge">5</span>
-                        </button>
-                    </div>
-
-                    <!-- User Menu -->
-                    <div class="user-menu">
-                        <div class="user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="user-details">
-                            <div class="user-name-nav" id="userName">Admin</div>
-                            <div class="user-role-nav" id="userRole">Administrator</div>
-                        </div>
-                        <button class="btn btn-secondary btn-sm" onclick="logout()">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- Dashboard Content -->
-            <main class="dashboard-content">
-                <!-- Toolbar -->
-                <div class="grid-toolbar">
-                    <h1 class="page-title" style="margin:0;">Product Manager</h1>
-
-                    <div style="display: flex; gap: var(--space-sm);">
-                        <button class="btn btn-secondary" onclick="loadProducts()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                        <button class="btn btn-primary" onclick="addNewRow()">
-                            <i class="fas fa-plus"></i> Add Row
-                        </button>
-                        <button class="btn btn-success" onclick="saveAllChanges()" id="saveBtn">
-                            <i class="fas fa-save"></i> Save Changes
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Excel-like Grid -->
-                <div class="excel-grid-container fade-in">
-                    <table class="excel-table" id="productsGrid">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;"></th>
-                                <th>Name *</th>
-                                <th style="width: 120px;">Code/SKU</th>
-                                <th style="width: 150px;">Category</th>
-                                <th style="width: 120px;">Brand</th>
-                                <th style="width: 100px;">Price *</th>
-                                <th style="width: 100px;">Cost</th>
-                                <th style="width: 80px;">Qty</th>
-                                <th style="width: 80px;">Unit</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsBody">
-                            <!-- Rows will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-
-            </main>
+    <!-- Unified Toolbar (Individual Glass Pills) -->
+    <div class="grid-toolbar">
+        <!-- Sync Status Pill -->
+        <div id="syncStatus" class="toolbar-pill pill-success">
+            <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
         </div>
+
+        <!-- Selection Segment (Pill) - Placeholder for future bulk actions -->
+        <div id="bulkToolbar" class="toolbar-pill pill-primary hidden">
+            <span class="selected-count" style="color: inherit; font-size: inherit;"><span id="selectedCount">0</span>
+                Selected</span>
+            <i class="fas fa-trash pill-action" onclick="bulkDelete()" style="margin-left: 8px; color: #ef4444;"
+                title="Bulk Delete"></i>
+            <i class="fas fa-times pill-action" onclick="clearSelection()" style="margin-left: 4px; opacity: 0.6;"
+                title="Clear Selection"></i>
+        </div>
+
+        <!-- Spacer -->
+        <div style="flex: 1;"></div>
+
+        <!-- Action Pills -->
+        <div class="toolbar-pill pill-ghost pill-icon-only pill-action" onclick="loadProducts()" title="Refresh">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+
+        <div class="toolbar-pill pill-primary pill-action" onclick="addNewRow()">
+            <i class="fas fa-plus"></i> Add Product
+        </div>
+
+        <div class="toolbar-pill pill-success pill-action" onclick="saveAllChanges()" id="saveBtn">
+            <i class="fas fa-save"></i> Save Changes
+        </div>
+    </div>
+
+    <!-- Excel-like Grid -->
+    <div class="excel-grid-container fade-in">
+        <table class="excel-table" id="productsGrid">
+            <thead>
+                <tr>
+                    <th style="width: 40px; text-align: center;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" onchange="toggleSelectAll(this)">
+                            <span class="checkmark"></span>
+                        </label>
+                    </th>
+                    <th style="width: 40px;">#</th>
+                    <th>Name *</th>
+                    <th style="width: 120px;">Code/SKU</th>
+                    <th style="width: 150px;">Category</th>
+                    <th style="width: 120px;">Brand</th>
+                    <th style="width: 100px;">Price *</th>
+                    <th style="width: 100px;">Cost</th>
+                    <th style="width: 80px;">Qty</th>
+                    <th style="width: 80px;">Unit</th>
+                    <th style="width: 50px;"></th>
+                </tr>
+            </thead>
+            <tbody id="productsBody">
+                <!-- Rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    <tbody id="productsBody">
+        <!-- Rows will be populated here -->
+    </tbody>
+    </table>
+    </div>
+
+    </main>
+    </div>
     </div>
 
     <!-- Supabase JS -->

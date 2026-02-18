@@ -143,6 +143,10 @@
                             <ul class="submenu">
                                 <li class="nav-item">
                                     <a href="#" class="nav-link"
+                                        onclick="switchView('purchase-order'); return false;">Purchase Order</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
                                         onclick="switchView('purchase-list'); return false;">Purchase List</a>
                                 </li>
                                 <li class="nav-item">
@@ -711,104 +715,10 @@
                 </div>
 
                 <!-- Warehouse Management View -->
-                <div id="view-warehouses" class="hidden">
-                    <div class="grid-toolbar">
-                        <div style="display: flex; align-items: center; gap: var(--space-md);">
-                            <h1 class="page-title" style="margin:0;">Warehouse Management</h1>
-                            <span id="syncStatusWarehouses" class="sync-status status-success">Synced to
-                                Supabase</span>
-                        </div>
-                        <div style="display: flex; gap: var(--space-sm);">
-                            <button class="btn btn-secondary" onclick="loadWarehousesList()"><i
-                                    class="fas fa-sync-alt"></i> Refresh</button>
-                            <button class="btn btn-primary" onclick="openWarehouseModal()">
-                                <i class="fas fa-plus"></i> Add Warehouse
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="excel-grid-container fade-in" style="margin-top: var(--space-md);">
-                        <table class="excel-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50px;">#</th>
-                                    <th>Warehouse Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Location (City, Country)</th>
-                                    <th style="width: 100px; text-align: center;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="warehousesListBody">
-                                <!-- Populated by JS -->
-                                <tr>
-                                    <td colspan="6" class="text-center" style="padding: 40px;">
-                                        <div class="spinner"></div> Loading warehouses...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Warehouse Modal -->
-                <div id="warehouseModal" class="modal-overlay hidden">
-                    <div class="modal-content" style="max-width: 600px;">
-                        <div class="modal-header">
-                            <h3 class="modal-title">Warehouse Details</h3>
-                            <button class="btn-icon" onclick="closeWarehouseModal()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="modal-body" style="padding: var(--space-lg);">
-                            <form id="warehouseForm" onsubmit="handleSaveWarehouse(event)">
-                                <input type="hidden" id="warehouseId">
-                                <div class="form-group">
-                                    <label class="field-label">Warehouse Name *</label>
-                                    <input type="text" id="warehouseName" class="excel-input" required
-                                        placeholder="Enter Name">
-                                </div>
-                                <div class="form-grid"
-                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
-                                    <div class="form-group">
-                                        <label class="field-label">Email</label>
-                                        <input type="email" id="warehouseEmail" class="excel-input"
-                                            placeholder="Enter Email">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="field-label">Phone Number</label>
-                                        <input type="text" id="warehousePhone" class="excel-input"
-                                            placeholder="Enter Phone Number">
-                                    </div>
-                                </div>
-                                <div class="form-grid"
-                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
-                                    <div class="form-group">
-                                        <label class="field-label">Country</label>
-                                        <input type="text" id="warehouseCountry" class="excel-input"
-                                            placeholder="Enter Country">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="field-label">City</label>
-                                        <input type="text" id="warehouseCity" class="excel-input"
-                                            placeholder="Enter City">
-                                    </div>
-                                </div>
-                                <div class="form-group" style="margin-top: var(--space-md);">
-                                    <label class="field-label">Zip Code</label>
-                                    <input type="text" id="warehouseZip" class="excel-input"
-                                        placeholder="Enter Zip Code">
-                                </div>
-                                <div
-                                    style="margin-top: var(--space-xl); display: flex; justify-content: flex-end; gap: var(--space-md);">
-                                    <button type="button" class="btn btn-secondary"
-                                        onclick="closeWarehouseModal()">Cancel</button>
-                                    <button type="submit" id="saveWarehouseBtn" class="btn btn-primary">Save
-                                        Warehouse</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                <!-- Warehouse Management View (Iframe) -->
+                <div id="view-warehouses" class="view-section hidden" style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="warehousesIframe" src="warehouses.html"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
                 </div>
 
                 <!-- User Management View (Iframe) -->
@@ -866,6 +776,13 @@
                 <div id="view-purchase-list" class="view-section hidden"
                     style="height: calc(100vh - 100px); padding: 0;">
                     <iframe id="purchaseListIframe" src="purchase-list.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Purchase Order View (Iframe) -->
+                <div id="view-purchase-order" class="view-section hidden"
+                    style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="purchaseOrderIframe" src="purchaseorder.html?mode=embedded"
                         style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
                 </div>
 

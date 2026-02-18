@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Unit Management - POS System</title>
+    <title>Warehouse Management - POS System</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -355,7 +355,7 @@
         <!-- Toolbar -->
         <div class="sheet-toolbar">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <h1 class="page-title" style="margin: 0; font-size: 1.25rem;">Unit Manager</h1>
+                <h1 class="page-title" style="margin: 0; font-size: 1.25rem;">Warehouse Manager</h1>
                 <div id="syncStatus" class="toolbar-pill pill-success">
                     <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
                 </div>
@@ -376,10 +376,10 @@
                     </div>
                 </div>
 
-                <div class="toolbar-pill pill-ghost pill-action" onclick="loadUnits()">
+                <div class="toolbar-pill pill-ghost pill-action" onclick="loadWarehouses()">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </div>
-                <div class="toolbar-pill pill-primary pill-action" onclick="addNewUnit()">
+                <div class="toolbar-pill pill-primary pill-action" onclick="addNewWarehouse()">
                     <i class="fas fa-plus"></i> Add Row
                 </div>
                 <div class="toolbar-pill pill-success pill-action" onclick="saveChanges()" id="saveBtn">
@@ -397,9 +397,9 @@
                 <tbody id="gridBody">
                     <!-- Populated by JS -->
                     <tr>
-                        <td colspan="4" class="empty-state">
+                        <td colspan="9" class="empty-state">
                             <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
-                            Loading units...
+                            Loading warehouses...
                         </td>
                     </tr>
                 </tbody>
@@ -411,7 +411,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="js/supabase-client.js"></script>
-    <script src="js/units.js"></script>
+    <script src="js/warehouses.js"></script>
     <script>
         // Bridge for sync status
         window.updateModuleSyncStatus = function (module, status) {

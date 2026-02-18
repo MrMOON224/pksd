@@ -146,24 +146,21 @@
             opacity: 1;
         }
 
-        /* Condensed Tag View for Code, Barcodes and Prices */
+        /* Condensed Tag View for Code, Barcodes */
         .cell-container.code:not(.edit-active) .tag:not(:first-child),
-        .cell-container.barcodes:not(.edit-active) .tag:not(:first-child),
-        .cell-container.prices:not(.edit-active) .tag:not(:first-child) {
+        .cell-container.barcodes:not(.edit-active) .tag:not(:first-child) {
             display: none;
         }
 
-        /* Only hide the input in code/barcode/price tag containers when not editing */
+        /* Only hide the input in code/barcode tag containers when not editing */
         .cell-container.code.has-tags:not(.edit-active) .cell-input,
-        .cell-container.barcodes.has-tags:not(.edit-active) .cell-input,
-        .cell-container.prices.has-tags:not(.edit-active) .cell-input {
+        .cell-container.barcodes.has-tags:not(.edit-active) .cell-input {
             opacity: 0;
             pointer-events: none;
         }
 
         .cell-container.code:not(.edit-active) .tag:first-child::after,
-        .cell-container.barcodes:not(.edit-active) .tag:first-child::after,
-        .cell-container.prices:not(.edit-active) .tag:first-child::after {
+        .cell-container.barcodes:not(.edit-active) .tag:first-child::after {
             content: ' ++';
             opacity: 0.6;
             margin-left: 4px;
@@ -171,8 +168,7 @@
         }
 
         .cell-container.code.has-multiple:not(.edit-active) .tag:first-child::after,
-        .cell-container.barcodes.has-multiple:not(.edit-active) .tag:first-child::after,
-        .cell-container.prices.has-multiple:not(.edit-active) .tag:first-child::after {
+        .cell-container.barcodes.has-multiple:not(.edit-active) .tag:first-child::after {
             display: inline;
         }
 
@@ -347,7 +343,7 @@
             { id: 'subCategory', label: 'Sub Category', width: '10%', type: 'dropdown', ref: 'subcategories', parent: 'category' },
             { id: 'brand_id', label: 'Brand', width: '10%', type: 'dropdown', ref: 'brands' },
             { id: 'cost', label: 'Cost', width: '7%' },
-            { id: 'prices', label: 'Price ++', width: '13%', type: 'tags' },
+            { id: 'prices', label: 'Price', width: '13%' },
             { id: 'unit', label: 'Unit', width: '8%', type: 'dropdown', ref: 'units' },
             { id: 'qty', label: 'Stock', width: '6%' },
             { id: 'margin', label: 'Margin %', width: '6%', readonly: true }
@@ -537,7 +533,7 @@
             input.onkeydown = (e) => {
                 if (e.key === 'Enter' || e.key === 'Tab') {
                     const val = e.target.value.trim();
-                    const isSticky = (colId === 'barcodes' || colId === 'prices');
+                    const isSticky = (colId === 'barcodes');
 
                     if (val !== '') {
                         e.preventDefault();
@@ -597,7 +593,10 @@
                     category: p.category_id || '',
                     subCategory: p.subcategory_id || '',
                     cost: p.cost || 0,
-                    prices: p.price ? [p.price.toString()] : [],
+                    cost: p.cost || 0,
+                    prices: p.price || 0,
+                    unit: p.unit_id || '',
+                    qty: p.stock_quantity || 0,
                     unit: p.unit_id || 'Pcs',
                     qty: p.stock || 0,
                     brand_id: p.brand_id

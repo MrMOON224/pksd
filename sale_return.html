@@ -351,7 +351,11 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+
+        // Wait for Supabase client to fully initialize before loading data
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(init, 150);
+        });
     </script>
 </body>
 

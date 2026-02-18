@@ -50,145 +50,159 @@
             min-height: calc(100vh - 40px);
         }
 
-        .btn-premium-danger {
+        /* Unified Glass Pill Design System */
+        .toolbar-pill {
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 19px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            cursor: default;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .pill-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .pill-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .pill-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .pill-primary {
+            background: rgba(79, 70, 229, 0.1);
+            color: #818cf8;
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .pill-ghost {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .pill-action {
+            cursor: pointer;
+        }
+
+        .pill-action:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .pill-icon-only {
+            width: 38px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Row Action & Checkbox Styles */
+        .btn-premium-delete {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
             border: 1px solid rgba(239, 68, 68, 0.2);
             width: 32px;
             height: 32px;
-            border-radius: 50%;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-premium-delete:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Custom Checkbox */
+        .checkbox-container {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            width: 20px;
+            height: 20px;
+            margin: 0 auto;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
             transition: all 0.2s ease;
         }
 
-        .btn-premium-danger:hover {
-            background: #ef4444;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        .checkbox-container:hover input~.checkmark {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
-        .bulk-toolbar {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-            background: var(--bg-primary);
-            padding: 10px var(--space-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--space-md);
-            border: 1px solid var(--primary);
-            animation: slideDown 0.3s ease;
+        .checkbox-container input:checked~.checkmark {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
         }
 
-        .selected-count {
-            font-weight: 600;
-            color: var(--primary-light);
-            font-size: 0.9rem;
+        .checkbox-container input:checked~.checkmark:after {
+            display: block;
         }
 
-        .selection-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-
-        .action-cell {
-            padding: 5px !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .excel-grid-container {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-md);
-            overflow: auto;
-            max-height: 600px;
-        }
-
-        .excel-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        .excel-table th {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        .empty-state {
+            padding: 40px;
+            text-align: center;
             color: var(--text-muted);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .excel-table td {
-            padding: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .excel-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 8px 10px;
-            outline: none;
-            font-family: inherit;
-            font-size: inherit;
-        }
-
-        .excel-input:focus {
-            background: rgba(79, 70, 229, 0.1);
-            box-shadow: inset 0 0 0 2px var(--primary);
-        }
-
-        .excel-tr.modified td {
-            background: rgba(245, 158, 11, 0.05);
-        }
-
-        .excel-tr.new-row td {
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        .sync-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .status-success {
-            color: #10b981;
-        }
-
-        .status-warning {
-            color: #f59e0b;
+            font-style: italic;
         }
 
         .grid-toolbar {
@@ -209,43 +223,50 @@
 
 <body>
     <div class="category-container">
-        <!-- Main Toolbar -->
-        <div class="grid-toolbar">
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <h1 class="page-title">Expense Categories</h1>
-                <div id="syncStatus" class="sync-status">
-                    <i class="fas fa-database"></i> <span id="syncStatusText">Synced to Supabase</span>
-                </div>
+        <!-- Unified Toolbar (Individual Glass Pills) -->
+        <div class="grid-toolbar" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <!-- Sync Status Pill -->
+            <div id="syncStatus" class="toolbar-pill pill-success">
+                <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
             </div>
 
-            <div style="display: flex; gap: var(--space-sm);">
-                <button class="btn btn-secondary" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <button class="btn btn-success" onclick="saveChanges()" id="saveBtn">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
+            <!-- Selection Segment (Pill) -->
+            <div id="bulkToolbar" class="toolbar-pill pill-primary hidden">
+                <span class="selected-count" style="color: inherit; font-size: inherit;"><span
+                        id="selectedCount">0</span> Selected</span>
+                <i class="fas fa-trash pill-action" onclick="bulkDelete()" style="margin-left: 8px; color: #ef4444;"
+                    title="Bulk Delete"></i>
+                <i class="fas fa-times pill-action" onclick="clearSelection()" style="margin-left: 4px; opacity: 0.6;"
+                    title="Clear Selection"></i>
             </div>
-        </div>
 
-        <!-- Bulk Action Toolbar -->
-        <div id="bulkToolbar" class="bulk-toolbar hidden">
-            <span class="selected-count"><span id="selectedCount">0</span> items selected</span>
-            <div style="flex:1;"></div>
-            <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
-                <i class="fas fa-trash"></i> Bulk Delete
-            </button>
-            <button class="btn btn-ghost btn-sm" onclick="clearSelection()" title="Clear Selection">
-                <i class="fas fa-times"></i>
-            </button>
+            <!-- Spacer -->
+            <div style="flex: 1;"></div>
+
+            <!-- Action Pills -->
+            <div class="toolbar-pill pill-ghost pill-icon-only pill-action" onclick="refreshData()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+
+            <div class="toolbar-pill pill-primary pill-action" onclick="addNewCategory()">
+                <i class="fas fa-plus"></i> Add Category
+            </div>
+
+            <div class="toolbar-pill pill-success pill-action" onclick="saveChanges()" id="saveBtn">
+                <i class="fas fa-save"></i> Save Changes
+            </div>
         </div>
 
         <div class="excel-grid-container">
             <table class="excel-table">
                 <thead>
                     <tr>
-                        <th style="width: 40px; text-align: center;"><input type="checkbox" class="selection-checkbox"
-                                onchange="toggleSelectAll(master)"></th>
+                        <th style="width: 40px; text-align: center;">
+                            <label class="checkbox-container">
+                                <input type="checkbox" onchange="toggleSelectAll(this)">
+                                <span class="checkmark"></span>
+                            </label>
+                        </th>
                         <th style="width: 40px;">#</th>
                         <th>Category Name *</th>
                         <th>Description</th>
@@ -351,7 +372,11 @@
             if (el) {
                 el.textContent = status;
                 const container = document.getElementById('syncStatus');
-                container.className = 'sync-status ' + (status.includes('Synced') ? 'status-success' : 'status-warning');
+                if (status.includes('Synced') || status === 'Ready') {
+                    container.className = 'toolbar-pill pill-success';
+                } else {
+                    container.className = 'toolbar-pill pill-warning';
+                }
             }
         }
 
@@ -361,7 +386,11 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+
+        // Wait for Supabase client to fully initialize before loading data
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(init, 150);
+        });
     </script>
 </body>
 

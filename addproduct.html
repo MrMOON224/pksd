@@ -15,27 +15,45 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Shared Styles -->
+    <!-- Shared Styles (Assumed external, keeping variables) -->
     <link rel="stylesheet" href="css/styles.css">
 
     <style>
+        :root {
+            /* Fallback variables if shared styles fail */
+            --primary: #6366f1;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --space-md: 16px;
+            --space-sm: 8px;
+        }
+
         /* ── Page Layout ── */
         body {
             background: var(--bg-primary);
             height: 100vh;
-            padding: var(--space-md);
+            padding: 12px;
+            margin: 0;
             color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         .page-container {
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: var(--space-md);
+            gap: 12px;
             height: 100%;
-            overflow: hidden;
         }
 
         /* ── Toolbar ── */
@@ -43,28 +61,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: var(--space-md);
             background: var(--bg-secondary);
-            padding: 8px 16px;
+            padding: 12px 20px;
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-lg);
             flex-shrink: 0;
         }
 
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-        }
-
         .toolbar-left h1 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             margin: 0;
-            font-weight: 700;
-            background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -72,242 +83,278 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            font-size: 0.72rem;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-            letter-spacing: 0.02em;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
             text-transform: uppercase;
-            border: 1px solid rgba(16, 185, 129, 0.25);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            margin-left: 12px;
+        }
+
+        .sync-badge i {
+            font-size: 0.5rem;
         }
 
         .toolbar-actions {
             display: flex;
-            gap: var(--space-sm);
+            gap: 8px;
         }
 
-        /* ── Master-Detail Layout ── */
+        /* ── Buttons Refinement ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* ── Editor Section ── */
         .editor-section {
             background: var(--bg-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--radius-lg);
-            padding: 0;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             flex-shrink: 0;
+            zoom: 1.05;
+            /* Zoom in slightly per user request */
         }
 
-        .grid-section {
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: var(--radius-lg);
-            padding: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-
-        /* ── Editor Form Grid ── */
         .form-grid {
             display: grid;
-            gap: 0;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .form-row {
-            display: grid;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .form-row:last-child {
-            border-bottom: none;
-        }
-
-        .row-3 {
-            grid-template-columns: 1fr 2fr 2.5fr;
-        }
-
-        .row-5 {
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        }
-
-        .row-5b {
-            grid-template-columns: 1fr 1.2fr 1fr 1fr 0.7fr;
-        }
-
-        .row-2 {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(4, 1fr);
+            background: rgba(15, 23, 42, 0.2);
         }
 
         .field-cell {
-            padding: 5px 12px;
+            padding: 8px 14px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            background: transparent;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
         }
 
-        .field-cell:last-child {
-            border-right: none;
+        .field-cell:hover {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .field-cell.col-span-2 {
+            grid-column: span 2;
+        }
+
+        .field-cell.no-bg {
+            background: none;
+            border-bottom: none;
         }
 
         .field-label {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.075em;
             color: var(--text-muted);
-            margin-bottom: 2px;
+            margin-bottom: 5px;
         }
 
         .field-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             color: var(--text-primary);
-            font-size: 0.88rem;
-            padding: 5px 10px;
+            font-size: 0.85rem;
+            padding: 0 10px;
             outline: none;
             transition: all 0.2s;
+            height: 30px;
+            box-sizing: border-box;
         }
 
         .field-input:focus {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(15, 23, 42, 0.8);
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
 
         .field-input[readonly] {
-            opacity: 0.7;
-            cursor: not-allowed;
-            background: rgba(255, 255, 255, 0.02);
-            border: none;
+            opacity: 0.6;
+            background: transparent;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            cursor: default;
         }
 
-        .editor-actions {
-            margin-top: var(--space-lg);
-            display: flex;
-            justify-content: flex-end;
-            gap: var(--space-md);
-        }
-
-        /* ── Barcode Tags in Editor ── */
-        .barcode-input-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
+        /* ── Barcode Tags Refinement ── */
         .barcode-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            min-height: 24px;
+            gap: 4px;
+            margin-top: 5px;
         }
 
         .barcode-tag {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: rgba(99, 102, 241, 0.2);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            color: #a5b4fc;
-            font-size: 0.75rem;
+            gap: 5px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #c7d2fe;
+            font-size: 0.7rem;
             padding: 2px 8px;
             border-radius: 4px;
+            font-weight: 500;
         }
 
         .barcode-tag .remove-tag {
             cursor: pointer;
-            opacity: 0.7;
+            font-size: 0.8rem;
+            color: rgba(199, 210, 254, 0.6);
         }
 
         .barcode-tag .remove-tag:hover {
-            color: #fca5a5;
-            opacity: 1;
+            color: #f87171;
         }
 
         /* ── Data Grid ── */
-        .table-container {
-            overflow-x: auto;
+        .grid-section {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             flex: 1;
-            overflow-y: auto;
+            min-height: 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .table-container {
+            overflow: auto;
+            flex: 1;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         thead {
-            background: rgba(0, 0, 0, 0.2);
             position: sticky;
             top: 0;
             z-index: 10;
+            background: #1e293b;
+            /* Fallback */
+            backdrop-filter: blur(10px);
         }
 
         th {
             text-align: left;
-            padding: 12px 16px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.06);
-            white-space: nowrap;
+            padding: 14px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            background: rgba(30, 41, 59, 0.8);
         }
 
         td {
             padding: 10px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             color: var(--text-secondary);
+            transition: color 0.2s;
         }
 
         tbody tr {
             cursor: pointer;
-            transition: background 0.1s;
         }
 
         tbody tr:hover {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tbody tr:hover td {
+            color: white;
         }
 
         tbody tr.selected {
-            background: rgba(99, 102, 241, 0.15);
-            border-left: 3px solid var(--primary);
+            background: rgba(99, 102, 241, 0.1);
         }
 
         tbody tr.selected td {
-            color: white;
+            color: #a5b4fc;
+            font-weight: 500;
         }
 
         /* ── Loading/Toast ── */
         .loading-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            backdrop-filter: blur(4px);
         }
 
-        .loading-overlay.hidden {
-            display: none;
+        .hidden {
+            display: none !important;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
             border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         @keyframes spin {
@@ -318,62 +365,47 @@
 
         .toast-container {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
+            bottom: 30px;
+            right: 30px;
             z-index: 10000;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .toast {
-            padding: 12px 20px;
-            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            border-radius: 8px;
             color: white;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.85rem;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .toast-success {
-            background: linear-gradient(135deg, #059669, #10b981);
+            background: #059669;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .toast-error {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 1024px) {
-            .form-row {
-                grid-template-columns: 1fr 1fr !important;
-            }
-
-            .row-3 {
-                grid-template-columns: 1fr !important;
-            }
-
-            .field-cell {
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            }
-        }
-
-        /* ── Embedded Mode ── */
-        body.embedded {
-            padding: var(--space-sm);
-        }
-
-        body.embedded .toolbar {
-            position: static;
-            margin-bottom: var(--space-md);
-        }
-
-        body.embedded .page-container {
-            max-width: 100%;
+            background: #dc2626;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -383,6 +415,7 @@
     <div class="loading-overlay hidden" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -390,119 +423,111 @@
 
         <!-- Toolbar -->
         <div class="toolbar">
-            <div class="toolbar-left">
+            <div class="toolbar-left" style="display:flex; align-items:center;">
                 <h1>Product Manager</h1>
                 <span class="sync-badge" id="syncBadge"><i class="fas fa-circle"></i> Synced to Supabase</span>
             </div>
             <div class="toolbar-actions">
-                <button class="btn btn-secondary btn-sm" onclick="clearEditor()"
-                    style="background: var(--bg-tertiary);">
+                <button class="btn btn-secondary" onclick="clearEditor()">
                     <i class="fas fa-eraser"></i> Clear
                 </button>
-                <button class="btn btn-danger btn-sm hidden" id="btn-delete" onclick="deleteCurrentProduct()">
+                <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentProduct()">
                     <i class="fas fa-trash"></i> Delete
                 </button>
-                <button class="btn btn-success btn-sm" onclick="saveProduct()">
+                <button class="btn btn-success" onclick="saveProduct()">
                     <i class="fas fa-save"></i> Save Product
                 </button>
-                <button class="btn btn-secondary btn-sm" onclick="refreshProducts()">
+                <button class="btn btn-secondary" onclick="refreshProducts()">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
         </div>
 
-        <!-- Editor Section (Shell) -->
+        <!-- Editor Section -->
         <div class="editor-section">
             <div class="form-grid">
-                <!-- Row 1 -->
-                <div class="form-row row-3">
-                    <div class="field-cell">
-                        <label class="field-label">Item Code ++</label>
-                        <div class="barcode-input-container">
-                            <input type="text" id="edit-code-input" class="field-input" placeholder="Enter code...">
-                            <div id="edit-code-tags" class="barcode-tags"></div>
-                        </div>
-                        <input type="hidden" id="edit-code">
+                <!-- Line 1: Identity -->
+                <div class="field-cell">
+                    <label class="field-label">Item Code ++</label>
+                    <div class="barcode-input-container">
+                        <input type="text" id="edit-code-input" class="field-input" placeholder="Enter code...">
+                        <div id="edit-code-tags" class="barcode-tags"></div>
                     </div>
-                    <div class="field-cell">
-                        <label class="field-label">Barcode ++</label>
-                        <div class="barcode-input-container">
-                            <input type="text" id="edit-barcode-input" class="field-input"
-                                placeholder="Scan barcode...">
-                            <div id="edit-barcode-tags" class="barcode-tags"></div>
-                        </div>
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Description</label>
-                        <input type="text" id="edit-name" class="field-input" placeholder="Product Name">
+                    <input type="hidden" id="edit-code">
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Barcode ++</label>
+                    <div class="barcode-input-container">
+                        <input type="text" id="edit-barcode-input" class="field-input" placeholder="Scan barcode...">
+                        <div id="edit-barcode-tags" class="barcode-tags"></div>
                     </div>
                 </div>
-
-                <!-- Row 2 -->
-                <div class="form-row row-5">
-                    <div class="field-cell">
-                        <label class="field-label">Category</label>
-                        <select id="edit-category" class="field-input"></select>
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Sub-Category</label>
-                        <select id="edit-subcategory" class="field-input"></select>
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Brand</label>
-                        <select id="edit-brand" class="field-input"></select>
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Cost</label>
-                        <input type="number" id="edit-cost" class="field-input" step="0.01" value="0">
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Sale Unit</label>
-                        <select id="edit-unit" class="field-input"></select>
-                    </div>
+                <div class="field-cell col-span-2">
+                    <label class="field-label">Description</label>
+                    <input type="text" id="edit-name" class="field-input" placeholder="Product Name">
                 </div>
 
-                <!-- Row 3 -->
-                <div class="form-row row-5b">
-                    <div class="field-cell">
-                        <label class="field-label">Purchase Unit</label>
-                        <select id="edit-purchase-unit" class="field-input"></select>
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Conversion (Pcs/Unit)</label>
-                        <input type="number" id="edit-conversion" class="field-input" value="1">
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Price ++</label>
-                        <div class="barcode-input-container">
-                            <input type="text" id="edit-price-input" class="field-input" placeholder="Enter price...">
-                            <div id="edit-price-tags" class="barcode-tags"></div>
-                        </div>
-                        <input type="hidden" id="edit-price">
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Margin %</label>
-                        <input type="text" id="edit-margin" class="field-input" readonly value="0.00%">
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Stock</label>
-                        <input type="number" id="edit-stock" class="field-input" value="0">
-                    </div>
+                <!-- Line 2: Classification + Stock -->
+                <div class="field-cell">
+                    <label class="field-label">Category</label>
+                    <select id="edit-category" class="field-input"></select>
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Sub-Category</label>
+                    <select id="edit-subcategory" class="field-input"></select>
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Brand</label>
+                    <select id="edit-brand" class="field-input"></select>
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Stock</label>
+                    <input type="number" id="edit-stock" class="field-input" value="0">
                 </div>
 
-                <!-- Row 4 -->
-                <div class="form-row row-2">
-                    <div class="field-cell">
-                        <label class="field-label">Supplier</label>
-                        <input type="text" id="edit-supplier" class="field-input" placeholder="Select Supplier">
-                    </div>
-                    <div class="field-cell">
-                        <label class="field-label">Shop</label>
-                        <input type="text" id="edit-shop" class="field-input" placeholder="Select Shop">
-                    </div>
+                <!-- Line 3: Pricing & Math -->
+                <div class="field-cell">
+                    <label class="field-label">Cost</label>
+                    <input type="number" id="edit-cost" class="field-input" step="0.01" value="0">
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Unit Price</label>
+                    <input type="number" id="edit-price" class="field-input" step="0.01" value="0">
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Box Price (Calc)</label>
+                    <input type="number" id="edit-box-price" class="field-input" step="0.01" value="0">
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Margin %</label>
+                    <input type="text" id="edit-margin" class="field-input" readonly value="0.00%">
+                </div>
+
+                <!-- Line 4: Units & Conversion -->
+                <div class="field-cell">
+                    <label class="field-label">Sale Unit</label>
+                    <select id="edit-unit" class="field-input"></select>
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Purchase Unit</label>
+                    <select id="edit-purchase-unit" class="field-input"></select>
+                </div>
+                <div class="field-cell">
+                    <label class="field-label">Conversion (Pcs/Unit)</label>
+                    <input type="number" id="edit-conversion" class="field-input" value="1">
+                </div>
+                <div class="field-cell no-bg"></div>
+
+                <!-- Line 5: Logistics -->
+                <div class="field-cell col-span-2">
+                    <label class="field-label">Supplier</label>
+                    <input type="text" id="edit-supplier" class="field-input" placeholder="Select Supplier">
+                </div>
+                <div class="field-cell col-span-2" style="border-right:none">
+                    <label class="field-label">Shop</label>
+                    <input type="text" id="edit-shop" class="field-input" placeholder="Select Shop">
                 </div>
             </div>
-
         </div>
 
         <!-- Grid Section (Table) -->
@@ -530,11 +555,10 @@
         </div>
     </div>
 
-    <!-- Init Scripts -->
+    <!-- Init Scripts (Backend Logic Kept Intact) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         if (!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
-        // Detect embedded mode
         if (new URLSearchParams(window.location.search).get('mode') === 'embedded') {
             document.body.classList.add('embedded');
         }
@@ -545,11 +569,9 @@
     <script>
         // ── State ──
         let productsData = [];
-        let currentProductId = null; // null = Add New mode
-        let currentBarcodes = [];    // Temporary storage for editor checkboxes
+        let currentProductId = null;
+        let currentBarcodes = [];
         let currentCodes = [];
-        let currentPrices = [];
-
         let refCategories = [], refSubcategories = [], refBrands = [], refUnits = [];
 
         // ── UI Helpers ──
@@ -568,10 +590,14 @@
             toast.className = `toast toast-${type}`;
             toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
 
-        // ── Data Loading ──
+        // ── Data Loading Logic ──
         async function init() {
             showLoading();
             try {
@@ -614,7 +640,7 @@
             showToast('Refreshed');
         }
 
-        // ── Rendering ──
+        // ── Rendering Logic ──
         function renderDropdowns() {
             const populate = (id, data, placeholder) => {
                 const el = EL(id);
@@ -629,8 +655,8 @@
             populate('edit-category', refCategories, 'Select Category');
             populate('edit-subcategory', refSubcategories, 'Select Sub-Category');
             populate('edit-brand', refBrands, 'Select Brand');
-            populateUnits('edit-unit', refUnits, 'Select Unit', false); // Uses ID for unit_id
-            populateUnits('edit-purchase-unit', refUnits, 'Select Purchase Unit', true); // Uses short_name for purchase_unit
+            populateUnits('edit-unit', refUnits, 'Select Unit', false);
+            populateUnits('edit-purchase-unit', refUnits, 'Select Purchase Unit', true);
         }
 
         function renderGrid() {
@@ -642,21 +668,20 @@
                 if (currentProductId === p.id) tr.classList.add('selected');
                 tr.onclick = () => selectProduct(p.id);
 
-                // Helper to find names
                 const catName = refCategories.find(c => c.id === p.category_id)?.name || '';
                 const brandName = refBrands.find(b => b.id === p.brand_id)?.name || '';
                 const formatNum = (n) => n ? parseFloat(n).toFixed(2) : '0.00';
 
                 tr.innerHTML = `
                     <td>${idx + 1}</td>
-                    <td>${escapeHtml(p.code)}</td>
-                    <td>${(p.barcodes || []).join(', ')}</td>
-                    <td><b>${escapeHtml(p.name)}</b></td>
+                    <td><code style="color:var(--primary)">${escapeHtml(p.code)}</code></td>
+                    <td><small>${(p.barcodes || []).join(', ')}</small></td>
+                    <td><b style="color:var(--text-primary)">${escapeHtml(p.name)}</b></td>
                     <td>${escapeHtml(catName)}</td>
                     <td>${escapeHtml(brandName)}</td>
-                    <td>${formatNum(p.cost)}</td>
-                    <td>${formatNum(p.price)}</td>
-                    <td>${p.stock}</td>
+                    <td style="font-family:monospace">${formatNum(p.cost)}</td>
+                    <td style="font-family:monospace; color:var(--primary)">${formatNum(p.price)}</td>
+                    <td><span style="font-weight:600">${p.stock}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -672,18 +697,9 @@
         function renderCodeTags() {
             const container = EL('edit-code-tags');
             container.innerHTML = currentCodes.map(c =>
-                `<span class="barcode-tag">${escapeHtml(c)} <i class="fas fa-times remove-tag" onclick="removeCode('${escapeHtml(c)}')"></i></span>`
+                `<span class="barcode-tag" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.2); color:#6ee7b7">${escapeHtml(c)} <i class="fas fa-times remove-tag" onclick="removeCode('${escapeHtml(c)}')"></i></span>`
             ).join('');
             EL('edit-code').value = currentCodes[0] || '';
-        }
-
-        function renderPriceTags() {
-            const container = EL('edit-price-tags');
-            container.innerHTML = currentPrices.map(p =>
-                `<span class="barcode-tag">${escapeHtml(p)} <i class="fas fa-times remove-tag" onclick="removePrice('${escapeHtml(p)}')"></i></span>`
-            ).join('');
-            EL('edit-price').value = currentPrices[0] || 0;
-            calcMargin();
         }
 
         // ── Logic ──
@@ -692,15 +708,13 @@
             const p = productsData.find(x => x.id === id);
             if (!p) return;
 
-            // Fill Form
             currentCodes = p.code ? [p.code] : [];
-            currentPrices = p.price ? [p.price.toString()] : [];
             currentBarcodes = [...(p.barcodes || [])];
 
             EL('edit-code').value = p.code || '';
             EL('edit-name').value = p.name || '';
             EL('edit-category').value = p.category_id || '';
-            updateSubcategories(p.category_id); // Filter subs
+            updateSubcategories(p.category_id);
             EL('edit-subcategory').value = p.subcategory_id || '';
             EL('edit-brand').value = p.brand_id || '';
             EL('edit-cost').value = p.cost || 0;
@@ -708,30 +722,25 @@
             EL('edit-purchase-unit').value = p.purchase_unit || 'Box';
             EL('edit-conversion').value = p.pcs_per_box || 1;
             EL('edit-price').value = p.price || 0;
+
+            const conv = parseFloat(p.pcs_per_box) || 1;
+            EL('edit-box-price').value = (p.price * conv).toFixed(2);
             EL('edit-stock').value = p.stock || 0;
             EL('edit-supplier').value = p.supplier || '';
             EL('edit-shop').value = p.shop || '';
 
-            currentBarcodes = [...(p.barcodes || [])];
             renderBarcodeTags();
             renderCodeTags();
-            renderPriceTags();
             calcMargin();
 
             EL('btn-delete').classList.remove('hidden');
-            renderGrid(); // Update selection highlight
-
-            // Scroll top
-            document.querySelector('.page-container').scrollTo({ top: 0, behavior: 'smooth' });
+            renderGrid();
         }
 
         function clearEditor() {
             currentProductId = null;
             currentBarcodes = [];
             currentCodes = [];
-            currentPrices = [];
-
-            // Reset inputs
             const inputs = document.querySelectorAll('.editor-section input, .editor-section select');
             inputs.forEach(i => {
                 if (i.type === 'number') i.value = 0;
@@ -740,48 +749,50 @@
             EL('edit-purchase-unit').value = 'Box';
             EL('edit-conversion').value = 1;
             EL('edit-margin').value = '0.00%';
-
             renderBarcodeTags();
             renderCodeTags();
-            renderPriceTags();
             EL('btn-delete').classList.add('hidden');
-            renderGrid(); // Clear highlight
-            EL('edit-code').focus();
+            renderGrid();
         }
 
         function updateSubcategories(catId) {
             const subSelect = EL('edit-subcategory');
-            const subs = catId
-                ? refSubcategories.filter(s => s.category_id == catId)
-                : refSubcategories;
-
+            const subs = catId ? refSubcategories.filter(s => s.category_id == catId) : refSubcategories;
             subSelect.innerHTML = `<option value="">Select Sub-Category</option>` +
                 subs.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
         }
 
-        // ── Calculation ──
         function calcMargin() {
             const cost = parseFloat(EL('edit-cost').value) || 0;
             const price = parseFloat(EL('edit-price').value) || 0;
-            if (cost > 0 && price > 0) {
-                const m = ((price - cost) / cost) * 100;
-                EL('edit-margin').value = m.toFixed(2) + '%';
-            } else {
-                EL('edit-margin').value = '0.00%';
+            EL('edit-margin').value = (cost > 0 && price > 0) ? (((price - cost) / cost) * 100).toFixed(2) + '%' : '0.00%';
+        }
+
+        function updateFromUnit() {
+            const unitPrice = parseFloat(EL('edit-price').value) || 0;
+            const conv = parseFloat(EL('edit-conversion').value) || 1;
+            EL('edit-box-price').value = (unitPrice * conv).toFixed(2);
+            calcMargin();
+        }
+
+        function updateFromBox() {
+            const boxPrice = parseFloat(EL('edit-box-price').value) || 0;
+            const conv = parseFloat(EL('edit-conversion').value) || 1;
+            if (conv > 0) {
+                EL('edit-price').value = (boxPrice / conv).toFixed(2);
+                calcMargin();
             }
         }
 
-        // ── Actions ──
         function addBarcode(val) {
-            if (!val) return;
-            if (!currentBarcodes.includes(val)) {
+            if (val && !currentBarcodes.includes(val)) {
                 currentBarcodes.push(val);
                 renderBarcodeTags();
             }
             EL('edit-barcode-input').value = '';
         }
 
-        window.removeBarcode = function (val) { // Global for onclick
+        window.removeBarcode = function (val) {
             currentBarcodes = currentBarcodes.filter(b => b !== val);
             renderBarcodeTags();
         }
@@ -791,27 +802,12 @@
             renderCodeTags();
         }
 
-        window.removePrice = function (val) {
-            currentPrices = currentPrices.filter(p => p !== val);
-            renderPriceTags();
-        }
-
         function addCode(val) {
-            if (!val) return;
-            if (!currentCodes.includes(val)) {
+            if (val && !currentCodes.includes(val)) {
                 currentCodes.push(val);
                 renderCodeTags();
             }
             EL('edit-code-input').value = '';
-        }
-
-        function addPrice(val) {
-            if (!val) return;
-            if (!currentPrices.includes(val)) {
-                currentPrices.push(val);
-                renderPriceTags();
-            }
-            EL('edit-price-input').value = '';
         }
 
         async function saveProduct() {
@@ -838,12 +834,10 @@
             showLoading();
             try {
                 if (currentProductId) {
-                    // Update
                     const { error } = await supabase.from('products').update(payload).eq('id', currentProductId);
                     if (error) throw error;
                     showToast('Product updated');
                 } else {
-                    // Insert
                     const { error } = await supabase.from('products').insert([payload]);
                     if (error) throw error;
                     showToast('Product created');
@@ -851,7 +845,6 @@
                 }
                 await loadProducts();
             } catch (e) {
-                console.error(e);
                 showToast(e.message, 'error');
             } finally {
                 hideLoading();
@@ -860,7 +853,6 @@
 
         async function deleteCurrentProduct() {
             if (!currentProductId || !confirm('Delete this product permanently?')) return;
-
             showLoading();
             try {
                 const { error } = await supabase.from('products').delete().eq('id', currentProductId);
@@ -869,51 +861,36 @@
                 clearEditor();
                 await loadProducts();
             } catch (e) {
-                console.error(e);
                 showToast(e.message, 'error');
             } finally {
                 hideLoading();
             }
         }
 
-        // ── Event Listeners ──
+        // Listeners
         EL('edit-cost').addEventListener('input', calcMargin);
-        EL('edit-price').addEventListener('input', calcMargin);
-
+        EL('edit-price').addEventListener('input', updateFromUnit);
+        EL('edit-conversion').addEventListener('input', updateFromUnit);
+        EL('edit-box-price').addEventListener('input', updateFromBox);
         EL('edit-category').addEventListener('change', (e) => updateSubcategories(e.target.value));
 
-        EL('edit-barcode-input').addEventListener('keydown', (e) => {
+        const handleTagInput = (e, callback) => {
             if (e.key === 'Enter' || e.key === 'Tab') {
                 const val = e.target.value.trim();
                 if (val) {
                     e.preventDefault();
-                    addBarcode(val);
+                    callback(val);
                 }
             }
+        };
+
+        EL('edit-barcode-input').addEventListener('keydown', (e) => handleTagInput(e, addBarcode));
+        EL('edit-code-input').addEventListener('keydown', (e) => handleTagInput(e, addCode));
+
+        // Wait for Supabase client to fully initialize before loading data
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(init, 150);
         });
-
-        EL('edit-code-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === 'Tab') {
-                const val = e.target.value.trim();
-                if (val) {
-                    e.preventDefault();
-                    addCode(val);
-                }
-            }
-        });
-
-        EL('edit-price-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === 'Tab') {
-                const val = e.target.value.trim();
-                if (val) {
-                    e.preventDefault();
-                    addPrice(val);
-                }
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', init);
-
     </script>
 </body>
 

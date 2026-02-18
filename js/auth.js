@@ -111,6 +111,11 @@ async function getCurrentUser() {
             if (error.name === 'AuthSessionMissingError' || error.message.indexOf('session missing') !== -1) {
                 return null;
             }
+            // Also silence AbortError which can occur during initialization
+            if (error.name === 'AbortError') {
+                console.log('Auth initialization in progress, skipping user check');
+                return null;
+            }
             throw error;
         }
 
@@ -125,7 +130,10 @@ async function getCurrentUser() {
 
         return null;
     } catch (error) {
-        console.error('Get user error:', error);
+        // Don't log AbortError as it's expected during initialization
+        if (error.name !== 'AbortError') {
+            console.error('Get user error:', error);
+        }
         return null;
     }
 }

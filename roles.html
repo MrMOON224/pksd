@@ -523,7 +523,11 @@
         };
 
         // Initial Load
-        document.addEventListener('DOMContentLoaded', loadRoles);
+
+        // Wait for Supabase client to fully initialize before loading data
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadRoles, 150);
+        });
 
     </script>
 </body>
