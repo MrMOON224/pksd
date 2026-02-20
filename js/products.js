@@ -105,19 +105,20 @@ window.clearProductDraft = function () {
 /**
  * Loading Products from Supabase
  */
-window.loadProducts = async function (forceRefresh = false) {
-    const iframe = document.getElementById('productGridIframe');
+window.loadProducts = function (forceRefresh) {
+    forceRefresh = forceRefresh || false;
+    var iframe = document.getElementById('productGridIframe');
     if (!document.getElementById('view-products')) return;
 
     window.updateModuleSyncStatus('Products', 'Loading...');
 
     // Check for local draft first
     if (!forceRefresh) {
-        const localDraft = localStorage.getItem('pos_draft_products');
+        var localDraft = localStorage.getItem('pos_draft_products');
         if (localDraft) {
             try {
-                const draft = JSON.parse(localDraft);
-                const hasMods = (draft.modifiedProducts && draft.modifiedProducts.length > 0) ||
+                var draft = JSON.parse(localDraft);
+                var hasMods = (draft.modifiedProducts && draft.modifiedProducts.length > 0) ||
                     (draft.deletedProducts && draft.deletedProducts.length > 0);
 
                 if (hasMods) {
@@ -139,24 +140,58 @@ window.loadProducts = async function (forceRefresh = false) {
         }
     }
 
-    try {
-        const { data, error } = await window.supabase
-            .from('products')
-            .select('*')
-            .order('name');
+    // Use DataLoader if available
+    if (typeof window.DataLoader !== 'undefined') {
+        // Find the best container for loading UI (iframe grid or productsBody)
+        var loadContainer = iframe ? null : 'productsBody';
 
-        if (error) throw error;
+        window.DataLoader.fetch({
+            fetchFn: function () {
+                return window.supabase
+                    .from('products')
+                    .select('*')
+                    .order('name');
+            },
+            containerId: loadContainer,
+            maxRetries: 3,
+            retryInterval: 2000,
+            loadingMessage: 'Loading products...',
+            errorMessage: 'Failed to load products. Check your connection and try again.',
+            onSuccess: function (data) {
+                window.productsData = data || [];
+                window.modifiedProducts.clear();
+                window.deletedProducts.clear();
+                window.renderGrid();
+                window.updateSaveButton();
+                window.updateModuleSyncStatus('Products', 'Synced to Supabase');
+            },
+            onError: function (err) {
+                console.error('Error loading products:', err);
+                window.updateModuleSyncStatus('Products', 'Error: ' + (err.message || 'Unknown'));
+            }
+        });
+    } else {
+        // Fallback without DataLoader
+        (async function () {
+            try {
+                var result = await window.supabase
+                    .from('products')
+                    .select('*')
+                    .order('name');
 
-        window.productsData = data || [];
-        window.modifiedProducts.clear();
-        window.deletedProducts.clear();
+                if (result.error) throw result.error;
 
-        window.renderGrid();
-        window.updateSaveButton();
-        window.updateModuleSyncStatus('Products', 'Synced to Supabase');
-    } catch (error) {
-        console.error('Error loading products:', error);
-        window.updateModuleSyncStatus('Products', 'Error: ' + error.message);
+                window.productsData = result.data || [];
+                window.modifiedProducts.clear();
+                window.deletedProducts.clear();
+                window.renderGrid();
+                window.updateSaveButton();
+                window.updateModuleSyncStatus('Products', 'Synced to Supabase');
+            } catch (error) {
+                console.error('Error loading products:', error);
+                window.updateModuleSyncStatus('Products', 'Error: ' + error.message);
+            }
+        })();
     }
 };
 

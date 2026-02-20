@@ -19,38 +19,78 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --primary: #4f46e5;
-            --primary-light: #818cf8;
-            --text-primary: #f8fafc;
-            --text-muted: #94a3b8;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --space-sm: 8px;
-            --space-md: 16px;
-            --space-lg: 24px;
-        }
+        /* Inherits variables from css/styles.css — no duplicate :root */
 
         body {
-            background-color: transparent;
+            background: transparent;
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: var(--space-md);
-            overflow-x: hidden;
+            padding: 0;
+            overflow: hidden;
         }
 
+        /* ── Sheet Layout (Excel-Style) ── */
         .category-container {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            min-height: calc(100vh - 40px);
+            background: var(--bg-primary);
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Unified Glass Pill Design System */
+        .grid-toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .excel-grid-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ── Excel Table ── */
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .excel-table th {
+            background: var(--bg-secondary);
+            color: var(--text-secondary, #cbd5e1);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.8rem 0.75rem;
+            text-align: left;
+        }
+
+        .excel-table td {
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            padding: 0.7rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .excel-table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.06);
+        }
+
+        /* ── Toolbar Pills ── */
         .toolbar-pill {
             height: 38px;
             padding: 0 16px;
@@ -117,7 +157,7 @@
             justify-content: center;
         }
 
-        /* Row Action & Checkbox Styles */
+        /* ── Row Actions ── */
         .btn-premium-delete {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
@@ -139,7 +179,7 @@
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
 
-        /* Custom Checkbox */
+        /* ── Custom Checkbox ── */
         .checkbox-container {
             display: block;
             position: relative;
@@ -204,27 +244,13 @@
             color: var(--text-muted);
             font-style: italic;
         }
-
-        .grid-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-lg);
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0;
-        }
     </style>
 </head>
 
 <body>
     <div class="category-container">
         <!-- Unified Toolbar (Individual Glass Pills) -->
-        <div class="grid-toolbar" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <div class="grid-toolbar" style="gap: 8px; flex-wrap: wrap;">
             <!-- Sync Status Pill -->
             <div id="syncStatus" class="toolbar-pill pill-success">
                 <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>

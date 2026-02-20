@@ -19,47 +19,67 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --primary: #f43f5e;
-            /* Rose/Red theme for returns */
-            --primary-light: #fb7185;
-            --text-primary: #f8fafc;
-            --text-muted: #94a3b8;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --space-sm: 8px;
-            --space-md: 16px;
-            --space-lg: 24px;
-        }
+        /* Inherits variables from css/styles.css — no duplicate :root */
 
         body {
-            background-color: transparent;
+            background: transparent;
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: var(--space-md);
-            overflow-x: hidden;
+            padding: 0;
+            overflow: hidden;
         }
 
+        /* ── Sheet Layout (Excel-Style) ── */
         .category-container {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            min-height: calc(100vh - 40px);
+            background: var(--bg-primary);
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
+        .grid-toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .sync-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 2px;
+        }
+
+        .status-success {
+            color: #10b981;
+        }
+
+        .status-warning {
+            color: #f59e0b;
+        }
+
+        /* ── Bulk Toolbar ── */
         .bulk-toolbar {
             display: flex;
             align-items: center;
-            gap: var(--space-md);
-            background: var(--bg-primary);
-            padding: 10px var(--space-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--space-md);
-            border: 1px solid var(--primary);
+            gap: var(--space-md, 16px);
+            background: var(--bg-secondary);
+            padding: 8px 1.5rem;
+            border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             animation: slideDown 0.3s ease;
         }
 
@@ -77,8 +97,8 @@
 
         .selected-count {
             font-weight: 600;
-            color: var(--primary-light);
-            font-size: 0.9rem;
+            color: var(--primary-light, #818cf8);
+            font-size: 0.85rem;
         }
 
         .selection-checkbox {
@@ -92,45 +112,49 @@
             display: none !important;
         }
 
+        /* ── Excel Table ── */
         .excel-grid-container {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-md);
-            overflow: auto;
-            max-height: calc(100vh - 250px);
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .excel-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            table-layout: fixed;
         }
 
         .excel-table th {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
+            background: var(--bg-secondary);
+            color: var(--text-secondary, #cbd5e1);
             font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             position: sticky;
             top: 0;
-            z-index: 10;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+            z-index: 50;
+            padding: 0.8rem 0.75rem;
+            text-align: left;
         }
 
         .excel-table td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            padding: 0.7rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
         }
 
         .excel-tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(99, 102, 241, 0.06);
         }
 
+        /* ── Status Badges ── */
         .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -148,34 +172,25 @@
             color: #94a3b8;
         }
 
-        .grid-toolbar {
+        /* ── Action Buttons ── */
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: var(--space-lg);
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+            justify-content: center;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-primary);
-            margin: 0;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .sync-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .status-success {
-            color: #10b981;
-        }
-
-        .status-warning {
-            color: #f59e0b;
+        .btn-icon:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
         }
     </style>
 </head>

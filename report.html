@@ -10,36 +10,23 @@
         rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tailwind CSS -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Tailwind CSS (for dynamic components) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --bg-glass: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-yellow: #fbbf24;
-            --accent-blue: #3b82f6;
-            --radius-md: 12px;
-        }
+        /* Inherits variables from css/styles.css — no duplicate :root */
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary, #0f172a);
+            color: var(--text-primary, #f1f5f9);
             margin: 0;
             padding: 1.5rem;
             min-height: 100vh;
             overflow-x: hidden;
+            display: block;
+            /* Report uses scrollable body instead of flex-h100 */
         }
 
         body.embedded {
@@ -49,16 +36,18 @@
         }
 
         .report-header {
-            background: var(--accent-yellow);
+            background: var(--accent-yellow, #fbbf24);
             color: #000;
-            padding: 8px 32px;
-            font-size: 20px;
+            padding: 8px 24px;
+            font-size: 1.25rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             margin-bottom: 2rem;
-            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
         }
 
         .report-grid {
@@ -69,13 +58,13 @@
         }
 
         .report-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            background: var(--bg-secondary, #1e293b);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            border-radius: 12px;
             padding: 1.25rem;
             position: relative;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 4px solid var(--primary);
+            border-left: 4px solid var(--primary, #6366f1);
         }
 
         .report-card:hover {
@@ -88,7 +77,7 @@
             position: absolute;
             top: 1rem;
             left: -0.75rem;
-            background: var(--primary);
+            background: var(--primary, #6366f1);
             color: white;
             width: 24px;
             height: 24px;
@@ -109,7 +98,7 @@
             color: white;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -130,7 +119,7 @@
             gap: 0.5rem;
             padding: 0.5rem 0.75rem;
             border-radius: 6px;
-            color: var(--text-secondary);
+            color: var(--text-secondary, #cbd5e1);
             text-decoration: none;
             font-size: 0.85rem;
             font-weight: 500;
@@ -139,14 +128,15 @@
 
         .report-link:hover {
             background: rgba(99, 102, 241, 0.1);
-            color: var(--primary-light);
+            color: var(--primary-light, #818cf8);
             padding-left: 1rem;
         }
 
         .detailed-report-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            background: var(--bg-glass, rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            border-radius: 12px;
             padding: 1.5rem;
             margin-top: 2rem;
         }
@@ -154,7 +144,7 @@
         .report-tabs {
             display: flex;
             gap: 2rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             margin-bottom: 1.5rem;
             overflow-x: auto;
             scrollbar-width: none;
@@ -164,7 +154,7 @@
             padding: 0.75rem 0.5rem;
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--text-muted, #94a3b8);
             cursor: pointer;
             position: relative;
             transition: all 0.2s;
@@ -172,7 +162,7 @@
         }
 
         .tab-item.active {
-            color: var(--primary-light);
+            color: var(--primary-light, #818cf8);
         }
 
         .tab-item.active::after {
@@ -182,7 +172,7 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background: var(--primary);
+            background: var(--primary, #6366f1);
         }
 
         .filter-row {
@@ -206,18 +196,23 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: var(--text-muted, #94a3b8);
         }
 
         .search-input {
             width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
+            background: var(--bg-primary, #0f172a);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             border-radius: 8px;
             padding: 10px 12px 10px 36px;
-            font-size: 14px;
+            font-size: 0.85rem;
             color: white;
             outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary, #6366f1);
         }
 
         .date-filter-group {
@@ -227,44 +222,49 @@
         }
 
         .date-input {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
+            background: var(--bg-primary, #0f172a);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             border-radius: 8px;
             padding: 8px 12px;
-            color: var(--text-secondary);
-            font-size: 14px;
+            color: var(--text-secondary, #cbd5e1);
+            font-size: 0.85rem;
             outline: none;
         }
 
         .report-table-container {
             overflow-x: auto;
             min-height: 400px;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
         }
 
         .report-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 0.8rem;
         }
 
         .report-table th {
             text-align: left;
             padding: 12px 16px;
-            color: var(--text-muted);
+            background: var(--bg-secondary, #1e293b);
+            color: var(--text-secondary, #cbd5e1);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border-bottom: 2px solid var(--bg-tertiary);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .report-table td {
             padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-secondary);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            color: var(--text-secondary, #cbd5e1);
         }
 
         .report-table tr:hover {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(99, 102, 241, 0.06);
         }
 
         .badge {
@@ -312,7 +312,7 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 2rem;
-            color: var(--text-muted);
+            color: var(--text-muted, #94a3b8);
             font-size: 13px;
         }
 
@@ -323,14 +323,15 @@
             align-items: center;
             justify-content: center;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .btn-page:hover:not(.disabled) {
-            background: var(--bg-tertiary);
+            background: var(--primary, #6366f1);
             color: white;
+            border-color: var(--primary, #6366f1);
         }
 
         .btn-page.disabled {
@@ -349,7 +350,7 @@
             width: 40px;
             height: 40px;
             border: 3px solid rgba(99, 102, 241, 0.1);
-            border-top-color: var(--primary);
+            border-top-color: var(--primary, #6366f1);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -361,8 +362,8 @@
         }
 
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
@@ -370,8 +371,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--bg-tertiary);
+            background: var(--border-color, rgba(255, 255, 255, 0.1));
             border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted, #94a3b8);
         }
     </style>
 </head>

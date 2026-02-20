@@ -238,27 +238,46 @@ window.switchView = function (viewName, action = null) {
  * Dashboard Data Loading
  * Fetches stats for the main dashboard view.
  */
-window.loadDashboardData = async function () {
+window.loadDashboardData = function () {
     if (document.getElementById('view-dashboard').classList.contains('hidden')) return;
 
-    try {
-        // Fetch stats (placeholder for actual Supabase logic)
-        // In a real scenario, we'd do complex aggregations here or call an Edge function
-
-        // For now, let's just simulate some data or fetch basic counts
-        const { count: productCount } = await window.supabase.from('products').select('*', { count: 'exact', head: true });
-        const { count: purchaseCount } = await window.supabase.from('purchases').select('*', { count: 'exact', head: true });
-
-        const totalProductsEl = document.getElementById('totalProducts');
-        const activePurchasesEl = document.getElementById('totalPurchases');
-
-        if (totalProductsEl) totalProductsEl.textContent = productCount || 0;
-        if (activePurchasesEl) activePurchasesEl.textContent = purchaseCount || 0;
-
-        // Load recent transactions
-        window.loadRecentTransactions();
-    } catch (error) {
-        console.error('Error loading dashboard data:', error);
+    // Use DataLoader for dashboard stats with retry
+    if (typeof window.DataLoader !== 'undefined') {
+        window.DataLoader.fetch({
+            fetchFn: async function () {
+                var prodResult = await window.supabase.from('products').select('*', { count: 'exact', head: true });
+                var purchResult = await window.supabase.from('purchases').select('*', { count: 'exact', head: true });
+                return { data: { productCount: prodResult.count || 0, purchaseCount: purchResult.count || 0 } };
+            },
+            containerId: null,
+            loadingMessage: 'Loading dashboard...',
+            errorMessage: 'Failed to load dashboard data.',
+            onSuccess: function (data) {
+                var totalProductsEl = document.getElementById('totalProducts');
+                var activePurchasesEl = document.getElementById('totalPurchases');
+                if (totalProductsEl) totalProductsEl.textContent = data.productCount;
+                if (activePurchasesEl) activePurchasesEl.textContent = data.purchaseCount;
+                window.loadRecentTransactions();
+            },
+            onError: function () {
+                console.error('Dashboard data load failed after retries.');
+            }
+        });
+    } else {
+        // Fallback without DataLoader
+        (async function () {
+            try {
+                var prodResult = await window.supabase.from('products').select('*', { count: 'exact', head: true });
+                var purchResult = await window.supabase.from('purchases').select('*', { count: 'exact', head: true });
+                var totalProductsEl = document.getElementById('totalProducts');
+                var activePurchasesEl = document.getElementById('totalPurchases');
+                if (totalProductsEl) totalProductsEl.textContent = prodResult.count || 0;
+                if (activePurchasesEl) activePurchasesEl.textContent = purchResult.count || 0;
+                window.loadRecentTransactions();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        })();
     }
 };
 
@@ -310,24 +329,59 @@ window.displayTransactions = function (transactions) {
  * Reference Data Loading
  * Loads common categories, brands, etc. for dropdowns.
  */
-window.loadReferenceData = async function () {
-    try {
-        const [cats, subcats, brands, units] = await Promise.all([
-            window.supabase.from('categories').select('*').order('name'),
-            window.supabase.from('subcategories').select('*').order('name'),
-            window.supabase.from('brands').select('*').order('name'),
-            window.supabase.from('units').select('*').order('name')
-        ]);
-
-        window.refCategories = cats.data || [];
-        window.refSubcategories = subcats.data || [];
-        window.refBrands = brands.data || [];
-        window.refUnits = units.data || [];
-
-        console.log('Reference data loaded');
-    } catch (error) {
-        console.error('Error loading reference data:', error);
-    }
+window.loadReferenceData = function () {
+    return new Promise(function (resolve) {
+        if (typeof window.DataLoader !== 'undefined') {
+            window.DataLoader.fetch({
+                fetchFn: async function () {
+                    var results = await Promise.all([
+                        window.supabase.from('categories').select('*').order('name'),
+                        window.supabase.from('subcategories').select('*').order('name'),
+                        window.supabase.from('brands').select('*').order('name'),
+                        window.supabase.from('units').select('*').order('name')
+                    ]);
+                    // Check for errors in any result
+                    for (var i = 0; i < results.length; i++) {
+                        if (results[i].error) throw results[i].error;
+                    }
+                    return { data: results };
+                },
+                containerId: null,
+                loadingMessage: 'Loading reference data...',
+                onSuccess: function (results) {
+                    window.refCategories = results[0].data || [];
+                    window.refSubcategories = results[1].data || [];
+                    window.refBrands = results[2].data || [];
+                    window.refUnits = results[3].data || [];
+                    console.log('Reference data loaded');
+                    resolve();
+                },
+                onError: function () {
+                    console.error('Reference data load failed after retries.');
+                    resolve(); // Don't block init
+                }
+            });
+        } else {
+            (async function () {
+                try {
+                    var results = await Promise.all([
+                        window.supabase.from('categories').select('*').order('name'),
+                        window.supabase.from('subcategories').select('*').order('name'),
+                        window.supabase.from('brands').select('*').order('name'),
+                        window.supabase.from('units').select('*').order('name')
+                    ]);
+                    window.refCategories = results[0].data || [];
+                    window.refSubcategories = results[1].data || [];
+                    window.refBrands = results[2].data || [];
+                    window.refUnits = results[3].data || [];
+                    console.log('Reference data loaded');
+                } catch (error) {
+                    console.error('Error loading reference data:', error);
+                }
+                resolve();
+            })();
+        }
+    });
 };
 
 /**
