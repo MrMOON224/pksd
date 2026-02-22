@@ -73,14 +73,14 @@
                             <a href="#" class="nav-link dropdown-toggle">
                                 <div style="display:flex; align-items:center; gap:var(--space-md); flex:1;">
                                     <i class="fas fa-boxes"></i>
-                                    <span>Products</span>
+                                    <span>Product</span>
                                 </div>
                                 <i class="fas fa-chevron-right nav-arrow"></i>
                             </a>
                             <ul class="submenu">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link" onclick="switchView('products'); return false;">Product
-                                        Manager</a>
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('products'); return false;">Products manager</a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="#" class="nav-link" onclick="switchView('product-add'); return false;">Add
@@ -144,6 +144,10 @@
                                 <li class="nav-item">
                                     <a href="#" class="nav-link"
                                         onclick="switchView('purchase-order'); return false;">Purchase Order</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"
+                                        onclick="switchView('purchase-order-list'); return false;">Order List</a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="#" class="nav-link"
@@ -477,7 +481,7 @@
 
                             <button class="btn btn-primary action-btn" onclick="switchView('products')">
                                 <i class="fas fa-boxes"></i>
-                                Manage Products
+                                Product
                             </button>
 
                             <button class="btn btn-primary action-btn" onclick="viewTransactions()">
@@ -501,54 +505,47 @@
                 <!-- Product Manager View -->
                 <div id="view-products" class="hidden">
                     <!-- Toolbar -->
-                    <div class="grid-toolbar">
+                    <div class="grid-toolbar" style="justify-content: space-between;">
                         <div style="display: flex; align-items: center; gap: var(--space-md);">
-                            <h1 class="page-title" style="margin:0;">Product Manager</h1>
-                            <div style="display: flex; gap: var(--space-sm); align-items: center;">
-                                <!-- Excel-like Status -->
-                                <div class="excel-status-chip"
-                                    style="margin-right: var(--space-md); font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
-                                    <i class="fas fa-database"></i> <span id="syncStatus">Ready</span>
-                                </div>
-
-                                <button class="btn btn-indigo" onclick="loadProducts(true)"
-                                    title="Refresh from Supabase">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
-                                <button class="btn btn-indigo" onclick="addNewRow()" title="Add empty row">
-                                    <i class="fas fa-plus"></i> Add Row
-                                </button>
-                                <button class="btn btn-indigo" onclick="openExcelImport()" title="Import CSV/Excel">
-                                    <i class="fas fa-file-import"></i> Import
-                                </button>
-                                <button class="btn btn-indigo" onclick="exportToExcel()" title="Export to CSV">
-                                    <i class="fas fa-file-export"></i> Export
-                                </button>
-                                <button class="btn btn-danger" onclick="deleteSelectedProducts()"
-                                    title="Delete selected products">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </button>
-                                <button class="btn btn-success" onclick="saveAllChanges()" id="saveBtn"
-                                    style="background: #059669; border-color: #059669;">
-                                    <i class="fas fa-save"></i> Save Changes
-                                </button>
+                            <!-- Excel-like Status -->
+                            <div class="excel-status-chip"
+                                style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-database"></i> <span id="syncStatus">Ready</span>
                             </div>
                         </div>
 
-                        <!-- Grid Headers (Hidden on Mobile/Tablet but useful for desktop) -->
-                        <div id="grid-header-labels" class="hidden">
-                            <!-- We might not need these in stacked mode -->
+                        <div style="display: flex; gap: var(--space-sm); align-items: center;">
+                            <button class="btn btn-indigo" onclick="loadProducts(true)" title="Refresh from Supabase">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-indigo" onclick="addNewRow()" title="Add empty row">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                            <button class="btn btn-indigo" onclick="openExcelImport()" title="Import CSV/Excel">
+                                <i class="fas fa-file-import"></i> Import
+                            </button>
+                            <button class="btn btn-indigo" onclick="exportToExcel()" title="Export to CSV">
+                                <i class="fas fa-file-export"></i> Export
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteSelectedProducts()"
+                                title="Delete selected products">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                            <button class="btn btn-success" onclick="saveAllChanges()" id="saveBtn"
+                                style="background: #059669; border-color: #059669;">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
                         </div>
-
-                        <!-- Seamless Grid Iframe -->
-                        <div id="grid-iframe-container"
-                            style="flex:1; display:flex; flex-direction:column; height: calc(100vh - 200px); background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; margin-top: var(--space-md);">
-                            <iframe id="productGridIframe" src="excel_example.html?mode=embedded"
-                                style="width: 100%; height: 100%; border: none;"
-                                onload="if(typeof window.loadProducts==='function') window.loadProducts()"></iframe>
-                        </div>
-
                     </div>
+
+                    <!-- Seamless Grid Iframe -->
+                    <div id="grid-iframe-container"
+                        style="flex:1; display:flex; flex-direction:column; height: calc(100vh - 140px); background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; margin-top: var(--space-md);">
+                        <iframe id="productGridIframe" src="excel_example.html?mode=embedded"
+                            style="width: 100%; height: 100%; border: none;"
+                            onload="if(typeof window.loadProducts==='function') window.loadProducts()"></iframe>
+                    </div>
+
                 </div>
 
                 <!-- Add Product View (Seamless Iframe) -->
@@ -783,6 +780,13 @@
                 <div id="view-purchase-order" class="view-section hidden"
                     style="height: calc(100vh - 100px); padding: 0;">
                     <iframe id="purchaseOrderIframe" src="purchaseorder.html?mode=embedded"
+                        style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
+                </div>
+
+                <!-- Purchase Order List View (Iframe) -->
+                <div id="view-purchase-order-list" class="view-section hidden"
+                    style="height: calc(100vh - 100px); padding: 0;">
+                    <iframe id="purchaseOrderListIframe" src="purchase-order-list.html?mode=embedded"
                         style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
                 </div>
 

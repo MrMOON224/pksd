@@ -32,24 +32,21 @@ window.addEventListener('message', function (event) {
     if (!iframe || event.source !== iframe.contentWindow) return;
 
     if (type === 'CELL_UPDATE') {
-        // Find existing product in local state
         const product = rowData.id ? window.productsData.find(p => p.id === rowData.id) : null;
 
         if (product) {
-            // Map grid column IDs back to DB field names if they differ
             const fieldMap = {
                 'desc': 'name',
                 'category': 'category_id',
                 'subCategory': 'subcategory_id',
-                'qty': 'stock'
+                'qty': 'stock',
+                'prices': 'price',
+                'barcode': 'barcodes'
             };
             const field = fieldMap[colId] || colId;
 
-            // Special handling for prices array -> single price field
-            // Special handling for tag arrays (take first for primary DB field)
-            if ((colId === 'prices' || colId === 'code') && Array.isArray(value)) {
-                if (colId === 'prices') product.price = parseFloat(value[0]) || 0;
-                if (colId === 'code') product.code = value[0] || '';
+            if (colId === 'barcode') {
+                product.barcodes = value ? [value] : [];
             } else {
                 product[field] = value;
             }
@@ -63,8 +60,9 @@ window.addEventListener('message', function (event) {
     } else if (type === 'EXPORT_DATA') {
         window.processExportData(data);
     } else if (type === 'SELECTION_CHANGE') {
-        window.selectedProductIds = new Set(data.selectedIds);
-        const deleteBtn = document.querySelector('button[onclick="deleteSelectedProducts()"]');
+        window.selectedProductIds = new Set(event.data.selectedIds);
+        // Update button text using ID
+        const deleteBtn = document.getElementById('deleteProductBtn');
         if (deleteBtn) {
             const count = window.selectedProductIds.size;
             deleteBtn.innerHTML = count > 0 ? `<i class="fas fa-trash-alt"></i> Delete (${count})` : `<i class="fas fa-trash-alt"></i> Delete`;
@@ -150,7 +148,7 @@ window.loadProducts = function (forceRefresh) {
                 return window.supabase
                     .from('products')
                     .select('*')
-                    .order('name');
+                    .order('created_at', { ascending: false });
             },
             containerId: loadContainer,
             maxRetries: 3,
@@ -177,7 +175,7 @@ window.loadProducts = function (forceRefresh) {
                 var result = await window.supabase
                     .from('products')
                     .select('*')
-                    .order('name');
+                    .order('created_at', { ascending: false });
 
                 if (result.error) throw result.error;
 
@@ -235,7 +233,7 @@ window.addNewRow = function () {
         isNew: true
     };
 
-    window.productsData.push(newProduct);
+    window.productsData.unshift(newProduct);
     window.modifiedProducts.add(newProduct.id);
     window.renderGrid();
     window.updateSaveButton();
@@ -248,7 +246,7 @@ window.addNewRow = function () {
             iframe.contentWindow.postMessage({
                 type: 'FOCUS_CELL',
                 data: {
-                    rowIdx: window.productsData.length - 1,
+                    rowIdx: 0,
                     colId: 'code'
                 }
             }, '*');
@@ -396,15 +394,17 @@ window.deleteSelectedProducts = function () {
     if (!confirm(`Are you sure you want to delete ${window.selectedProductIds.size} products?`)) return;
 
     window.selectedProductIds.forEach(id => {
-        const product = window.productsData.find(p => p.id === id);
+        const idStr = String(id);
+        const product = window.productsData.find(p => String(p.id) === idStr);
         if (product && !product.isNew) {
-            window.deletedProducts.add(id);
+            window.deletedProducts.add(idStr);
         }
-        window.modifiedProducts.delete(id);
+        window.modifiedProducts.delete(idStr);
     });
 
     // Update local data
-    window.productsData = window.productsData.filter(p => !window.selectedProductIds.has(p.id));
+    const selectedIds = new Set(Array.from(window.selectedProductIds).map(id => String(id)));
+    window.productsData = window.productsData.filter(p => !selectedIds.has(String(p.id)));
 
     // Clear selection
     window.selectedProductIds.clear();
@@ -414,8 +414,8 @@ window.deleteSelectedProducts = function () {
     window.updateSaveButton();
     window.saveProductDraft();
 
-    // Update button text
-    const deleteBtn = document.querySelector('button[onclick="deleteSelectedProducts()"]');
+    // Update button text using ID
+    const deleteBtn = document.getElementById('deleteProductBtn');
     if (deleteBtn) {
         deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Delete`;
         deleteBtn.disabled = true;
@@ -580,21 +580,19 @@ window.processExportData = function (data) {
         return;
     }
 
-    const headers = ['Item Code', 'Barcodes', 'Description', 'Category', 'Sub-Category', 'Brand', 'Cost', 'Price', 'Unit Type', 'Stock'];
+    const headers = ['Item Code', 'Barcode', 'Description', 'Category', 'Sub-Category', 'Brand', 'Cost', 'Price', 'Unit Type', 'Stock'];
     const csvRows = [headers.join(',')];
 
     data.forEach(p => {
-        // Find human names for IDs if needed, or use what's in rowData
-        // excel_example.html mapping: 'desc' -> 'name', 'category' -> 'category_id', etc.
         const row = [
             `"${(p.code || '').replace(/"/g, '""')}"`,
-            `"${(p.barcodes || []).join('; ').replace(/"/g, '""')}"`,
+            `"${(p.barcode || '').replace(/"/g, '""')}"`,
             `"${(p.desc || '').replace(/"/g, '""')}"`,
             `"${(p.category || '').replace(/"/g, '""')}"`,
             `"${(p.subCategory || '').replace(/"/g, '""')}"`,
             `"${(p.brand_id || '').replace(/"/g, '""')}"`,
             p.cost || 0,
-            p.prices ? (p.prices[0] || 0) : 0,
+            p.prices || 0,
             `"${(p.unit || '').replace(/"/g, '""')}"`,
             p.qty || 0
         ];
@@ -625,25 +623,23 @@ window.handleExcelImport = function (input) {
     const reader = new FileReader();
     reader.onload = function (e) {
         const text = e.target.result;
-        // Simplified CSV parse for demo
         const lines = text.split('\n');
         const headers = lines[0].split(',');
         const importedData = [];
 
         for (let i = 1; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
-            const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // CSV regex
+            const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             const p = {};
-            // Basic mapping logic
             p.id = crypto.randomUUID();
             p.code = (values[0] || '').replace(/"/g, '');
-            p.barcodes = (values[1] || '').replace(/"/g, '').split(';').map(b => b.trim()).filter(b => b);
+            p.barcode = (values[1] || '').replace(/"/g, '');
             p.desc = (values[2] || '').replace(/"/g, '');
             p.category = (values[3] || '').replace(/"/g, '');
             p.subCategory = (values[4] || '').replace(/"/g, '');
             p.brand_id = (values[5] || '').replace(/"/g, '');
             p.cost = parseFloat(values[6]) || 0;
-            p.prices = [parseFloat(values[7]) || 0];
+            p.prices = parseFloat(values[7]) || 0;
             p.unit = (values[8] || '').replace(/"/g, '');
             p.qty = parseFloat(values[9]) || 0;
             importedData.push(p);

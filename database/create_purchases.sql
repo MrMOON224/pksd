@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS purchase_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     purchase_id UUID REFERENCES purchases(id) ON DELETE CASCADE,
     product_id UUID REFERENCES products(id),
+    -- unit of measurement selected for this line
+    unit_id UUID REFERENCES units(id),
     quantity DECIMAL(15,2) NOT NULL,
     unit_cost DECIMAL(15,2) NOT NULL,
     discount_amount DECIMAL(15,2) DEFAULT 0,

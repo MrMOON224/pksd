@@ -20,21 +20,15 @@ window.deletedSubcategories = new Set();
 
 // Switch between Main Categories and Subcategories tabs
 window.switchCategoryTab = function (tab) {
-    const mainTab = document.getElementById('mainCategoriesTab');
-    const subTab = document.getElementById('subcategoriesTab');
     const mainView = document.getElementById('mainCategoriesView');
     const subView = document.getElementById('subcategoriesView');
 
-    if (!mainTab || !subTab || !mainView || !subView) return;
+    if (!mainView || !subView) return;
 
     if (tab === 'main') {
-        mainTab.style.borderBottom = '3px solid var(--primary)';
-        subTab.style.borderBottom = 'none';
         mainView.classList.remove('hidden');
         subView.classList.add('hidden');
     } else {
-        subTab.style.borderBottom = '3px solid var(--primary)';
-        mainTab.style.borderBottom = 'none';
         subView.classList.remove('hidden');
         mainView.classList.add('hidden');
     }
@@ -149,11 +143,16 @@ window.renderCategories = function () {
         tr.dataset.index = index;
 
         tr.innerHTML = `
-            <td style="text-align: center;"><input type="checkbox" class="selection-checkbox" data-id="${category.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)"></td>
-            <td>${index + 1}</td>
+            <td style="text-align: center;">
+                <label class="checkbox-container">
+                    <input type="checkbox" class="selection-checkbox" data-id="${category.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)">
+                    <span class="checkmark"></span>
+                </label>
+            </td>
+            <td style="text-align: center;">${index + 1}</td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(category.name || '')}" data-field="name" oninput="window.markCategoryModified(this)"></td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(category.description || '')}" data-field="description" oninput="window.markCategoryModified(this)"></td>
-            <td class="action-cell">
+            <td class="action-cell" style="text-align: center;">
                 <button class="btn-premium-danger" onclick="window.deleteCategory(${index})" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
         `;
@@ -182,8 +181,13 @@ window.renderSubcategories = function () {
         ).join('');
 
         tr.innerHTML = `
-            <td style="text-align: center;"><input type="checkbox" class="selection-checkbox" data-id="${sub.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)"></td>
-            <td>${index + 1}</td>
+            <td style="text-align: center;">
+                <label class="checkbox-container">
+                    <input type="checkbox" class="selection-checkbox" data-id="${sub.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)">
+                    <span class="checkmark"></span>
+                </label>
+            </td>
+            <td style="text-align: center;">${index + 1}</td>
             <td>
                 <select class="excel-input" data-field="category_id" onchange="window.markSubcategoryModified(this)">
                     <option value="">Select Category</option>
@@ -192,7 +196,7 @@ window.renderSubcategories = function () {
             </td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(sub.name || '')}" data-field="name" oninput="window.markSubcategoryModified(this)"></td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(sub.description || '')}" data-field="description" oninput="window.markSubcategoryModified(this)"></td>
-            <td class="action-cell">
+            <td class="action-cell" style="text-align: center;">
                 <button class="btn-premium-danger" onclick="window.deleteSubcategory(${index})" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
         `;
@@ -397,21 +401,15 @@ window.deletedVariationOptions = new Set();
 
 // Switch between Variation Types and Options tabs
 window.switchVariationTab = function (tab) {
-    const typesTab = document.getElementById('variationTypesTab');
-    const optionsTab = document.getElementById('variationOptionsTab');
     const typesView = document.getElementById('variationTypesView');
     const optionsView = document.getElementById('variationOptionsView');
 
-    if (!typesTab || !optionsTab || !typesView || !optionsView) return;
+    if (!typesView || !optionsView) return;
 
     if (tab === 'types') {
-        typesTab.style.borderBottom = '3px solid var(--primary)';
-        optionsTab.style.borderBottom = 'none';
         typesView.classList.remove('hidden');
         optionsView.classList.add('hidden');
     } else {
-        optionsTab.style.borderBottom = '3px solid var(--primary)';
-        typesTab.style.borderBottom = 'none';
         optionsView.classList.remove('hidden');
         typesView.classList.add('hidden');
     }
@@ -520,11 +518,16 @@ window.renderVariationTypes = function () {
         tr.dataset.index = index;
 
         tr.innerHTML = `
-            <td style="text-align: center;"><input type="checkbox" class="selection-checkbox" data-id="${type.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)"></td>
-            <td>${index + 1}</td>
+            <td style="text-align: center;">
+                <label class="checkbox-container">
+                    <input type="checkbox" class="selection-checkbox" data-id="${type.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)">
+                    <span class="checkmark"></span>
+                </label>
+            </td>
+            <td style="text-align: center;">${index + 1}</td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(type.name || '')}" data-field="name" oninput="window.markVariationTypeModified(this)"></td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(type.description || '')}" data-field="description" oninput="window.markVariationTypeModified(this)"></td>
-            <td class="action-cell">
+            <td class="action-cell" style="text-align: center;">
                 <button class="btn-premium-danger" onclick="window.deleteVariationType(${index})" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
         `;
@@ -553,8 +556,13 @@ window.renderVariationOptions = function () {
         ).join('');
 
         tr.innerHTML = `
-            <td style="text-align: center;"><input type="checkbox" class="selection-checkbox" data-id="${opt.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)"></td>
-            <td>${index + 1}</td>
+            <td style="text-align: center;">
+                <label class="checkbox-container">
+                    <input type="checkbox" class="selection-checkbox" data-id="${opt.id}" ${isSelected ? 'checked' : ''} onchange="window.handleSelectionChange(this)">
+                    <span class="checkmark"></span>
+                </label>
+            </td>
+            <td style="text-align: center;">${index + 1}</td>
             <td>
                 <select class="excel-input" data-field="variation_type_id" onchange="window.markVariationOptionModified(this)">
                     <option value="">Select Type</option>
@@ -562,7 +570,7 @@ window.renderVariationOptions = function () {
                 </select>
             </td>
             <td><input type="text" class="excel-input" value="${window.escapeHtml(opt.option_value || '')}" data-field="option_value" oninput="window.markVariationOptionModified(this)"></td>
-            <td class="action-cell">
+            <td class="action-cell" style="text-align: center;">
                 <button class="btn-premium-danger" onclick="window.deleteVariationOption(${index})" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
         `;
@@ -804,3 +812,207 @@ window.executeBulkDelete = async function (ids) {
         window.hideLoading();
     }
 };
+
+window.handleCategoryExcelImport = function (input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    window.showLoading();
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        window.hideLoading();
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            if (rows.length < 2) {
+                alert("The Excel file doesn't contain enough data (needs header and at least 1 row).");
+                return;
+            }
+
+            const mainView = document.getElementById('mainCategoriesView');
+            const isMain = mainView && !mainView.classList.contains('hidden');
+
+            const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
+
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            if (isMain) {
+                const nameIdx = headers.findIndex(h => h.includes('name'));
+                const descIdx = headers.findIndex(h => h.includes('desc'));
+
+                if (nameIdx === -1) {
+                    alert("Could not find a 'Name' column in the Excel file.");
+                    return;
+                }
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || !row[nameIdx]) {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    const newId = 'new_' + Date.now() + '_' + addedCount;
+                    window.categoriesData.push({
+                        id: newId,
+                        name: row[nameIdx] || '',
+                        description: descIdx !== -1 ? (row[descIdx] || '') : '',
+                        isNew: true
+                    });
+                    window.modifiedCategories.add(newId);
+                    addedCount++;
+                }
+
+                window.renderCategories();
+            } else {
+                const mainCatIdx = headers.findIndex(h => h.includes('main') || h === 'category');
+                const subCatIdx = headers.findIndex(h => h.includes('sub') || h === 'name');
+                const descIdx = headers.findIndex(h => h.includes('desc'));
+
+                if (mainCatIdx === -1 || subCatIdx === -1) {
+                    alert("Could not find 'Main Category' and 'Subcategory Name' columns.");
+                    return;
+                }
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || !row[mainCatIdx] || !row[subCatIdx]) {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    const mainCatName = String(row[mainCatIdx]).trim().toLowerCase();
+                    const mainCat = window.categoriesData.find(c => c.name && c.name.toLowerCase() === mainCatName);
+
+                    if (!mainCat) {
+                        console.warn(`Category '${row[mainCatIdx]}' not found, skipping subcategory '${row[subCatIdx]}'`);
+                        skippedCount++;
+                        continue;
+                    }
+
+                    const newId = 'new_' + Date.now() + '_' + addedCount;
+                    window.subcategoriesData.push({
+                        id: newId,
+                        category_id: mainCat.id,
+                        name: row[subCatIdx] || '',
+                        description: descIdx !== -1 ? (row[descIdx] || '') : '',
+                        isNew: true
+                    });
+                    window.modifiedSubcategories.add(newId);
+                    addedCount++;
+                }
+
+                window.renderSubcategories();
+            }
+
+            window.saveCategoriesDraft();
+            alert(`Successfully imported ${addedCount} rows.${skippedCount > 0 ? ' Skipped ' + skippedCount + ' rows.' : ''}`);
+
+        } catch (err) {
+            console.error("Excel import error:", err);
+            alert("Failed to import Excel file: " + err.message);
+        }
+
+        input.value = '';
+    };
+    reader.onerror = function () {
+        window.hideLoading();
+        alert("Failed to read file.");
+        input.value = '';
+    }
+    reader.readAsArrayBuffer(file);
+};
+
+// --- Arrow Key Navigation ---
+function getCategoryGridInputs(tableBodyId) {
+    const tbody = document.getElementById(tableBodyId);
+    if (!tbody) return [];
+    const rows = tbody.querySelectorAll('.excel-tr');
+    const inputs = [];
+    rows.forEach((row, rowIdx) => {
+        const rowInputs = row.querySelectorAll('input.excel-input, select.excel-input');
+        rowInputs.forEach(input => {
+            inputs.push({ row: rowIdx, input: input, field: input.dataset.field });
+        });
+    });
+    return inputs;
+}
+
+function moveCategoryFocus(tableBodyId, currentInput, direction) {
+    const allInputs = getCategoryGridInputs(tableBodyId);
+    const currentIdx = allInputs.findIndex(i => i.input === currentInput);
+    if (currentIdx === -1) return;
+
+    let targetIdx = currentIdx;
+    // Determine number of columns based on table
+    let numCols = 2; // default for categories
+    if (tableBodyId === 'subcategoriesBody') numCols = 3;
+    else if (tableBodyId === 'variationTypesBody') numCols = 2;
+    else if (tableBodyId === 'variationOptionsBody') numCols = 3;
+
+    if (direction === 'right') {
+        targetIdx = currentIdx + 1;
+    } else if (direction === 'left') {
+        targetIdx = currentIdx - 1;
+    } else if (direction === 'down') {
+        targetIdx = currentIdx + numCols;
+    } else if (direction === 'up') {
+        targetIdx = currentIdx - numCols;
+    }
+
+    if (targetIdx >= 0 && targetIdx < allInputs.length) {
+        allInputs[targetIdx].input.focus();
+        if (allInputs[targetIdx].input.tagName === 'INPUT') {
+            allInputs[targetIdx].input.select();
+        }
+    }
+}
+
+function setupCategoryKeyNavigation() {
+    document.addEventListener('keydown', (e) => {
+        const input = e.target;
+        if (!input.classList.contains('excel-input')) return;
+        
+        const row = input.closest('.excel-tr');
+        if (!row) return;
+
+        // Determine which table we're in
+        const tbody = input.closest('tbody');
+        const tableBodyId = tbody ? tbody.id : null;
+        
+        // Skip if not a known table
+        if (!tableBodyId || !['categoriesBody', 'subcategoriesBody', 'variationTypesBody', 'variationOptionsBody'].includes(tableBodyId)) return;
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            moveCategoryFocus(tableBodyId, input, 'right');
+        } else if (e.key === 'ArrowRight') {
+            const selStart = input.selectionStart;
+            const val = input.value;
+            if (selStart === val.length) {
+                e.preventDefault();
+                moveCategoryFocus(tableBodyId, input, 'right');
+            }
+        } else if (e.key === 'ArrowLeft') {
+            const selStart = input.selectionStart;
+            if (selStart === 0) {
+                e.preventDefault();
+                moveCategoryFocus(tableBodyId, input, 'left');
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            moveCategoryFocus(tableBodyId, input, 'down');
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            moveCategoryFocus(tableBodyId, input, 'up');
+        }
+    });
+}
+
+// Initialize category key navigation
+setupCategoryKeyNavigation();

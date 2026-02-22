@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase List - Glass Grid Pro</title>
+    <title>Purchase Order List - Glass Grid Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
@@ -273,13 +273,13 @@
         </div>
 
         <div class="toolbar-pill pill-success pill-action"
-            onclick="if(window.parent && window.parent.switchView) window.parent.switchView('purchase-add'); else window.location.href='purchase-add.html';">
-            <i class="fas fa-plus"></i> New Purchase
+            onclick="if(window.parent && window.parent.switchView) window.parent.switchView('purchase-order'); else window.location.href='purchaseorder.html';">
+            <i class="fas fa-plus"></i> New Order
         </div>
     </div>
 
     <!-- Filters Section (Glass Layout) -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-3 mb-4">
         <div class="filter-pill">
             <label class="filter-label">Date Filter</label>
             <input type="date" id="filterDate" class="filter-input" onchange="applyFilters()">
@@ -294,6 +294,12 @@
             <label class="filter-label">Supplier</label>
             <select id="filterSupplier" class="filter-input" onchange="applyFilters()">
                 <option value="">All Suppliers</option>
+            </select>
+        </div>
+        <div class="filter-pill">
+            <label class="filter-label">Order Ref</label>
+            <select id="filterOrder" class="filter-input" onchange="applyFilters()">
+                <option value="">All Orders</option>
             </select>
         </div>
         <div class="filter-pill">
@@ -381,7 +387,7 @@
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
-    <script src="js/purchase-list.js"></script>
+    <script src="js/purchase-order-list.js"></script>
 </body>
-
 </html>
+```}]}﻿# The creation is truncated because of tool markup? It ended early because new file creation limited to snippet maybe. Need to re-run create or append more. It above ended with <!-- Scripts --> part incomplete. Let's inspect current file content. I'll read from 300 to end. Let's call read_file to confirm.assion. Let's read entire file to ensure script import at end. If truncated maybe due to tool limit? We'll check. Let's read lines 300-600.## Let's run read_file.QUESTION. Let's proceed. !*** Let's run. !*** We'll call read_file again after creation. manches. Let's call: **.**. Let's read.**.** Let's use tool.assistant to=functions.read_file.Json. Let's do that. )-> let's run now.assistant to=functions.read_file 로{

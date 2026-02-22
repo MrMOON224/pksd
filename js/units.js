@@ -136,8 +136,8 @@ function renderBody() {
                         <span class="checkmark"></span>
                     </label>
                 </td>
-                <td class="action-cell">
-                    <button class="btn-premium-delete" onclick="deleteUnit(${index})" title="Delete">
+                <td class="action-cell" style="text-align: center;">
+                    <button class="btn-premium-danger" onclick="deleteUnit(${index})" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -149,7 +149,6 @@ function renderBody() {
 window.renderGrid = function () {
     renderHeader();
     renderBody();
-    updateBulkToolbar();
 };
 
 // --- CRUD Operations ---
@@ -198,7 +197,6 @@ window.deleteUnit = function (index) {
         unitsData.splice(index, 1);
         renderBody();
         saveDraft();
-        updateBulkToolbar();
     }
 };
 
@@ -260,7 +258,6 @@ window.saveChanges = async function () {
 };
 
 // --- Selection & Bulk Actions ---
-// Similar to brands.js, sharing logic via global if possible or duplicated for independence
 
 window.toggleSelectAll = function (master) {
     const table = master.closest('table');
@@ -271,28 +268,13 @@ window.toggleSelectAll = function (master) {
         if (master.checked) selectedIds.add(id);
         else selectedIds.delete(id);
     });
-    updateBulkToolbar();
 };
 
 window.handleSelectionChange = function (cb) {
     const id = cb.dataset.id;
     if (cb.checked) selectedIds.add(id);
     else selectedIds.delete(id);
-    updateBulkToolbar();
 };
-
-function updateBulkToolbar() {
-    const toolbar = document.getElementById('bulkToolbar');
-    const countEl = document.getElementById('selectedCount');
-    if (!toolbar || !countEl) return;
-
-    if (selectedIds.size > 0) {
-        toolbar.classList.remove('hidden');
-        countEl.textContent = selectedIds.size;
-    } else {
-        toolbar.classList.add('hidden');
-    }
-}
 
 window.clearSelection = function () {
     selectedIds.clear();
@@ -300,11 +282,13 @@ window.clearSelection = function () {
     if (master) master.checked = false;
     const items = document.querySelectorAll('tbody .selection-checkbox');
     items.forEach(i => i.checked = false);
-    updateBulkToolbar();
 };
 
 window.bulkDelete = async function () {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0) {
+        alert('Please select items to delete.');
+        return;
+    }
     if (confirm(`Are you sure you want to delete ${selectedIds.size} selected units?`)) {
         try {
             updateSyncStatus('Deleting...');
@@ -386,9 +370,81 @@ function setupResizers() {
     });
 }
 
+// --- Arrow Key Navigation ---
+function getGridInputs() {
+    const rows = document.querySelectorAll('#gridBody .excel-tr');
+    const inputs = [];
+    rows.forEach((row, rowIdx) => {
+        const rowInputs = row.querySelectorAll('input.excel-input');
+        rowInputs.forEach(input => {
+            inputs.push({ row: rowIdx, input: input, field: input.dataset.field });
+        });
+    });
+    return inputs;
+}
+
+function moveGridFocus(currentInput, direction) {
+    const allInputs = getGridInputs();
+    const currentIdx = allInputs.findIndex(i => i.input === currentInput);
+    if (currentIdx === -1) return;
+
+    let targetIdx = currentIdx;
+    const numCols = 4; // name, short_name, description,
+
+    if (direction === 'right') {
+        targetIdx = currentIdx + 1;
+    } else if (direction === 'left') {
+        targetIdx = currentIdx - 1;
+    } else if (direction === 'down') {
+        targetIdx = currentIdx + numCols;
+    } else if (direction === 'up') {
+        targetIdx = currentIdx - numCols;
+    }
+
+    if (targetIdx >= 0 && targetIdx < allInputs.length) {
+        allInputs[targetIdx].input.focus();
+        allInputs[targetIdx].input.select();
+    }
+}
+
+function setupGridKeyNavigation() {
+    document.addEventListener('keydown', (e) => {
+        if (!e.target.classList.contains('excel-input')) return;
+        
+        const input = e.target;
+        const row = input.closest('.excel-tr');
+        if (!row) return;
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            moveGridFocus(input, 'right');
+        } else if (e.key === 'ArrowRight') {
+            const selStart = input.selectionStart;
+            const val = input.value;
+            if (selStart === val.length) {
+                e.preventDefault();
+                moveGridFocus(input, 'right');
+            }
+        } else if (e.key === 'ArrowLeft') {
+            const selStart = input.selectionStart;
+            if (selStart === 0) {
+                e.preventDefault();
+                moveGridFocus(input, 'left');
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            moveGridFocus(input, 'down');
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            moveGridFocus(input, 'up');
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     if (window.supabase || (window.parent && window.parent.supabase)) {
         if (!window.supabase) window.supabase = window.parent.supabase;
+        setupGridKeyNavigation();
         window.loadUnits();
     }
 });

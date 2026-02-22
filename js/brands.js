@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Brand Management Module
  * Handles loading, rendering, and CRUD operations for brands with high-density inline editing.
  */
@@ -132,8 +132,8 @@ function renderBody() {
                 <td><input type="text" class="excel-input" value="${escapeHtml(b.name || '')}" data-field="name" oninput="markModified(this)" placeholder="Required"></td>
                 <td><input type="text" class="excel-input" value="${escapeHtml(b.description || '')}" data-field="description" oninput="markModified(this)" placeholder="Optional"></td>
                 <td><input type="text" class="excel-input" value="${escapeHtml(b.website || '')}" data-field="website" oninput="markModified(this)" placeholder="Optional"></td>
-                <td class="action-cell">
-                    <button class="btn-premium-delete" onclick="deleteBrand(${index})" title="Delete">
+                <td class="action-cell" style="text-align: center;">
+                    <button class="btn-premium-danger" onclick="deleteBrand(${index})" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -145,7 +145,6 @@ function renderBody() {
 window.renderGrid = function () {
     renderHeader();
     renderBody();
-    updateBulkToolbar();
 };
 
 // --- CRUD Operations ---
@@ -194,7 +193,6 @@ window.deleteBrand = function (index) {
         brandsData.splice(index, 1);
         renderBody();
         saveDraft();
-        updateBulkToolbar();
     }
 };
 
@@ -268,28 +266,13 @@ window.toggleSelectAll = function (master) {
         if (master.checked) selectedIds.add(id);
         else selectedIds.delete(id);
     });
-    updateBulkToolbar();
 };
 
 window.handleSelectionChange = function (cb) {
     const id = cb.dataset.id;
     if (cb.checked) selectedIds.add(id);
     else selectedIds.delete(id);
-    updateBulkToolbar();
 };
-
-function updateBulkToolbar() {
-    const toolbar = document.getElementById('bulkToolbar');
-    const countEl = document.getElementById('selectedCount');
-    if (!toolbar || !countEl) return;
-
-    if (selectedIds.size > 0) {
-        toolbar.classList.remove('hidden');
-        countEl.textContent = selectedIds.size;
-    } else {
-        toolbar.classList.add('hidden');
-    }
-}
 
 window.clearSelection = function () {
     selectedIds.clear();
@@ -297,11 +280,13 @@ window.clearSelection = function () {
     if (master) master.checked = false;
     const items = document.querySelectorAll('tbody .selection-checkbox');
     items.forEach(i => i.checked = false);
-    updateBulkToolbar();
 };
 
 window.bulkDelete = async function () {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0) {
+        alert('Please select items to delete.');
+        return;
+    }
     if (confirm(`Are you sure you want to delete ${selectedIds.size} selected brands?`)) {
         try {
             updateSyncStatus('Deleting...');
@@ -386,10 +371,83 @@ function setupResizers() {
     });
 }
 
+
+// --- Arrow Key Navigation ---
+function getGridInputs() {
+    const rows = document.querySelectorAll('#gridBody .excel-tr');
+    const inputs = [];
+    rows.forEach((row, rowIdx) => {
+        const rowInputs = row.querySelectorAll('input.excel-input');
+        rowInputs.forEach(input => {
+            inputs.push({ row: rowIdx, input: input, field: input.dataset.field });
+        });
+    });
+    return inputs;
+}
+
+function moveGridFocus(currentInput, direction) {
+    const allInputs = getGridInputs();
+    const currentIdx = allInputs.findIndex(i => i.input === currentInput);
+    if (currentIdx === -1) return;
+
+    let targetIdx = currentIdx;
+    const numCols = 3; // name, description, website
+
+    if (direction === 'right') {
+        targetIdx = currentIdx + 1;
+    } else if (direction === 'left') {
+        targetIdx = currentIdx - 1;
+    } else if (direction === 'down') {
+        targetIdx = currentIdx + numCols;
+    } else if (direction === 'up') {
+        targetIdx = currentIdx - numCols;
+    }
+
+    if (targetIdx >= 0 && targetIdx < allInputs.length) {
+        allInputs[targetIdx].input.focus();
+        allInputs[targetIdx].input.select();
+    }
+}
+
+function setupGridKeyNavigation() {
+    document.addEventListener('keydown', (e) => {
+        if (!e.target.classList.contains('excel-input')) return;
+        
+        const input = e.target;
+        const row = input.closest('.excel-tr');
+        if (!row) return;
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            moveGridFocus(input, 'right');
+        } else if (e.key === 'ArrowRight') {
+            const selStart = input.selectionStart;
+            const val = input.value;
+            if (selStart === val.length) {
+                e.preventDefault();
+                moveGridFocus(input, 'right');
+            }
+        } else if (e.key === 'ArrowLeft') {
+            const selStart = input.selectionStart;
+            if (selStart === 0) {
+                e.preventDefault();
+                moveGridFocus(input, 'left');
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            moveGridFocus(input, 'down');
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            moveGridFocus(input, 'up');
+        }
+    });
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
     if (window.supabase || (window.parent && window.parent.supabase)) {
         if (!window.supabase) window.supabase = window.parent.supabase;
+        setupGridKeyNavigation();
         window.loadBrands();
     }
 });

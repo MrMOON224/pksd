@@ -137,6 +137,12 @@
                     <input type="date" id="orderDate" class="glass-input !w-32">
                 </div>
                 <div class="flex items-center gap-2">
+                    <label class="font-bold text-[var(--text-muted)] uppercase text-[9px]">Load Order</label>
+                    <select id="orderDropdown" class="glass-input !w-48" onchange="if(this.value) loadOrder(this.value)">
+                        <option value="">Select Order...</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
                     <label class="font-bold text-[var(--text-muted)] uppercase text-[9px]">Requested Shop</label>
                     <select id="warehouseId" class="glass-input !w-48">
                         <option value="">Select Warehouse...</option>
@@ -197,11 +203,11 @@
                         <th class="w-40">Barcode</th>
                         <th>Description</th>
                         <th class="w-16 text-center">QTY</th>
-                        <th class="w-20 text-center">PCS/BOX</th>
+                        <th class="w-20 text-center">Unit</th>
                         <th class="w-24 text-right">Cost</th>
-                        <th class="w-16 text-right">Disco</th>
+                        <th class="w-16 text-right">Discount</th>
                         <th class="w-24 text-right">Amount</th>
-                        <th class="w-48 remark-header">Remark ( foc / Exchange / Damage )</th>
+                        <th class="w-48 remark-header">Remark</th>
                         <th class="w-6 border-none"></th>
                     </tr>
                 </thead>
@@ -321,6 +327,8 @@
         let items = [];
         let suppliers = [];
         let warehouses = [];
+        let units = [];
+        let unitsMap = new Map();
         let productsMap = new Map();
         let loadedOrderId = null;
 
@@ -353,8 +361,26 @@
                     whSelect.appendChild(opt);
                 });
 
+                // Load Units (for unit dropdown)
+                const { data: unitData } = await supabase.from('units').select('id, name');
+                units = unitData || [];
+                units.forEach(u => unitsMap.set(u.id, u.name));
+
+                // add custom arrow for selects via css injection (only once)
+                const styleEl = document.createElement('style');
+                styleEl.textContent = `
+                    select.glass-input {
+                        appearance: none;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='currentColor' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 0.5rem center;
+                        background-size: 0.75rem;
+                    }
+                `;
+                document.head.appendChild(styleEl);
+
                 // Load Products
-                const { data: prodData } = await supabase.from('products').select('id, code, name, barcodes, cost, price');
+                const { data: prodData } = await supabase.from('products').select('id, code, name, barcodes, cost, price, pcs_per_box, unit_id');
                 (prodData || []).forEach(p => {
                     productsMap.set(p.id, p);
                     if (p.code) productsMap.set(p.code, p);
@@ -363,7 +389,26 @@
                     }
                 });
 
+                // populate order dropdown
+                await loadOrderDropdown();
+
                 addRow();
+
+                // helper to fill dropdown with recent orders
+                async function loadOrderDropdown() {
+                    try {
+                        const { data } = await supabase.from('purchases').select('id, reference_no').eq('status','Ordered').order('date', { ascending: false }).limit(50);
+                        const sel = document.getElementById('orderDropdown');
+                        (data || []).forEach(o => {
+                            const opt = document.createElement('option');
+                            opt.value = o.id;
+                            opt.textContent = o.reference_no;
+                            sel.appendChild(opt);
+                        });
+                    } catch (e) {
+                        console.error('Order dropdown load error', e);
+                    }
+                }
             } catch (err) {
                 console.error('Init error:', err);
                 alert('Failed to load data: ' + err.message);
@@ -396,7 +441,12 @@
                                onkeydown="handleGridKey(${index}, event)"
                                class="bg-transparent w-full outline-none p-2 ${isP && item.lastTyped !== 'description' ? 'preview-text' : ''}" placeholder="Description..."></td>
                     <td><input type="number" value="${item.qty || 0}" oninput="updateItem(${index}, 'qty', this.value)" class="bg-transparent w-full text-center outline-none no-spinner font-bold p-2"></td>
-                    <td><input type="text" value="${item.pcsBox || ''}" onchange="updateItem(${index}, 'pcsBox', this.value)" class="bg-transparent w-full outline-none p-2 text-center"></td>
+                    <td>
+                        <select onchange="updateItem(${index}, 'unitId', this.value)" class="glass-input appearance-none bg-transparent w-full outline-none p-2 text-center">
+                            <option value="">Select unit</option>
+                            ${units.map(u => `<option value="${u.id}" ${item.unitId === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
+                        </select>
+                    </td>
                     <td><input type="number" value="${item.cost || 0}" oninput="updateItem(${index}, 'cost', this.value)" class="bg-transparent w-full outline-none text-right p-2 no-spinner ${isP ? 'preview-text' : ''}"></td>
                     <td><input type="text" value="${item.discount || '0'}" oninput="updateItem(${index}, 'discount', this.value)" class="bg-transparent w-full outline-none text-right p-2"></td>
                     <td class="text-right font-bold pr-3">${(item.amount || 0).toLocaleString()}</td>
@@ -439,7 +489,7 @@
                 const row = document.getElementById('tableBody').children[idx];
                 if (row) {
                     const inputs = row.querySelectorAll('input');
-                    // indices: 0:itemCode, 1:barcode, 2:description, 3:qty, 4:pcsBox, 5:cost, 6:discount
+                    // indices: 0:itemCode, 1:barcode, 2:description, 3:qty, 4:unit, 5:cost, 6:discount
                     if (field !== 'itemCode') inputs[0].value = product.code || '';
                     if (field !== 'barcode') inputs[1].value = product.barcodes?.[0] || '';
                     if (field !== 'description') inputs[2].value = product.name || '';
@@ -491,13 +541,8 @@
                 barcode: product.barcodes?.[0] || '',
                 description: product.name || '',
                 qty: 1,
-                pcsBox: product.pcs_per_box || 1,
-                cost: product.cost || product.price || 0,
-                discount: 0,
-                amount: product.cost || product.price || 0,
-                remark: '',
-                isPreview: false,
-                tempProductId: null
+                pcsBox: product.pcs_per_box || 1, // legacy field
+                unitId: product.unit_id || '',
             };
 
             renderTable();
@@ -518,6 +563,10 @@
 
         function updateItem(index, field, value) {
             items[index][field] = value;
+            if (field === 'unitId') {
+                // optionally keep human-readable name
+                items[index].unitName = unitsMap.get(value) || '';
+            }
             if (['qty', 'cost', 'discount', 'pcsBox'].includes(field)) {
                 const qty = parseFloat(items[index].qty) || 0;
                 const cost = parseFloat(items[index].cost) || 0;
@@ -525,9 +574,7 @@
                 let d = dStr.includes('%') ? (parseFloat(dStr) / 100) * (qty * cost) : parseFloat(dStr) || 0;
                 items[index].amount = (qty * cost) - d;
 
-                // Don't re-render if it's just a value update (to prevent losing focus)
-                // However, renderTable is needed to update the 'Amount' display
-                // We'll surgically update the amount cell
+                // update amount cell without redrawing whole table
                 const row = document.getElementById('tableBody').children[index];
                 if (row) {
                     const amountCell = row.children[8];
@@ -544,6 +591,7 @@
                 description: '',
                 qty: 0,
                 pcsBox: '',
+                unitId: '',
                 cost: 0,
                 discount: '0',
                 amount: 0,
@@ -670,8 +718,10 @@
                     quantity: parseFloat(item.qty) || 0,
                     unit_cost: parseFloat(item.cost) || 0,
                     discount_amount: parseFloat(item.discount) || 0,
-                    discount_amount: parseFloat(item.discount) || 0,
                     subtotal: item.amount,
+                    // new unit reference (falls back to null)
+                    unit_id: item.unitId || null,
+                    // keep old field for compatibility if still used elsewhere
                     pcs_box: item.pcsBox,
                     remark: item.remark
                 }));
@@ -859,7 +909,8 @@
                         barcode: prod?.barcodes?.[0] || '',
                         description: prod?.name || '',
                         qty: pi.quantity,
-                        pcsBox: pi.pcs_box,
+                        pcsBox: pi.pcs_box, // legacy
+                        unitId: pi.unit_id || prod?.unit_id || '',
                         cost: pi.unit_cost,
                         discount: pi.discount_amount,
                         amount: pi.subtotal,

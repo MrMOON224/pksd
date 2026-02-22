@@ -196,11 +196,11 @@
                         <th class="w-40">Barcode</th>
                         <th>Description</th>
                         <th class="w-16 text-center">QTY</th>
-                        <th class="w-20 text-center">PCS/BOX</th>
+                        <th class="w-20 text-center">Unit</th>
                         <th class="w-24 text-right">Cost</th>
                         <th class="w-16 text-right">Disco</th>
                         <th class="w-24 text-right">Amount</th>
-                        <th class="w-48 remark-header">Reason ( Damage / Expiry / Other )</th>
+                        <th class="w-48 remark-header">remark</th>
                         <th class="w-6 border-none"></th>
                     </tr>
                 </thead>
@@ -315,8 +315,8 @@
     <script>
         let items = [];
         let suppliers = [];
-        let warehouses = [];
-        let productsMap = new Map();
+        let warehouses = [];        let units = [];
+        let unitsMap = new Map();        let productsMap = new Map();
         let loadedReturnId = null;
 
         window.onload = () => {
@@ -348,8 +348,13 @@
                     whSelect.appendChild(opt);
                 });
 
+                // Load Units
+                const { data: unitData } = await supabase.from('units').select('id, name');
+                units = unitData || [];
+                units.forEach(u => unitsMap.set(u.id, u.name));
+
                 // Load Products
-                const { data: prodData } = await supabase.from('products').select('id, code, name, barcodes, cost, price, pcs_per_box');
+                const { data: prodData } = await supabase.from('products').select('id, code, name, barcodes, cost, price, pcs_per_box, unit_id');
                 (prodData || []).forEach(p => {
                     productsMap.set(p.id, p);
                     if (p.code) productsMap.set(p.code, p);
@@ -389,7 +394,12 @@
                                onkeydown="handleGridKey(${index}, event)"
                                class="bg-transparent w-full outline-none p-2 ${isP && item.lastTyped !== 'description' ? 'preview-text' : ''}" placeholder="Description..."></td>
                     <td><input type="number" value="${item.qty || 0}" oninput="updateItem(${index}, 'qty', this.value)" class="bg-transparent w-full text-center outline-none no-spinner font-bold p-2"></td>
-                    <td><input type="text" value="${item.pcsBox || ''}" onchange="updateItem(${index}, 'pcsBox', this.value)" class="bg-transparent w-full outline-none p-2 text-center text-white/50"></td>
+                    <td>
+                        <select onchange="updateItem(${index}, 'unitId', this.value)" class="glass-input appearance-none bg-transparent w-full outline-none p-2 text-center text-white/50">
+                            <option value="">Select unit</option>
+                            ${units.map(u => `<option value="${u.id}" ${item.unitId===u.id? 'selected' : ''}>${u.name}</option>`).join('')}
+                        </select>
+                    </td>
                     <td><input type="number" value="${item.cost || 0}" oninput="updateItem(${index}, 'cost', this.value)" class="bg-transparent w-full outline-none text-right p-2 no-spinner ${isP ? 'preview-text' : ''}"></td>
                     <td><input type="text" value="${item.discount || '0'}" oninput="updateItem(${index}, 'discount', this.value)" class="bg-transparent w-full outline-none text-right p-2"></td>
                     <td class="text-right font-bold pr-3">${(item.amount || 0).toLocaleString()}</td>
@@ -480,13 +490,7 @@
                 description: product.name || '',
                 qty: 1,
                 pcsBox: product.pcs_per_box || 1,
-                cost: product.cost || product.price || 0,
-                discount: 0,
-                amount: product.cost || product.price || 0,
-                remark: '',
-                isPreview: false,
-                tempProductId: null
-            };
+                    unitId: product.unit_id || '',
 
             renderTable();
 
@@ -504,6 +508,9 @@
 
         function updateItem(index, field, value) {
             items[index][field] = value;
+            if (field === 'unitId') {
+                items[index].unitName = unitsMap.get(value) || '';
+            }
             if (['qty', 'cost', 'discount', 'pcsBox'].includes(field)) {
                 const qty = parseFloat(items[index].qty) || 0;
                 const cost = parseFloat(items[index].cost) || 0;
@@ -528,6 +535,7 @@
                 description: '',
                 qty: 0,
                 pcsBox: '',
+                unitId: '',
                 cost: 0,
                 discount: '0',
                 amount: 0,
@@ -636,6 +644,7 @@
                     unit_cost: parseFloat(item.cost) || 0,
                     discount_amount: parseFloat(item.discount) || 0,
                     subtotal: item.amount,
+                    unit_id: item.unitId || null,
                     remark: item.remark
                 }));
 
@@ -735,6 +744,7 @@
                         description: prod?.name || '',
                         qty: pi.quantity,
                         pcsBox: pi.pcs_box || prod?.pcs_per_box || 1,
+                        unitId: pi.unit_id || prod?.unit_id || '',
                         cost: pi.unit_cost,
                         discount: pi.discount_amount || 0,
                         amount: pi.subtotal,

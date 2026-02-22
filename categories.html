@@ -9,345 +9,351 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <!DOCTYPE html>
+    <html lang="en">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <title>Category Manager - POS System</title>
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <style>
-        :root {
-            --bg-glass: rgba(15, 23, 42, 0.6);
-            --bg-glass-hover: rgba(15, 23, 42, 0.8);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --primary: #4f46e5;
-            --primary-light: #818cf8;
-            --text-primary: #f8fafc;
-            --text-muted: #94a3b8;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --space-sm: 8px;
-            --space-md: 16px;
-            --space-lg: 24px;
-        }
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet">
 
-        body {
-            background-color: transparent;
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: var(--space-md);
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        /* Excel-like Grid Layout */
-        .sheet-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            backdrop-filter: blur(12px);
-        }
+        <!-- Scripts for Excel parsing -->
+        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
-        .sheet-toolbar {
-            padding: var(--space-md) var(--space-lg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(255, 255, 255, 0.02);
-        }
+        <!-- Styles -->
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/dashboard.css">
+        <style>
+            :root {
+                --bg-glass: rgba(15, 23, 42, 0.6);
+                --bg-glass-hover: rgba(15, 23, 42, 0.8);
+                --border-color: rgba(255, 255, 255, 0.1);
+                --primary: #4f46e5;
+                --primary-light: #818cf8;
+                --text-primary: #f8fafc;
+                --text-muted: #94a3b8;
+                --radius-md: 8px;
+                --radius-lg: 12px;
+                --space-sm: 8px;
+                --space-md: 16px;
+                --space-lg: 24px;
+            }
 
-        .sheet-wrapper {
-            flex: 1;
-            overflow-x: hidden;
-            overflow-y: auto;
-            position: relative;
-        }
+            body {
+                background-color: transparent;
+                color: var(--text-primary);
+                font-family: 'Inter', sans-serif;
+                margin: 0;
+                padding: var(--space-md);
+                overflow: hidden;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
 
-        .excel-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            font-size: 0.875rem;
-        }
+            /* Excel-like Grid Layout */
+            .sheet-container {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                background: var(--bg-secondary);
+                border-radius: var(--radius-lg);
+                border: 1px solid var(--border-color);
+                overflow: hidden;
+                backdrop-filter: blur(12px);
+            }
 
-        .excel-table th {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: var(--bg-primary);
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.70rem;
-            letter-spacing: 0.05em;
-            padding: 12px 10px;
-            border-bottom: 2px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-        }
+            .sheet-toolbar {
+                padding: var(--space-md) var(--space-lg);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid var(--border-color);
+                background: rgba(255, 255, 255, 0.02);
+            }
 
-        .excel-table td {
-            padding: 0;
-            border-bottom: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+            .sheet-wrapper {
+                flex: 1;
+                overflow-x: hidden;
+                overflow-y: auto;
+                position: relative;
+            }
 
-        .excel-tr:hover td {
-            background: rgba(45, 212, 191, 0.03);
-        }
+            .excel-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+                font-size: 0.875rem;
+            }
 
-        .excel-tr.modified td {
-            background: rgba(245, 158, 11, 0.05);
-        }
+            .excel-table th {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                background: var(--bg-primary);
+                color: var(--text-muted);
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.70rem;
+                letter-spacing: 0.05em;
+                padding: 12px 10px;
+                border-bottom: 2px solid var(--border-color);
+                border-right: 1px solid var(--border-color);
+            }
 
-        .excel-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 10px;
-            outline: none;
-            font-family: inherit;
-            font-size: inherit;
-            height: 38px;
-        }
+            .excel-table td {
+                padding: 0;
+                border-bottom: 1px solid var(--border-color);
+                border-right: 1px solid var(--border-color);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-        .excel-input:focus {
-            background: rgba(79, 70, 229, 0.1);
-            box-shadow: inset 0 0 0 2px var(--primary);
-        }
+            .excel-tr:hover td {
+                background: rgba(45, 212, 191, 0.03);
+            }
 
-        /* Unified Glass Pill Design System */
-        .toolbar-pill {
-            height: 38px;
-            padding: 0 16px;
-            border-radius: 19px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.825rem;
-            font-weight: 600;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap;
-            cursor: default;
-            user-select: none;
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-primary);
-        }
+            .excel-tr.modified td {
+                background: rgba(245, 158, 11, 0.05);
+            }
 
-        .pill-action {
-            cursor: pointer;
-        }
+            .excel-input {
+                width: 100%;
+                background: transparent;
+                border: none;
+                color: var(--text-primary);
+                padding: 10px;
+                outline: none;
+                font-family: inherit;
+                font-size: inherit;
+                height: 38px;
+            }
 
-        .pill-action:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
+            .excel-input:focus {
+                background: rgba(79, 70, 229, 0.1);
+                box-shadow: inset 0 0 0 2px var(--primary);
+            }
 
-        .pill-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #34d399;
-            border-color: rgba(16, 185, 129, 0.2);
-        }
+            .btn-simple {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 16px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border: none;
+                white-space: nowrap;
+                min-height: 42px;
+            }
 
-        .pill-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.2);
-        }
+            .btn-simple-primary {
+                background: var(--primary);
+                color: white;
+            }
 
-        .pill-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border-color: rgba(239, 68, 68, 0.2);
-        }
+            .btn-simple-primary:hover {
+                background: var(--primary-dark);
+            }
 
-        .pill-primary {
-            background: rgba(79, 70, 229, 0.1);
-            color: #818cf8;
-            border-color: rgba(79, 70, 229, 0.2);
-        }
+            .btn-simple-success {
+                background: #10b981;
+                color: white;
+            }
 
-        /* Row Action & Checkbox Styles */
-        .btn-premium-delete {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+            .btn-simple-success:hover {
+                background: #059669;
+            }
 
-        .btn-premium-delete:hover {
-            background: #ef4444;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-            border-color: #ef4444;
-        }
+            .btn-simple-danger {
+                background: #ef4444;
+                color: white;
+            }
 
-        /* Modified Indicator */
-        .excel-tr.modified td:first-child::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 8px 8px 0 0;
-            border-color: #f59e0b transparent transparent transparent;
-            z-index: 5;
-        }
+            .btn-simple-danger:hover {
+                background: #dc2626;
+            }
 
-        /* Custom Checkbox */
-        .checkbox-container {
-            display: block;
-            position: relative;
-            cursor: pointer;
-            user-select: none;
-            width: 20px;
-            height: 20px;
-            margin: 0 auto;
-        }
+            .btn-simple-ghost {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+            }
 
-        .checkbox-container input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
+            .btn-simple-ghost:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
 
-        .checkmark {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 20px;
-            width: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
+            .btn-simple-active {
+                background: var(--primary);
+                color: white;
+            }
 
-        .checkbox-container:hover input~.checkmark {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
+            .btn-premium-danger {
+                background: rgba(239, 68, 68, 0.1);
+                color: #f87171;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
 
-        .checkbox-container input:checked~.checkmark {
-            background: var(--primary);
-            border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
-        }
+            .btn-premium-danger:hover {
+                background: #ef4444;
+                color: white;
+                transform: scale(1.1);
+                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+                border-color: #ef4444;
+            }
 
-        .checkmark:after {
-            content: "";
-            position: absolute;
-            display: none;
-            left: 6px;
-            top: 2px;
-            width: 5px;
-            height: 10px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
+            /* Modified Indicator */
+            .excel-tr.modified td:first-child::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 8px 8px 0 0;
+                border-color: #f59e0b transparent transparent transparent;
+                z-index: 5;
+            }
 
-        .checkbox-container input:checked~.checkmark:after {
-            display: block;
-        }
+            .checkbox-container {
+                display: block;
+                position: relative;
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                user-select: none;
+                margin: 0 auto;
+            }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+            .checkbox-container input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                height: 0;
+                width: 0;
+            }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-        }
+            .checkmark {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 18px;
+                width: 18px;
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                transition: all 0.2s ease;
+            }
 
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
-        }
+            .checkbox-container:hover input~.checkmark {
+                background-color: rgba(255, 255, 255, 0.12);
+                border-color: var(--primary-light);
+            }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
-    </style>
-</head>
+            .checkbox-container input:checked~.checkmark {
+                background-color: var(--primary);
+                border-color: var(--primary);
+                box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
+            }
+
+            .checkmark:after {
+                content: "";
+                position: absolute;
+                display: none;
+            }
+
+            .checkbox-container input:checked~.checkmark:after {
+                display: block;
+            }
+
+            .checkbox-container .checkmark:after {
+                left: 6px;
+                top: 2px;
+                width: 5px;
+                height: 10px;
+                border: solid white;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+
+            /* Scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: rgba(15, 23, 42, 0.5);
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #475569;
+                border-radius: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #64748b;
+            }
+        </style>
+    </head>
 
 <body>
+    <input type="file" id="excelInput" style="display:none" accept=".csv, .xlsx, .xls"
+        onchange="handleCategoryExcelImport(this)">
+
     <div class="sheet-container">
         <!-- Sheet Toolbar -->
         <div class="sheet-toolbar">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <h1 class="page-title" style="margin: 0; font-size: 1.25rem;">Category Manager</h1>
-                <div id="syncStatus" class="toolbar-pill pill-success">
-                    <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
-                </div>
-            </div>
-
             <div style="display: flex; align-items: center; gap: 8px;">
-                <!-- Tab Segments -->
-                <div class="toolbar-pill pill-ghost pill-action" onclick="switchCategorySubTab('main')"
-                    id="mainCategoriesTab">
-                    <i class="fas fa-layer-group"></i> Main Categories
-                </div>
-                <div class="toolbar-pill pill-ghost pill-action" onclick="switchCategorySubTab('sub')"
-                    id="subcategoriesTab">
-                    <i class="fas fa-list-ul"></i> Subcategories
-                </div>
-
-                <div class="toolbar-pill pill-ghost pill-action" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </div>
-                <div class="toolbar-pill pill-primary pill-action" onclick="window.addNewRowToCurrentTab()">
-                    <i class="fas fa-plus"></i> Add Row
-                </div>
-                <div class="toolbar-pill pill-success pill-action" onclick="saveChanges()" id="saveBtn">
-                    <i class="fas fa-save"></i> Save Changes
-                </div>
+                <span id="syncStatus" class="sync-status" style="font-size: 0.75rem; color: var(--text-muted);">
+                    <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
+                </span>
             </div>
-        </div>
 
-        <!-- Bulk Toolbar (Hidden by default) -->
-        <div id="bulkToolbar" class="sheet-toolbar hidden"
-            style="background: rgba(79, 70, 229, 0.05); border-top: 1px solid var(--border-color);">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="toolbar-pill pill-primary">
-                    <span id="selectedCount">0</span> Selected
-                </div>
-                <div class="toolbar-pill pill-danger pill-action" onclick="bulkDelete()">
-                    <i class="fas fa-trash"></i> Delete Selected
-                </div>
-                <div class="toolbar-pill pill-ghost pill-action" onclick="clearSelection()">
-                    <i class="fas fa-times"></i> Cancel
-                </div>
+                <button class="btn-simple btn-simple-ghost" onclick="switchCategorySubTab('main')" id="mainCategoriesTab">
+                    <i class="fas fa-layer-group"></i> Main Categories
+                </button>
+                <button class="btn-simple btn-simple-ghost" onclick="switchCategorySubTab('sub')" id="subcategoriesTab">
+                    <i class="fas fa-list-ul"></i> Subcategories
+                </button>
+                <button class="btn-simple btn-simple-ghost" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn-simple btn-simple-primary" onclick="document.getElementById('excelInput').click()">
+                    <i class="fas fa-file-excel"></i> Import
+                </button>
+                <button class="btn-simple btn-simple-primary" onclick="window.addNewRowToCurrentTab()">
+                    <i class="fas fa-plus"></i> Add Row
+                </button>
+                <button class="btn-simple btn-simple-danger" onclick="bulkDelete()" id="deleteBtn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn-simple btn-simple-success" onclick="saveChanges()" id="saveBtn">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
             </div>
         </div>
 
@@ -367,7 +373,7 @@
                             <th style="width: 40px;">#</th>
                             <th>Name *</th>
                             <th>Description</th>
-                            <th style="width: 50px;">Action</th>
+                            <th style="width: 50px;"></th>
                         </tr>
                     </thead>
                     <tbody id="categoriesBody">
@@ -391,7 +397,7 @@
                             <th>Main Category *</th>
                             <th>Subcategory Name *</th>
                             <th>Description</th>
-                            <th style="width: 50px;">Action</th>
+                            <th style="width: 50px;"></th>
                         </tr>
                     </thead>
                     <tbody id="subcategoriesBody">
@@ -427,8 +433,13 @@
             window.switchCategoryTab(tab);
             const mainTab = document.getElementById('mainCategoriesTab');
             const subTab = document.getElementById('subcategoriesTab');
-            mainTab.className = tab === 'main' ? 'btn btn-indigo btn-sm' : 'btn btn-secondary btn-sm';
-            subTab.className = tab === 'sub' ? 'btn btn-indigo btn-sm' : 'btn btn-secondary btn-sm';
+            if (tab === 'main') {
+                mainTab.className = 'btn-simple btn-simple-active';
+                subTab.className = 'btn-simple btn-simple-ghost';
+            } else {
+                mainTab.className = 'btn-simple btn-simple-ghost';
+                subTab.className = 'btn-simple btn-simple-active';
+            }
         }
 
         // Selection Logic
@@ -441,7 +452,6 @@
                 cb.checked = master.checked;
                 handleSelectionChange(cb);
             });
-            updateBulkToolbar();
         }
 
         window.handleSelectionChange = function (checkbox) {
@@ -451,30 +461,20 @@
             } else {
                 window.selectedIds.delete(id);
             }
-            updateBulkToolbar();
-        }
-
-        function updateBulkToolbar() {
-            const toolbar = document.getElementById('bulkToolbar');
-            const countEl = document.getElementById('selectedCount');
-            const count = window.selectedIds.size;
-
-            if (count > 0) {
-                toolbar.classList.remove('hidden');
-                countEl.textContent = count;
-            } else {
-                toolbar.classList.add('hidden');
-            }
         }
 
         window.clearSelection = function () {
             window.selectedIds.clear();
-            document.querySelectorAll('.selection-checkbox').forEach(cb => cb.checked = false);
-            updateBulkToolbar();
+            document.querySelectorAll('.selection-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
         }
 
         function bulkDelete() {
-            if (window.selectedIds.size === 0) return;
+            if (window.selectedIds.size === 0) {
+                alert('Please select items to delete.');
+                return;
+            }
             if (typeof window.executeBulkDelete === 'function') {
                 window.executeBulkDelete(Array.from(window.selectedIds));
             }
@@ -521,12 +521,6 @@
             const el = document.getElementById('syncStatusText');
             if (el) {
                 el.textContent = status;
-                const container = document.getElementById('syncStatus');
-                if (status.includes('Synced') || status === 'Ready') {
-                    container.className = 'toolbar-pill pill-success';
-                } else {
-                    container.className = 'toolbar-pill pill-warning';
-                }
             }
         };
 
@@ -545,6 +539,8 @@
 
         // Wait for Supabase client to fully initialize before loading data
         document.addEventListener('DOMContentLoaded', () => {
+            // Set initial active tab
+            document.getElementById('mainCategoriesTab').className = 'btn-simple btn-simple-active';
             setTimeout(init, 150);
         });
     </script>

@@ -62,6 +62,7 @@
             letter-spacing: -0.025em;
             background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -393,6 +394,57 @@
             background: #dc2626;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        .form-dropdown-menu {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            max-height: 250px;
+            overflow-y: auto;
+            min-width: 200px;
+        }
+
+        .form-dropdown-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.15s;
+        }
+
+        .form-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .form-dropdown-item:hover,
+        .form-dropdown-item.highlighted {
+            background: rgba(79, 70, 229, 0.2);
+        }
+
+        .form-dropdown-item.selected {
+            background: rgba(79, 70, 229, 0.3);
+        }
+
+        .field-input-wrapper {
+            position: relative;
+        }
+
+        .field-input-wrapper .field-input {
+            width: 100%;
+        }
+
+        .field-input-wrapper .dropdown-arrow {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -405,12 +457,20 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Dropdown Menu -->
+    <div id="formDdMenu" class="form-dropdown-menu hidden"></div>
+
     <div class="page-container">
 
         <!-- Toolbar -->
         <div class="toolbar">
-            <div class="toolbar-left" style="display:flex; align-items:center;">
-                <h1>Product Manager</h1>
+            <div class="toolbar-left" style="display:flex; align-items:center; gap:12px; flex:1;">
+                <div class="search-container" style="position:relative; flex:1; max-width:400px;">
+                    <i class="fas fa-search"
+                        style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem;"></i>
+                    <input type="text" id="searchInput" class="field-input" placeholder="Search products..."
+                        style="padding-left:36px;" oninput="filterProducts()">
+                </div>
                 <span class="sync-badge" id="syncBadge"><i class="fas fa-circle"></i> Synced to Supabase</span>
             </div>
             <div class="toolbar-actions">
@@ -456,15 +516,24 @@
                 <!-- Line 2: Classification + Stock -->
                 <div class="field-cell">
                     <label class="field-label">Category</label>
-                    <select id="edit-category" class="field-input"></select>
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-category" class="field-input" data-dropdown="categories" placeholder="Select Category">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
                 <div class="field-cell">
                     <label class="field-label">Sub-Category</label>
-                    <select id="edit-subcategory" class="field-input"></select>
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-subcategory" class="field-input" data-dropdown="subcategories" data-parent="edit-category" placeholder="Select Sub-Category">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
                 <div class="field-cell">
                     <label class="field-label">Brand</label>
-                    <select id="edit-brand" class="field-input"></select>
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-brand" class="field-input" data-dropdown="brands" placeholder="Select Brand">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
                 <div class="field-cell">
                     <label class="field-label">Stock</label>
@@ -481,8 +550,9 @@
                     <input type="number" id="edit-price" class="field-input" step="0.01" value="0">
                 </div>
                 <div class="field-cell">
-                    <label class="field-label">Box Price (Calc)</label>
-                    <input type="number" id="edit-box-price" class="field-input" step="0.01" value="0">
+                    <label class="field-label">Box Price</label>
+                    <input type="number" id="edit-box-price" class="field-input" step="0.01" value="0"
+                        style="background:rgba(99,102,241,0.08);">
                 </div>
                 <div class="field-cell">
                     <label class="field-label">Margin %</label>
@@ -492,26 +562,41 @@
                 <!-- Line 4: Units & Conversion -->
                 <div class="field-cell">
                     <label class="field-label">Sale Unit</label>
-                    <select id="edit-unit" class="field-input"></select>
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-unit" class="field-input" data-dropdown="units" placeholder="Select Unit">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
                 <div class="field-cell">
                     <label class="field-label">Purchase Unit</label>
-                    <select id="edit-purchase-unit" class="field-input"></select>
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-purchase-unit" class="field-input" data-dropdown="units" data-short="true" placeholder="Select Purchase Unit">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
                 <div class="field-cell">
                     <label class="field-label">Conversion (Pcs/Unit)</label>
                     <input type="number" id="edit-conversion" class="field-input" value="1">
                 </div>
-                <div class="field-cell no-bg"></div>
+                <div class="field-cell" style="border-right:none">
+                    <label class="field-label">Remark</label>
+                    <input type="text" id="edit-remark" class="field-input" placeholder="Notes...">
+                </div>
 
                 <!-- Line 5: Logistics -->
                 <div class="field-cell col-span-2">
                     <label class="field-label">Supplier</label>
-                    <input type="text" id="edit-supplier" class="field-input" placeholder="Select Supplier">
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-supplier" class="field-input" data-dropdown="suppliers" placeholder="Select Supplier">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
                 <div class="field-cell col-span-2" style="border-right:none">
                     <label class="field-label">Shop</label>
-                    <input type="text" id="edit-shop" class="field-input" placeholder="Select Shop">
+                    <div class="field-input-wrapper">
+                        <input type="text" id="edit-shop" class="field-input" data-dropdown="shops" placeholder="Select Shop">
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -558,7 +643,7 @@
         let currentProductId = null;
         let currentBarcodes = [];
         let currentCodes = [];
-        let refCategories = [], refSubcategories = [], refBrands = [], refUnits = [];
+        let refCategories = [], refSubcategories = [], refBrands = [], refUnits = [], refSuppliers = [], refShops = [];
 
         // ── UI Helpers ──
         const EL = (id) => document.getElementById(id);
@@ -600,16 +685,20 @@
         }
 
         async function loadReferences() {
-            const [c, s, b, u] = await Promise.all([
+            const [c, s, b, u, sup, sh] = await Promise.all([
                 supabase.from('categories').select('*').order('name'),
                 supabase.from('subcategories').select('*').order('name'),
                 supabase.from('brands').select('*').order('name'),
-                supabase.from('units').select('*').order('name')
+                supabase.from('units').select('*').order('name'),
+                supabase.from('suppliers').select('*').order('name'),
+                supabase.from('warehouses').select('*').order('name')
             ]);
             refCategories = c.data || [];
             refSubcategories = s.data || [];
             refBrands = b.data || [];
             refUnits = u.data || [];
+            refSuppliers = sup.data || [];
+            refShops = sh.data || [];
         }
 
         async function loadProducts() {
@@ -628,27 +717,22 @@
 
         // ── Rendering Logic ──
         function renderDropdowns() {
-            const populate = (id, data, placeholder) => {
-                const el = EL(id);
-                el.innerHTML = `<option value="">${placeholder}</option>` +
-                    data.map(i => `<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
+            // Store reference data for dropdowns
+            window._ddData = {
+                categories: refCategories.map(c => ({ id: c.id, name: c.name })),
+                subcategories: refSubcategories.map(s => ({ id: s.id, name: s.name, parent_id: s.category_id })),
+                brands: refBrands.map(b => ({ id: b.id, name: b.name })),
+                units: refUnits.map(u => ({ id: u.id, name: u.short_name, short_name: u.short_name })),
+                suppliers: refSuppliers.map(s => ({ id: s.id, name: s.name })),
+                shops: refShops.map(s => ({ id: s.id, name: s.name }))
             };
-            const populateUnits = (id, data, placeholder, useShortName = false) => {
-                const el = EL(id);
-                el.innerHTML = `<option value="">${placeholder}</option>` +
-                    data.map(u => `<option value="${useShortName ? escapeHtml(u.short_name) : u.id}">${escapeHtml(u.short_name)}</option>`).join('');
-            };
-            populate('edit-category', refCategories, 'Select Category');
-            populate('edit-subcategory', refSubcategories, 'Select Sub-Category');
-            populate('edit-brand', refBrands, 'Select Brand');
-            populateUnits('edit-unit', refUnits, 'Select Unit', false);
-            populateUnits('edit-purchase-unit', refUnits, 'Select Purchase Unit', true);
         }
 
-        function renderGrid() {
+        function renderGrid(filteredData = null) {
             const tbody = EL('tableBody');
             tbody.innerHTML = '';
-            productsData.forEach((p, idx) => {
+            const data = filteredData || productsData;
+            data.forEach((p, idx) => {
                 const tr = document.createElement('tr');
                 tr.dataset.id = p.id;
                 if (currentProductId === p.id) tr.classList.add('selected');
@@ -656,6 +740,7 @@
 
                 const catName = refCategories.find(c => c.id === p.category_id)?.name || '';
                 const brandName = refBrands.find(b => b.id === p.brand_id)?.name || '';
+                const unitName = refUnits.find(u => u.id === p.unit_id)?.short_name || '';
                 const formatNum = (n) => n ? parseFloat(n).toFixed(2) : '0.00';
 
                 tr.innerHTML = `
@@ -671,6 +756,24 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function filterProducts() {
+            const search = EL('searchInput').value.toLowerCase().trim();
+            if (!search) {
+                renderGrid();
+                return;
+            }
+            const filtered = productsData.filter(p => {
+                const catName = refCategories.find(c => c.id === p.category_id)?.name || '';
+                const brandName = refBrands.find(b => b.id === p.brand_id)?.name || '';
+                return (p.name || '').toLowerCase().includes(search) ||
+                    (p.code || '').toLowerCase().includes(search) ||
+                    (p.barcodes || []).some(b => b.toLowerCase().includes(search)) ||
+                    catName.toLowerCase().includes(search) ||
+                    brandName.toLowerCase().includes(search);
+            });
+            renderGrid(filtered);
         }
 
         function renderBarcodeTags() {
@@ -697,23 +800,36 @@
             currentCodes = p.code ? [p.code] : [];
             currentBarcodes = [...(p.barcodes || [])];
 
+            const getCatName = (cid) => refCategories.find(c => c.id === cid)?.name || '';
+            const getBrandName = (bid) => refBrands.find(b => b.id === bid)?.name || '';
+            const getUnitName = (uid) => refUnits.find(u => u.id === uid)?.short_name || '';
+            const getSubName = (sid) => refSubcategories.find(s => s.id === sid)?.name || '';
+
             EL('edit-code').value = p.code || '';
             EL('edit-name').value = p.name || '';
-            EL('edit-category').value = p.category_id || '';
+            EL('edit-category').value = getCatName(p.category_id);
+            EL('edit-category').dataset.value = p.category_id || '';
             updateSubcategories(p.category_id);
-            EL('edit-subcategory').value = p.subcategory_id || '';
-            EL('edit-brand').value = p.brand_id || '';
+            EL('edit-subcategory').value = getSubName(p.subcategory_id);
+            EL('edit-subcategory').dataset.value = p.subcategory_id || '';
+            EL('edit-brand').value = getBrandName(p.brand_id);
+            EL('edit-brand').dataset.value = p.brand_id || '';
             EL('edit-cost').value = p.cost || 0;
-            EL('edit-unit').value = p.unit_id || '';
-            EL('edit-purchase-unit').value = p.purchase_unit || 'Box';
+            EL('edit-unit').value = getUnitName(p.unit_id);
+            EL('edit-unit').dataset.value = p.unit_id || '';
+            const purchaseUnit = refUnits.find(u => u.short_name === p.purchase_unit)?.short_name || p.purchase_unit || 'Box';
+            EL('edit-purchase-unit').value = purchaseUnit;
+            EL('edit-purchase-unit').dataset.value = p.purchase_unit || 'Box';
             EL('edit-conversion').value = p.pcs_per_box || 1;
             EL('edit-price').value = p.price || 0;
-
             const conv = parseFloat(p.pcs_per_box) || 1;
-            EL('edit-box-price').value = (p.price * conv).toFixed(2);
+            EL('edit-box-price').value = p.box_price || (p.price * conv).toFixed(2) || 0;
             EL('edit-stock').value = p.stock || 0;
             EL('edit-supplier').value = p.supplier || '';
+            EL('edit-supplier').dataset.value = p.supplier || '';
             EL('edit-shop').value = p.shop || '';
+            EL('edit-shop').dataset.value = p.shop || '';
+            EL('edit-remark').value = p.remark || '';
 
             renderBarcodeTags();
             renderCodeTags();
@@ -731,10 +847,16 @@
             inputs.forEach(i => {
                 if (i.type === 'number') i.value = 0;
                 else i.value = '';
+                // Clear dropdown data-value
+                if (i.dataset.dropdown) {
+                    i.dataset.value = '';
+                }
             });
             EL('edit-purchase-unit').value = 'Box';
+            EL('edit-purchase-unit').dataset.value = 'Box';
             EL('edit-conversion').value = 1;
             EL('edit-margin').value = '0.00%';
+            EL('edit-box-price').value = 0;
             renderBarcodeTags();
             renderCodeTags();
             EL('btn-delete').classList.add('hidden');
@@ -742,10 +864,8 @@
         }
 
         function updateSubcategories(catId) {
-            const subSelect = EL('edit-subcategory');
-            const subs = catId ? refSubcategories.filter(s => s.category_id == catId) : refSubcategories;
-            subSelect.innerHTML = `<option value="">Select Sub-Category</option>` +
-                subs.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+            // With custom dropdown, subcategories are filtered automatically when dropdown opens
+            // This function is kept for compatibility but doesn't need to do anything
         }
 
         function calcMargin() {
@@ -754,20 +874,10 @@
             EL('edit-margin').value = (cost > 0 && price > 0) ? (((price - cost) / cost) * 100).toFixed(2) + '%' : '0.00%';
         }
 
-        function updateFromUnit() {
+        function updateBoxPrice() {
             const unitPrice = parseFloat(EL('edit-price').value) || 0;
             const conv = parseFloat(EL('edit-conversion').value) || 1;
             EL('edit-box-price').value = (unitPrice * conv).toFixed(2);
-            calcMargin();
-        }
-
-        function updateFromBox() {
-            const boxPrice = parseFloat(EL('edit-box-price').value) || 0;
-            const conv = parseFloat(EL('edit-conversion').value) || 1;
-            if (conv > 0) {
-                EL('edit-price').value = (boxPrice / conv).toFixed(2);
-                calcMargin();
-            }
         }
 
         function addBarcode(val) {
@@ -800,20 +910,27 @@
             const name = EL('edit-name').value.trim();
             if (!name) return showToast('Product name is required', 'error');
 
+            const getDropdownValue = (id) => {
+                const el = EL(id);
+                return el.dataset.value || '';
+            };
+
             const payload = {
                 code: EL('edit-code').value.trim(),
                 name: name,
                 barcodes: currentBarcodes,
-                category_id: EL('edit-category').value || null,
-                subcategory_id: EL('edit-subcategory').value || null,
-                brand_id: EL('edit-brand').value || null,
+                category_id: getDropdownValue('edit-category') || null,
+                subcategory_id: getDropdownValue('edit-subcategory') || null,
+                brand_id: getDropdownValue('edit-brand') || null,
                 cost: parseFloat(EL('edit-cost').value) || 0,
                 price: parseFloat(EL('edit-price').value) || 0,
-                unit_id: EL('edit-unit').value || null,
-                purchase_unit: EL('edit-purchase-unit').value,
+                box_price: parseFloat(EL('edit-box-price').value) || 0,
+                unit_id: getDropdownValue('edit-unit') || null,
+                purchase_unit: getDropdownValue('edit-purchase-unit') || 'Box',
                 pcs_per_box: parseInt(EL('edit-conversion').value) || 1,
-                supplier: EL('edit-supplier').value,
-                shop: EL('edit-shop').value,
+                supplier: getDropdownValue('edit-supplier') || '',
+                shop: getDropdownValue('edit-shop') || '',
+                remark: EL('edit-remark').value,
                 stock: parseInt(EL('edit-stock').value) || 0,
             };
 
@@ -855,10 +972,15 @@
 
         // Listeners
         EL('edit-cost').addEventListener('input', calcMargin);
-        EL('edit-price').addEventListener('input', updateFromUnit);
-        EL('edit-conversion').addEventListener('input', updateFromUnit);
-        EL('edit-box-price').addEventListener('input', updateFromBox);
-        EL('edit-category').addEventListener('change', (e) => updateSubcategories(e.target.value));
+        EL('edit-price').addEventListener('input', function () {
+            calcMargin();
+            updateBoxPrice();
+        });
+        EL('edit-conversion').addEventListener('input', updateBoxPrice);
+        EL('edit-category').addEventListener('change', (e) => {
+            const catId = e.target.dataset.value;
+            updateSubcategories(catId);
+        });
 
         const handleTagInput = (e, callback) => {
             if (e.key === 'Enter' || e.key === 'Tab') {
@@ -872,6 +994,229 @@
 
         EL('edit-barcode-input').addEventListener('keydown', (e) => handleTagInput(e, addBarcode));
         EL('edit-code-input').addEventListener('keydown', (e) => handleTagInput(e, addCode));
+
+        // ── Custom Dropdown System ──
+        let ddOpen = false;
+        let ddCurrentField = null;
+        let ddOptions = [];
+        let ddSelectedIndex = -1;
+        let ddParentValue = null;
+
+        const ddMenu = document.getElementById('formDdMenu');
+
+        function getDropdownData(inputEl) {
+            const type = inputEl.dataset.dropdown;
+            if (!type || !window._ddData) return [];
+            
+            let data = window._ddData[type] || [];
+            
+            // Filter by parent if needed
+            const parentField = inputEl.dataset.parent;
+            if (parentField) {
+                const parentEl = document.getElementById(parentField);
+                const parentVal = parentEl?.dataset?.value;
+                if (type === 'subcategories' && parentVal) {
+                    data = data.filter(item => item.parent_id === parseInt(parentVal) || item.parent_id === parentVal);
+                }
+            }
+            
+            return data;
+        }
+
+        function showDd(inputEl) {
+            ddCurrentField = inputEl.id;
+            ddOptions = getDropdownData(inputEl);
+            
+            if (ddOptions.length === 0) {
+                hideDd();
+                return;
+            }
+
+            const rect = inputEl.getBoundingClientRect();
+            ddMenu.style.top = (rect.bottom + 4) + 'px';
+            ddMenu.style.left = rect.left + 'px';
+            ddMenu.style.width = rect.width + 'px';
+            
+            const searchVal = inputEl.value.toLowerCase();
+            const filtered = ddOptions.filter(o => !searchVal || o.name.toLowerCase().includes(searchVal));
+            
+            ddMenu.innerHTML = filtered.map((opt, idx) => 
+                `<div class="form-dropdown-item" data-id="${opt.id}" data-name="${escapeHtml(opt.name)}" data-idx="${idx}">${escapeHtml(opt.name)}</div>`
+            ).join('');
+            
+            ddMenu.classList.remove('hidden');
+            ddOpen = true;
+            ddSelectedIndex = -1;
+        }
+
+        function hideDd() {
+            ddMenu.classList.add('hidden');
+            ddOpen = false;
+            ddCurrentField = null;
+            ddOptions = [];
+            ddSelectedIndex = -1;
+        }
+
+        function highlightDdItem(idx) {
+            const items = ddMenu.querySelectorAll('.form-dropdown-item');
+            items.forEach((item, i) => {
+                item.classList.toggle('highlighted', i === idx);
+            });
+            ddSelectedIndex = idx;
+            if (items[idx]) {
+                items[idx].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function selectDdItem(idx) {
+            const items = ddMenu.querySelectorAll('.form-dropdown-item');
+            if (items[idx]) {
+                const item = items[idx];
+                const inputEl = document.getElementById(ddCurrentField);
+                inputEl.value = item.dataset.name;
+                inputEl.dataset.value = item.dataset.id;
+                
+                // If subcategory, update based on new category
+                if (ddCurrentField === 'edit-category') {
+                    updateSubcategories(item.dataset.id);
+                    const subEl = document.getElementById('edit-subcategory');
+                    subEl.value = '';
+                    subEl.dataset.value = '';
+                }
+                
+                hideDd();
+                // Move to next field
+                const fieldIdx = formFields.indexOf(ddCurrentField);
+                if (fieldIdx < formFields.length - 1) {
+                    document.getElementById(formFields[fieldIdx + 1])?.focus();
+                }
+            }
+        }
+
+        // Add focus/click handlers for dropdown inputs
+        const dropdownFields = ['edit-category', 'edit-subcategory', 'edit-brand', 'edit-unit', 'edit-purchase-unit', 'edit-supplier', 'edit-shop'];
+        
+        dropdownFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('focus', () => showDd(el));
+                el.addEventListener('click', () => showDd(el));
+                el.addEventListener('input', () => showDd(el));
+                el.addEventListener('keydown', (e) => {
+                    if (ddOpen) {
+                        if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const newIdx = Math.min(ddSelectedIndex + 1, ddMenu.children.length - 1);
+                            highlightDdItem(newIdx);
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const newIdx = Math.max(ddSelectedIndex - 1, 0);
+                            highlightDdItem(newIdx);
+                        } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (ddSelectedIndex >= 0) {
+                                selectDdItem(ddSelectedIndex);
+                            } else if (ddMenu.children.length === 1) {
+                                selectDdItem(0);
+                            }
+                        } else if (e.key === 'Escape') {
+                            hideDd();
+                        } else if (e.key === 'Tab') {
+                            hideDd();
+                        }
+                    } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+                        showDd(el);
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.field-input-wrapper') && !e.target.closest('#formDdMenu')) {
+                hideDd();
+            }
+        });
+
+        // Dropdown item click
+        ddMenu.addEventListener('click', (e) => {
+            const item = e.target.closest('.form-dropdown-item');
+            if (item) {
+                const idx = parseInt(item.dataset.idx);
+                selectDdItem(idx);
+            }
+        });
+
+        // Arrow key and Enter navigation for form fields
+        const formFields = [
+            'edit-code-input',
+            'edit-barcode-input', 
+            'edit-name',
+            'edit-category',
+            'edit-subcategory',
+            'edit-brand',
+            'edit-stock',
+            'edit-cost',
+            'edit-price',
+            'edit-box-price',
+            'edit-unit',
+            'edit-purchase-unit',
+            'edit-conversion',
+            'edit-remark',
+            'edit-supplier',
+            'edit-shop'
+        ];
+
+        function handleFormKeyDown(e) {
+            const fieldId = e.target.id;
+            const fieldIdx = formFields.indexOf(fieldId);
+            if (fieldIdx === -1) return;
+            
+            // If dropdown is open and field is a dropdown field, let dropdown handler manage keys
+            if (ddOpen && dropdownFields.includes(fieldId)) return;
+            
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (fieldIdx < formFields.length - 1) {
+                    document.getElementById(formFields[fieldIdx + 1])?.focus();
+                }
+            } else if (e.key === 'ArrowRight' && e.target.tagName === 'INPUT') {
+                const selStart = e.target.selectionStart;
+                const val = e.target.value;
+                if (selStart === val.length) {
+                    e.preventDefault();
+                    if (fieldIdx < formFields.length - 1) {
+                        document.getElementById(formFields[fieldIdx + 1])?.focus();
+                    }
+                }
+            } else if (e.key === 'ArrowLeft' && e.target.tagName === 'INPUT') {
+                const selStart = e.target.selectionStart;
+                if (selStart === 0) {
+                    e.preventDefault();
+                    if (fieldIdx > 0) {
+                        document.getElementById(formFields[fieldIdx - 1])?.focus();
+                    }
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextRowIdx = fieldIdx + 4;
+                if (nextRowIdx < formFields.length) {
+                    document.getElementById(formFields[nextRowIdx])?.focus();
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevRowIdx = fieldIdx - 4;
+                if (prevRowIdx >= 0) {
+                    document.getElementById(formFields[prevRowIdx])?.focus();
+                }
+            }
+        }
+
+        formFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('keydown', handleFormKeyDown);
+        });
 
         // Wait for Supabase client to fully initialize before loading data
         document.addEventListener('DOMContentLoaded', () => {

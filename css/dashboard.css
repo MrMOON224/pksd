@@ -276,6 +276,17 @@ tr:hover {
     margin-bottom: 0;
 }
 
+/* Toolbar */
+.grid-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+
 /* Responsive */
 @media (max-width: 1024px) {
     .content-grid {
@@ -353,16 +364,5 @@ tr:hover {
 
     .user-info {
         display: none;
-    }
-}
-
-/* Tablet view - hide sidebar */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .sidebar {
-        display: none !important;
-    }
-
-    .main-wrapper {
-        margin-left: 0 !important;
     }
 }

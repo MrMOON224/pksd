@@ -144,9 +144,49 @@ window.switchView = function (viewName, action = null) {
     // Update Title
     const titleEl = document.querySelector('.page-title-nav');
     if (titleEl) {
-        titleEl.textContent = viewName.split('-').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
+        // Custom titles for specific views
+        const customTitles = {
+            'products': 'Products manager',
+            'product-add': 'Add Product',
+            'categories': 'Categories',
+            'variations': 'Variations',
+            'brands': 'Brands',
+            'units': 'Units',
+            'barcodes': 'Print Barcodes',
+            'adjustments': 'Stock Adjustments',
+            'warehouses': 'Warehouses',
+            'transfers': 'Stock Transfers',
+            'expenses': 'Expenses',
+            'expense-categories': 'Expense Categories',
+            'customers': 'Customers',
+            'suppliers': 'Suppliers',
+            'users': 'Users',
+            'roles': 'Roles & Permissions',
+            'currencies': 'Currencies',
+            'languages': 'Languages',
+            'settings': 'Settings',
+            'reports': 'Reports',
+            'pos': 'POS',
+            'sales': 'Sales',
+            'sales-return': 'Sales Return',
+            'purchase-add': 'Add Purchase',
+            'purchase-list': 'Purchase List',
+            'purchase-order': 'Purchase Order',
+            'purchase-order-list': 'Purchase Orders',
+            'purchase-return': 'Purchase Return',
+            'quotation': 'Quotations',
+            'sms-templates': 'SMS Templates',
+            'email-templates': 'Email Templates',
+            'api-settings': 'API Settings'
+        };
+        
+        if (customTitles[viewName]) {
+            titleEl.textContent = customTitles[viewName];
+        } else {
+            titleEl.textContent = viewName.split('-').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
     }
 
     // Update Sidebar Active State

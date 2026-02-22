@@ -148,117 +148,59 @@
             opacity: 0.5;
         }
 
-        /* Unified Glass Pill Design System */
-        .toolbar-pill {
-            height: 38px;
-            padding: 0 16px;
-            border-radius: 19px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.825rem;
-            font-weight: 600;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap;
-            cursor: default;
-            user-select: none;
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-primary);
-        }
-
-        .pill-action {
-            cursor: pointer;
-        }
-
-        .pill-action:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .pill-action:active {
-            transform: translateY(0);
-        }
-
-        .pill-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #34d399;
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .pill-success.pill-action:hover {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-        }
-
-        .pill-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.2);
-        }
-
-        .pill-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border-color: rgba(239, 68, 68, 0.2);
-        }
-
-        .pill-danger.pill-action:hover {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-
-        .pill-primary {
-            background: rgba(79, 70, 229, 0.1);
-            color: #818cf8;
-            border-color: rgba(79, 70, 229, 0.2);
-        }
-
-        .pill-primary.pill-action:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-        }
-
-        .pill-ghost {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted);
-            border-color: var(--border-color);
-        }
-
-        .pill-ghost.pill-action:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-        }
-
-        .pill-icon-only {
-            width: 38px;
-            padding: 0;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
+            .btn-simple {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 16px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border: none;
+                white-space: nowrap;
+                min-height: 42px;
             }
 
-            to {
-                opacity: 1;
-                transform: translateX(0);
+            .btn-simple-primary {
+                background: var(--primary);
+                color: white;
             }
-        }
 
-        /* Row Action & Checkbox Styles */
-        .btn-premium-delete {
+            .btn-simple-primary:hover {
+                background: var(--primary-dark);
+            }
+
+            .btn-simple-success {
+                background: #10b981;
+                color: white;
+            }
+
+            .btn-simple-success:hover {
+                background: #059669;
+            }
+
+            .btn-simple-danger {
+                background: #ef4444;
+                color: white;
+            }
+
+            .btn-simple-danger:hover {
+                background: #dc2626;
+            }
+
+            .btn-simple-ghost {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+            }
+
+            .btn-simple-ghost:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .btn-premium-danger {
             background: rgba(239, 68, 68, 0.1);
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -272,7 +214,7 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-premium-delete:hover {
+        .btn-premium-danger:hover {
             background: #ef4444;
             color: white;
             transform: scale(1.1);
@@ -354,37 +296,25 @@
     <div class="sheet-container">
         <!-- Toolbar -->
         <div class="sheet-toolbar">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <h1 class="page-title" style="margin: 0; font-size: 1.25rem;">Brand Manager</h1>
-                <div id="syncStatus" class="toolbar-pill pill-success">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="syncStatus" class="sync-status" style="font-size: 0.75rem; color: var(--text-muted);">
                     <i class="fas fa-database"></i> <span id="syncStatusText">Ready</span>
-                </div>
+                </span>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <!-- Bulk Toolbar (Hidden by default) -->
-                <div id="bulkToolbar" style="display: flex; align-items: center; gap: 8px;" class="hidden">
-                    <div class="toolbar-pill">
-                        <span id="selectedCount">0</span> selected
-                    </div>
-                    <div class="toolbar-pill pill-danger pill-action" onclick="bulkDelete()">
-                        <i class="fas fa-trash"></i> Delete
-                    </div>
-                    <div class="toolbar-pill pill-ghost pill-action pill-icon-only" onclick="clearSelection()"
-                        title="Clear Selection">
-                        <i class="fas fa-times"></i>
-                    </div>
-                </div>
-
-                <div class="toolbar-pill pill-ghost pill-action" onclick="loadBrands()">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="btn-simple btn-simple-ghost" onclick="loadBrands()">
                     <i class="fas fa-sync-alt"></i> Refresh
-                </div>
-                <div class="toolbar-pill pill-primary pill-action" onclick="addNewBrand()">
+                </button>
+                <button class="btn-simple btn-simple-primary" onclick="addNewBrand()">
                     <i class="fas fa-plus"></i> Add Row
-                </div>
-                <div class="toolbar-pill pill-success pill-action" onclick="saveChanges()" id="saveBtn">
+                </button>
+                <button class="btn-simple btn-simple-danger" onclick="bulkDelete()" id="deleteBtn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn-simple btn-simple-success" onclick="saveChanges()" id="saveBtn">
                     <i class="fas fa-save"></i> Save Changes
-                </div>
+                </button>
             </div>
         </div>
 
@@ -418,12 +348,6 @@
             const el = document.getElementById('syncStatusText');
             if (el) {
                 el.textContent = status;
-                const container = document.getElementById('syncStatus');
-                if (status.includes('Synced') || status === 'Ready') {
-                    container.className = 'toolbar-pill pill-success';
-                } else {
-                    container.className = 'toolbar-pill pill-warning';
-                }
             }
         };
     </script>
